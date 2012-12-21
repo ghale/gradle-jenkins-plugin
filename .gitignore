@@ -1,0 +1,10 @@
+.metadata
+.gradle
+.groovy
+build
+bin
+.classpath
+.project
+.settings
+
+*.swp

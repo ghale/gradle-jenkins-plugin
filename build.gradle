@@ -1,0 +1,11 @@
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+
+group = 'org.gradle.plugins'
+
+dependencies {
+   compile gradleApi()
+   groovy localGroovy()
+   
+   compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') 
+}
