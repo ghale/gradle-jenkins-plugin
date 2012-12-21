@@ -19,6 +19,7 @@ import org.gradle.plugins.jenkins.JenkinsServiceException
 
 import groovy.mock.interceptor.MockFor
 import groovyx.net.http.HttpResponseDecorator
+import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 
 class JenkinsRESTServiceImplTest {
@@ -48,6 +49,25 @@ class JenkinsRESTServiceImplTest {
 			def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
 			def xml = service.getJobConfiguration("compile")
 			assert xml == "<test1><test2>srv value</test2></test1>"
+		}
+	}
+	
+	@Test
+	def void getJobConfiguration_returnsNullOnNotFound() {
+		mockRESTClient.demand.with {
+			get() { Map<String, ?> map ->
+				HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 404, "Not Found"))
+				HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+				throw new HttpResponseException(response)
+			}
+		}
+		
+		mockRESTClient.ignore('getClient')
+		
+		mockRESTClient.use {
+			def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
+			def xml = service.getJobConfiguration("compile")
+			assert xml == null
 		}
 	}
 	

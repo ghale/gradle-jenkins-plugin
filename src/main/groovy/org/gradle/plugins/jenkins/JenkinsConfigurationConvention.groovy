@@ -13,8 +13,4 @@ class JenkinsConfigurationConvention {
 	def jenkins(closure) {
 		ConfigureUtil.configure(closure, jenkins)
 	}
-	
-	def branches(closure) {
-		branches.configure(closure)
-	}
 }

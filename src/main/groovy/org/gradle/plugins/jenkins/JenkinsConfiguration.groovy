@@ -23,4 +23,16 @@ class JenkinsConfiguration {
 	def templates(Closure closure) {
 		templates.configure(closure)
 	}
+	
+	def url(String url) {
+		this.url = url
+	}
+	
+	def username(String username) {
+		this.username = username
+	}
+	
+	def password(String password) {
+		this.password = password
+	}
 }

@@ -2,6 +2,7 @@ package org.gradle.plugins.jenkins
 
 import groovy.xml.StreamingMarkupBuilder
 import groovyx.net.http.RESTClient
+import groovyx.net.http.HttpResponseException
 import static groovyx.net.http.ContentType.*
 
 class JenkinsRESTServiceImpl implements JenkinsService {
@@ -28,11 +29,9 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 	def restServiceGET(path) {
 		def client = getRestClient()
 		
-		def response = client.get(path: path)
+		def response = client.get(path: path) 
 		if (response.success) {
 			return response.getData()
-		} else if (response.status == 404) {
-			return null
 		} else {
 			throw new Exception('REST Service call failed with response code: ' + response.status)
 		}
@@ -44,7 +43,7 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 
 		def response = client.post(path: path, query: query, requestContentType: XML, body: payload)
 		if (response.success) {
-			return response.data
+			return response.getData()
 		} else {
 			throw new Exception('REST Service call failed with response code: ' + response.status)
 		}
@@ -55,6 +54,12 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 		def responseXml
 		try {
 			responseXml = restServiceGET("/job/${jobName}/config.xml")
+		} catch (HttpResponseException hre) {
+			if (hre.response.status == 404) {
+				responseXml = null
+			} else {
+				throw new JenkinsServiceException("Jenkins Service Call failed", hre)
+			}
 		} catch (Exception e) {
 			throw new JenkinsServiceException("Jenkins Service Call failed", e)
 		}
