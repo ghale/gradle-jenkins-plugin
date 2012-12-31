@@ -81,10 +81,6 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 		} catch (Exception e) {
 			throw new JenkinsServiceException("Jenkins Service Call failed", e)
 		}
-		
-		if (! response.success) {
-			throw new JenkinsServiceException("Jenkins Service Call failed with status: ${response.status}")
-		}
 	}
 
 	@Override
@@ -94,10 +90,6 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 			response = restServicePOST("/job/${jobName}/doDelete", [:], "")
 		} catch (Exception e) {
 			throw new JenkinsServiceException("Jenkins Service Call failed", e)
-		}
-		
-		if (! response.success) {
-			throw new JenkinsServiceException("Jenkins Service Call failed with status: ${response.status}")
 		}
 	}
 

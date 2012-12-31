@@ -51,9 +51,17 @@ class DeleteJenkinsJobTaskTest {
 	def void execute_deletesJobs() {
 		mockJenkinsRESTService.demand.with {
 			getJobConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-			deleteJob() { String jobName -> }
+			deleteJob() { String jobName -> 
+				if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+					throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
+				}
+			}
 			getJobConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-			deleteJob() { String jobName -> }
+			deleteJob() { String jobName -> 
+				if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+					throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
+				}
+			}
 		}
 		
 		mockJenkinsRESTService.use {

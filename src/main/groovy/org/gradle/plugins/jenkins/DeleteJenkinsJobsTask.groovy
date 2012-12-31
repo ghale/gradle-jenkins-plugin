@@ -7,13 +7,13 @@ class DeleteJenkinsJobsTask extends DefaultTask {
 
 	@TaskAction
 	def doDeleteJobs() {
-		service = new JenkinsRESTServiceImpl(project.jenkins.url, project.jenkins.username, project.jenkins.password)
+		def service = new JenkinsRESTServiceImpl(project.jenkins.url, project.jenkins.username, project.jenkins.password)
 		
 		project.jenkins.jobs.each { job ->
 			def existing = service.getJobConfiguration(job.definition.name)
 			if (existing != null) {
 				logger.warn('Deleting job ' + job.definition.name)
-				service.deleteJob(job.name)
+				service.deleteJob(job.definition.name)
 			} else {
 				logger.warn('Jenkins job ' + job.definition.name + ' does not exist')
 			}
