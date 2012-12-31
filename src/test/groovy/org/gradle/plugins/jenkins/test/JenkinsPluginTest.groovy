@@ -37,6 +37,16 @@ class JenkinsPluginTest {
 	void apply_createsJenkinsJobsCollection() {
 		assert project.convention.plugins.jenkins.jenkins.jobs instanceof NamedDomainObjectCollection<JenkinsJob>
 	}
+	
+	@Test
+	void apply_createsJenkinsServerDefinitionCollection() {
+		assert project.convention.plugins.jenkins.jenkins.servers instanceof NamedDomainObjectCollection<JenkinsServerDefinition>
+	}
+	
+	@Test
+	void apply_createsJenkinsTemplatesCollection() {
+		assert project.convention.plugins.jenkins.jenkins.templates instanceof NamedDomainObjectCollection<JenkinsJobDefinition>
+	}
 
 	@Test
 	void configure_addsJenkinsJob() {

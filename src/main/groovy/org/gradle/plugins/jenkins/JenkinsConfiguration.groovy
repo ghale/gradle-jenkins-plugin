@@ -5,14 +5,12 @@ import org.gradle.util.Configurable
 
 class JenkinsConfiguration {
 	private final NamedDomainObjectContainer<JenkinsJob> jobs
+	private final NamedDomainObjectContainer<JenkinsServerDefinition> servers
 	private final NamedDomainObjectContainer<JenkinsJobDefinition> templates
 	
-	def url
-	def username
-	def password
-	
-	public JenkinsConfiguration(NamedDomainObjectContainer<JenkinsJob> jobs, NamedDomainObjectContainer<JenkinsJobDefinition> templates) {
+	public JenkinsConfiguration(NamedDomainObjectContainer<JenkinsJob> jobs, NamedDomainObjectContainer<JenkinsJobDefinition> templates, NamedDomainObjectContainer<JenkinsServerDefinition> servers) {
 		this.jobs = jobs
+		this.servers = servers
 		this.templates = templates
 	}
 	
@@ -24,15 +22,7 @@ class JenkinsConfiguration {
 		templates.configure(closure)
 	}
 	
-	def url(String url) {
-		this.url = url
-	}
-	
-	def username(String username) {
-		this.username = username
-	}
-	
-	def password(String password) {
-		this.password = password
+	def servers(Closure closure) {
+		servers.configure(closure)
 	}
 }
