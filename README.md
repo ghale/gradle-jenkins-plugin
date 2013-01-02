@@ -89,7 +89,7 @@ The following conventions are added
 		- **url** - The url to the jenkins instance. 
 		- **username** - The username to use (must have admin privileges). (Optional)
 		- **password** - The password to use. (Optional
-		- **secure** - Whether or not the server is secured (requiring username and password).  If Username and password are not defined, and secure is set to true, they will be prompted for on the console.  If no console is available, an exception will be thrown.  In the event that the secure field is set to false, empty values for username and password are allowed and no prompting will occur. (Optional, default = true)
+		- **secure** - Whether or not the server is secured (requiring username and password).  If username and password are not defined, and secure is set to true, they will be prompted for on the console.  If no console is available, an exception will be thrown.  In the event that the secure field is set to false, empty values for username and password are allowed and no prompting will occur. (Optional, default = true)
   
 	- **templates** - Definitions of jobs that can be used as templates for concrete jobs.  Each named template defines one field:
 		- **xml** - The config.xml to use as a template for defining jobs.  This field can accept a String, a File, or a Groovy MarkupBuilder closure.
@@ -104,8 +104,8 @@ The following conventions are added
 Tasks
 =====
 The plugin applies two tasks to the project.  Both tasks operate on all defined jobs. 
-- **updateJenkinsJobs** - Creates or updates an existing job on the server.  
-- **deleteJenkinsJobs** - Deletes the jobs from the server.  
+- **updateJenkinsJobs** - Creates or updates jobs on the server(s).  
+- **deleteJenkinsJobs** - Deletes the jobs from the server(s).  
 
 
               
