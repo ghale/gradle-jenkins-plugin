@@ -4,7 +4,7 @@ import org.gradle.util.ConfigureUtil
 
 class JenkinsJob {
 	def name
-	def servers = []
+	def serverDefinitions = []
 	def definition
 	
 	JenkinsJob(String name) {
@@ -20,7 +20,7 @@ class JenkinsJob {
 		ConfigureUtil.configure(closure, definition)
 	}
 	
-	def server(String serverName) {
-		servers += serverName
+	def server(JenkinsServerDefinition server) {
+		serverDefinitions += server
 	}
 }

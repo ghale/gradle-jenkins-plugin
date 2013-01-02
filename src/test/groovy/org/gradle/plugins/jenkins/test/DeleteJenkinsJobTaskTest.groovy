@@ -47,7 +47,7 @@ class DeleteJenkinsJobTaskTest {
 			jobs {
 				project.branches.eachWithIndex { branchName, map, index ->
 					"compile_${branchName}" {
-						server "test1"
+						server servers.test1
 						definition {
 							name "${project.name} compile (${branchName})"
 							xml templates.compile.xml
@@ -92,7 +92,7 @@ class DeleteJenkinsJobTaskTest {
 		}
 		
 		project.jenkins.jobs.each { job ->
-			job.server "test2"
+			job.server project.jenkins.servers.test2
 		}
 		
 		mockJenkinsRESTService.use {

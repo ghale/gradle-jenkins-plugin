@@ -4,18 +4,42 @@ import org.gradle.api.DefaultTask
 
 abstract class AbstractJenkinsTask extends DefaultTask {
 
-	def List<JenkinsServerDefinition> getServerDefinitions(List<String> serverNames) {
-		if (serverNames == null || serverNames.isEmpty()) {
-			serverNames = [ "default" ]
+	def List<JenkinsServerDefinition> getServerDefinitions(JenkinsJob job) {
+		def serverDefinitions = []
+		if (job.serverDefinitions == null || job.serverDefinitions.isEmpty()) {
+			if (project.jenkins.defaultServer != null) {
+				serverDefinitions = [ project.jenkins.defaultServer ]
+			} else {
+				throw new JenkinsConfigurationException("No servers defined for job ${job.name} and no defaultServer set!")
+			}
+		} else {
+			serverDefinitions = job.serverDefinitions
 		}
 		
-		def serverDefinitions = []
-		serverNames.each { serverName ->
-			def server = project.jenkins.servers.findByName(serverName)
-			if (server == null) {
-				throw new JenkinsConfigurationException("No server definition named " + serverName + " found!") 
-			} else {
-				serverDefinitions += server
+		serverDefinitions.each { server ->
+			def console = System.console()
+			if (server.url == null) {
+				if (console != null) {
+					server.url = console.readLine("\nEnter the URL for server \"${server.name}\": ", null)
+				} else {
+					throw new JenkinsConfigurationException("No URL defined for server \"${server.name}\" and no console available for input.")
+				}
+			}
+			
+			if (server.username == null) {
+				if (console != null) {
+					server.username = console.readLine("\nEnter the username for server \"${server.name}\": ", null)
+				} else {
+					throw new JenkinsConfigurationException("No username defined for server \"${server.name}\" and no console available for input.")
+				}
+			}
+			
+			if (server.password == null) {
+				if (console != null) {
+					server.password = new String(console.readPassword("\nEnter the password for server \"${server.name}\": ", null))
+				} else {
+					throw new JenkinsConfigurationException("No password defined for server \"${server.name}\" and no console available for input.")
+				}
 			}
 		}
 		

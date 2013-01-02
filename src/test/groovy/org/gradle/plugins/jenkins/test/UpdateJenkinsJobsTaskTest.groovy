@@ -50,7 +50,7 @@ class UpdateJenkinsJobsTaskTest {
 			jobs {
 				project.branches.eachWithIndex { branchName, map, index ->
 					"compile_${branchName}" {
-						server "test1"
+						server servers.test1
 						definition {
 							name "${project.name} compile (${branchName})"
 							xml templates.compile.xml
@@ -129,7 +129,7 @@ class UpdateJenkinsJobsTaskTest {
 		}
 		
 		project.jenkins.jobs.each { job ->
-			job.server "test2"
+			job.server project.jenkins.servers.test2
 		}
 		
 		mockJenkinsRESTService.use {
@@ -156,16 +156,12 @@ class UpdateJenkinsJobsTaskTest {
 			}
 		}
 		
-		project.jenkins.servers.configure {
-			'default' {
-				url 'default'
-				username 'default'
-				password 'default'
-			}
+		project.jenkins {
+			defaultServer project.jenkins.servers.test1
 		}
 		
 		project.jenkins.jobs.each { job ->
-			job.servers = []
+			job.serverDefinitions = []
 		}
 		
 		mockJenkinsRESTService.use {
@@ -176,7 +172,7 @@ class UpdateJenkinsJobsTaskTest {
 	@Test(expected = JenkinsConfigurationException)
 	def void execute_throwsExceptionOnMissingServer() {
 		project.jenkins.jobs.each { job ->
-			job.servers = [ "NOTDEFINED" ]
+			job.serverDefinitions = []
 		}
 		
 		mockJenkinsRESTService.use {
@@ -185,6 +181,102 @@ class UpdateJenkinsJobsTaskTest {
 			} catch (TaskExecutionException e) {
 				throw e.cause
 			} 
+		}
+	}
+	
+	@Test(expected = JenkinsConfigurationException)
+	def void execute_throwsExceptionForMissingURL() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			2.times {
+				getJobConfiguration() { String jobName ->
+					null
+				}
+				
+				createJob() { String jobName, String configXML ->
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			
+			}
+		}
+		
+		project.jenkins.servers.each { server ->
+			server.url = null
+		}
+		
+		mockJenkinsRESTService.use {
+			try {
+				project.tasks.updateJenkinsJobs.execute()
+			} catch (TaskExecutionException e) {
+				throw e.cause
+			} 
+		}
+	}
+	
+	@Test(expected = JenkinsConfigurationException)
+	def void execute_throwsExceptionForMissingUsername() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			2.times {
+				getJobConfiguration() { String jobName ->
+					null
+				}
+				
+				createJob() { String jobName, String configXML ->
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			
+			}
+		}
+		
+		project.jenkins.servers.each { server ->
+			server.username = null
+		}
+		
+		mockJenkinsRESTService.use {
+			try {
+				project.tasks.updateJenkinsJobs.execute()
+			} catch (TaskExecutionException e) {
+				throw e.cause
+			}
+		}
+	}
+	
+	@Test(expected = JenkinsConfigurationException)
+	def void execute_throwsExceptionForMissingPassword() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			2.times {
+				getJobConfiguration() { String jobName ->
+					null
+				}
+				
+				createJob() { String jobName, String configXML ->
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			
+			}
+		}
+		
+		project.jenkins.servers.each { server ->
+			server.password = null
+		}
+		
+		mockJenkinsRESTService.use {
+			try {
+				project.tasks.updateJenkinsJobs.execute()
+			} catch (TaskExecutionException e) {
+				throw e.cause
+			}
 		}
 	}
 }
