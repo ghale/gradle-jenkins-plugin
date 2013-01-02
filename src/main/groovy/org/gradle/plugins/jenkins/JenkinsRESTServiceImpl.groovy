@@ -17,10 +17,16 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 		this.password = password
 	}
 	
+	public JenkinsRESTServiceImpl(String url) {
+		this.url = url
+	}
+	
 	def getRestClient() {
 		if (client == null) {
 			client = new RESTClient(url)
-			client.client.addRequestInterceptor(new PreemptiveAuthInterceptor(username, password))
+			if (username != null) {
+				client.client.addRequestInterceptor(new PreemptiveAuthInterceptor(username, password))
+			}
 		}
 		
 		return client

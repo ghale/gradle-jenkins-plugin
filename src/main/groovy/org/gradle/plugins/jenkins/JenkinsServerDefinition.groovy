@@ -5,6 +5,7 @@ class JenkinsServerDefinition {
 	def url
 	def username
 	def password
+	def secure = true
 	
 	JenkinsServerDefinition(String name) {
 		this.name = name
@@ -20,5 +21,9 @@ class JenkinsServerDefinition {
 	
 	def password(String password) {
 		this.password = password
+	}
+	
+	def secure(Boolean secure) {
+		this.secure = secure
 	}
 }

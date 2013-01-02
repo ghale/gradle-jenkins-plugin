@@ -13,8 +13,9 @@ The following gradle file uses a single template xml file (downloaded straight f
 	        servers {
 	                testing {
 	                        url 'http://jenkins.somewhere.com:8080'
-	                        username "testuser"
-	                        password "testpass"
+	                        secure true         // optional
+	                        username "testuser" // optional
+	                        password "testpass" // optional
 	                }
 	        }
 	
@@ -24,10 +25,11 @@ The following gradle file uses a single template xml file (downloaded straight f
 	                }
 	        } 
 	
-	        defaultServer servers.testing  
+	        defaultServer servers.testing // optional 
 	        jobs {
 	                [ 'master', 'develop' ].each { branchName ->
 	                        "build_${branchName}" {
+	                        		server servers.testing // optional
 	                                definition {
 	                                        name "Build ${project.name} (${branchName})"
 	                                        xml templates.build.override { projectXml ->
@@ -54,7 +56,7 @@ Configuration
 
 jenkins - The main configuration closure contains servers, templates, jobs and (optionally) a defaultServer definition.  If a defaultServer is not defined, then each job must specify the server it should be applied to.
 
-servers - Definitions of jenkins servers where jobs can be applied.  Each named server can define three String fields: the url to the jenkins instance, the username to use (must have admin privileges) and the password to use.  Username and password are optional and if they are not defined, they will be prompted for on the console.  If no console is available, an exception will be thrown.
+servers - Definitions of jenkins servers where jobs can be applied.  Each named server can define several fields: the url to the jenkins instance, the username to use (must have admin privileges) and the password to use.  Username and password are optional and if they are not defined, they will be prompted for on the console.  If no console is available, an exception will be thrown.  In the event that the Jenkins server is not secured, setting the "secure" field to false will allow empty values for username and password and will not prompt for any.  Ommitting the secure field defaults to true.
 
 templates - Definitions of jobs that can be used as templates for concrete jobs.  Each named template defines the xml field.  This can accept a String, a File, or a Groovy MarkupBuilder closure.
 

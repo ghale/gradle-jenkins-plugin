@@ -279,4 +279,70 @@ class UpdateJenkinsJobsTaskTest {
 			}
 		}
 	}
+	
+	@Test
+	def void execute_allowsMissingUsernameForInsecureServer() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			2.times {
+				getJobConfiguration() { String jobName ->
+					null
+				}
+				
+				createJob() { String jobName, String configXML ->
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			
+			}
+		}
+		
+		project.jenkins.servers.each { server ->
+			server.secure = false
+			server.username = null
+		}
+		
+		mockJenkinsRESTService.use {
+			try {
+				project.tasks.updateJenkinsJobs.execute()
+			} catch (TaskExecutionException e) {
+				throw e.cause
+			}
+		}
+	}
+	
+	@Test
+	def void execute_allowsMissingPasswordForInsecureServer() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			2.times {
+				getJobConfiguration() { String jobName ->
+					null
+				}
+				
+				createJob() { String jobName, String configXML ->
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			
+			}
+		}
+		
+		project.jenkins.servers.each { server ->
+			server.secure = false
+			server.password = null
+		}
+		
+		mockJenkinsRESTService.use {
+			try {
+				project.tasks.updateJenkinsJobs.execute()
+			} catch (TaskExecutionException e) {
+				throw e.cause
+			}
+		}
+	}
 }

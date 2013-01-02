@@ -9,7 +9,7 @@ class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
 	def doDeleteJobs() {
 		project.jenkins.jobs.each { job ->
 			getServerDefinitions(job).each { server ->
-				def service = new JenkinsRESTServiceImpl(server.url, server.username, server.password)
+				def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
 				def existing = service.getJobConfiguration(job.definition.name)
 				if (existing != null) {
 					logger.warn('Deleting job ' + job.definition.name + ' on ' + server.url)

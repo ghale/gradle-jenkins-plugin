@@ -16,6 +16,7 @@ import org.gradle.plugins.jenkins.JenkinsPlugin
 import org.gradle.plugins.jenkins.JenkinsConfiguration
 import org.gradle.plugins.jenkins.JenkinsRESTServiceImpl
 import org.gradle.plugins.jenkins.JenkinsServiceException
+import org.gradle.plugins.jenkins.PreemptiveAuthInterceptor
 
 import groovy.mock.interceptor.MockFor
 import groovyx.net.http.HttpResponseDecorator
@@ -206,6 +207,28 @@ class JenkinsRESTServiceImplTest {
 		mockRESTClient.use {
 			def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
 			service.deleteJob("compile")
+		}
+	}
+	
+	@Test
+	def void getJobConfiguration_doesNotAddInterceptorForInSecureServer() {
+		mockRESTClient.demand.with {
+			get() { Map<String, ?> map ->
+				HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+				HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
+				return response
+			}
+		}
+		
+		mockRESTClient.ignore('getClient')
+		
+		mockRESTClient.use {
+			def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url)
+			def xml = service.getJobConfiguration("compile")
+			assert xml == "<test1><test2>srv value</test2></test1>"
+			for (int i=0; i < service.client.client.getRequestInterceptorCount(); i++) { 
+				assert ! (service.client.client.getRequestInterceptor(i) instanceof PreemptiveAuthInterceptor)
+			}
 		}
 	}
 }
