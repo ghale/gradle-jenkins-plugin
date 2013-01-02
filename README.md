@@ -7,46 +7,46 @@ Example
 =======
 The following gradle file uses a single template xml file (downloaded straight from <JOB_URL>/api/config.xml) and then generates two new jobs - one for the master branch of a git repository and one for the develop branch.  For each, it uses a closure to override the template to disable the job, set a custom workspace, set the repository url, and set the branch name. 
 
-apply plugin: 'jenkins'
-
-jenkins {
-        servers {
-                testing {
-                        url 'http://jenkins.somewhere.com:8080'
-                        username "testuser"
-                        password "testpass"
-                }
-        }
-
-        templates {
-                build {
-                        xml file('build-template.xml')
-                }
-        } 
-
-        defaultServer servers.testing  
-        jobs {
-                [ 'master', 'develop' ].each { branchName ->
-                        "build_${branchName}" {
-                                definition {
-                                        name "Build ${project.name} (${branchName})"
-                                        xml templates.build.override { projectXml ->
-                                                projectXml.disabled = 'true'
-                                                projectXml.customWorkspace = "/build/${branchName}/${project.name}"
-                                                projectXml.scm.userRemoteConfigs.'hudson.plugins.git.UserRemoteConfig'.url = "git@gitserver:${project.name}.git"
-                                                projectXml.scm.branches.replaceNode { node ->
-                                                        branches() {
-                                                                'hudson.plugins.git.BranchSpec'() {
-                                                                        name([:], "*/${branchName}")
-                                                                }
-                                                        }
-                                                }
-                                        }
-                                }
-                        }
-                }
-        }
-}
+	apply plugin: 'jenkins'
+	
+	jenkins {
+	        servers {
+	                testing {
+	                        url 'http://jenkins.somewhere.com:8080'
+	                        username "testuser"
+	                        password "testpass"
+	                }
+	        }
+	
+	        templates {
+	                build {
+	                        xml file('build-template.xml')
+	                }
+	        } 
+	
+	        defaultServer servers.testing  
+	        jobs {
+	                [ 'master', 'develop' ].each { branchName ->
+	                        "build_${branchName}" {
+	                                definition {
+	                                        name "Build ${project.name} (${branchName})"
+	                                        xml templates.build.override { projectXml ->
+	                                                projectXml.disabled = 'true'
+	                                                projectXml.customWorkspace = "/build/${branchName}/${project.name}"
+	                                                projectXml.scm.userRemoteConfigs.'hudson.plugins.git.UserRemoteConfig'.url = "git@gitserver:${project.name}.git"
+	                                                projectXml.scm.branches.replaceNode { node ->
+	                                                        branches() {
+	                                                                'hudson.plugins.git.BranchSpec'() {
+	                                                                        name([:], "*/${branchName}")
+	                                                                }
+	                                                        }
+	                                                }
+	                                        }
+	                                }
+	                        }
+	                }
+	        }
+	}
 
 
 Configuration
