@@ -1,13 +1,13 @@
-package org.gradle.plugins.jenkins.test;
+package com.terrafolio.gradle.plugins.jenkins.test;
 
 import static org.junit.Assert.*;
 
-import org.gradle.plugins.jenkins.JenkinsConfigurationConvention
-import org.gradle.plugins.jenkins.JenkinsPlugin
-import org.gradle.plugins.jenkins.DeleteJenkinsJobsTask
-import org.gradle.plugins.jenkins.JenkinsConfiguration
-import org.gradle.plugins.jenkins.JenkinsJob
-import org.gradle.plugins.jenkins.UpdateJenkinsJobsTask
+import com.terrafolio.gradle.plugins.jenkins.JenkinsConfigurationConvention
+import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
+import com.terrafolio.gradle.plugins.jenkins.DeleteJenkinsJobsTask
+import com.terrafolio.gradle.plugins.jenkins.JenkinsConfiguration
+import com.terrafolio.gradle.plugins.jenkins.JenkinsJob
+import com.terrafolio.gradle.plugins.jenkins.UpdateJenkinsJobsTask
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project;
 import org.junit.Test;

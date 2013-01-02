@@ -1,4 +1,4 @@
-package org.gradle.plugins.jenkins
+package com.terrafolio.gradle.plugins.jenkins
 
 import org.gradle.api.DefaultTask
 

@@ -1,4 +1,4 @@
-package org.gradle.plugins.jenkins.test;
+package com.terrafolio.gradle.plugins.jenkins.test;
 
 import static org.junit.Assert.*
 
@@ -12,11 +12,11 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Before
 import org.junit.Test
 
-import org.gradle.plugins.jenkins.JenkinsPlugin
-import org.gradle.plugins.jenkins.JenkinsConfiguration
-import org.gradle.plugins.jenkins.JenkinsRESTServiceImpl
-import org.gradle.plugins.jenkins.JenkinsServiceException
-import org.gradle.plugins.jenkins.PreemptiveAuthInterceptor
+import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
+import com.terrafolio.gradle.plugins.jenkins.JenkinsConfiguration
+import com.terrafolio.gradle.plugins.jenkins.JenkinsRESTServiceImpl
+import com.terrafolio.gradle.plugins.jenkins.JenkinsServiceException
+import com.terrafolio.gradle.plugins.jenkins.PreemptiveAuthInterceptor
 
 import groovy.mock.interceptor.MockFor
 import groovyx.net.http.HttpResponseDecorator

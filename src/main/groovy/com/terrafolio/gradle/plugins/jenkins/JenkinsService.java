@@ -1,4 +1,4 @@
-package org.gradle.plugins.jenkins;
+package com.terrafolio.gradle.plugins.jenkins;
 
 public interface JenkinsService {
 	public String getJobConfiguration(String jobName) throws JenkinsServiceException;

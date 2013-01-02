@@ -1,4 +1,4 @@
-package org.gradle.plugins.jenkins
+package com.terrafolio.gradle.plugins.jenkins
 
 import groovy.xml.StreamingMarkupBuilder
 import groovyx.net.http.RESTClient

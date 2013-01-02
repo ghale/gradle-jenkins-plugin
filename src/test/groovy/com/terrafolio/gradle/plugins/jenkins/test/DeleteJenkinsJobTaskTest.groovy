@@ -1,4 +1,4 @@
-package org.gradle.plugins.jenkins.test;
+package com.terrafolio.gradle.plugins.jenkins.test;
 
 import static org.junit.Assert.*;
 import groovy.mock.interceptor.MockFor;
@@ -9,8 +9,8 @@ import org.junit.Test
 
 import org.gradle.testfixtures.ProjectBuilder
 
-import org.gradle.plugins.jenkins.JenkinsPlugin
-import org.gradle.plugins.jenkins.JenkinsRESTServiceImpl
+import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
+import com.terrafolio.gradle.plugins.jenkins.JenkinsRESTServiceImpl
 
 class DeleteJenkinsJobTaskTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()

@@ -1,4 +1,4 @@
-package org.gradle.plugins.jenkins.test;
+package com.terrafolio.gradle.plugins.jenkins.test;
 
 import static org.junit.Assert.*
 
@@ -8,10 +8,10 @@ import org.junit.Before
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.api.tasks.TaskExecutionException
 
-import org.gradle.plugins.jenkins.JenkinsPlugin
-import org.gradle.plugins.jenkins.JenkinsRESTServiceImpl
-import org.gradle.plugins.jenkins.JenkinsServiceException
-import org.gradle.plugins.jenkins.JenkinsConfigurationException
+import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
+import com.terrafolio.gradle.plugins.jenkins.JenkinsRESTServiceImpl
+import com.terrafolio.gradle.plugins.jenkins.JenkinsServiceException
+import com.terrafolio.gradle.plugins.jenkins.JenkinsConfigurationException
 
 import groovy.mock.interceptor.MockFor
 
