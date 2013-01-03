@@ -26,4 +26,33 @@ class JenkinsServerDefinition {
 	def secure(Boolean secure) {
 		this.secure = secure
 	}
+	
+	def void checkDefinitionValues() {
+		def console = System.console()
+		if (url == null) {
+			if (console != null) {
+				url = console.readLine("\nEnter the URL for server \"${name}\": ", null)
+			} else {
+				throw new JenkinsConfigurationException("No URL defined for server \"${name}\" and no console available for input.")
+			}
+		}
+		
+		if (secure) {
+			if (username == null) {
+				if (console != null) {
+					username = console.readLine("\nEnter the username for server \"${name}\": ", null)
+				} else {
+					throw new JenkinsConfigurationException("No username defined for server \"${name}\" and no console available for input.")
+				}
+			}
+			
+			if (password == null) {
+				if (console != null) {
+					password = new String(console.readPassword("\nEnter the password for server \"${name}\": ", null))
+				} else {
+					throw new JenkinsConfigurationException("No password defined for server \"${name}\" and no console available for input.")
+				}
+			}
+		}
+	}
 }
