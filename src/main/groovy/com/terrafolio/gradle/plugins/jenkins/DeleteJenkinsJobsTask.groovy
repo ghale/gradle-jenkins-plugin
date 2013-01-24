@@ -7,7 +7,7 @@ class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
 
 	@TaskAction
 	def doDeleteJobs() {
-		project.jenkins.jobs.each { job ->
+		getJobs().each { job ->
 			getServerDefinitions(job).each { server ->
 				def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
 				def existing = service.getJobConfiguration(job.definition.name)

@@ -375,4 +375,34 @@ class UpdateJenkinsJobsTaskTest {
 			project.tasks.updateJenkinsJobs.execute()
 		}
 	}
+	
+	@Test
+	def void execute_filtersJobs() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			2.times {
+				getJobConfiguration() { String jobName ->
+					null
+				}
+				
+				createJob() { String jobName, String configXML ->
+					assert jobName =~ /master/
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			
+			}
+		}
+		
+		project.jenkinsJobFilter = '.*_master'
+		project.jenkins.jobs.each { job ->
+			job.server project.jenkins.servers.test2
+		}
+		
+		mockJenkinsRESTService.use {
+			project.tasks.updateJenkinsJobs.execute()
+		}
+	}
 }
