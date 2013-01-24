@@ -22,7 +22,9 @@ class JenkinsJob {
 	}
 	
 	def server(JenkinsServerDefinition server) {
-		serverDefinitions += server
+		if (! serverDefinitions.contains(server)) {
+			serverDefinitions += server
+		}
 	}
 	
 	def server(JenkinsServerDefinition server, Closure closure) {
