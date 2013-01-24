@@ -13,7 +13,11 @@ abstract class AbstractJenkinsTask extends DefaultTask {
 				throw new JenkinsConfigurationException("No servers defined for job ${job.name} and no defaultServer set!")
 			}
 		} else {
-			serverDefinitions = job.serverDefinitions
+			if (project.hasProperty('jenkinsServerFilter')) {
+				serverDefinitions = job.serverDefinitions.findAll { it.name =~ project.jenkinsServerFilter }	
+			} else {
+				serverDefinitions = job.serverDefinitions
+			}
 		}
 		
 		serverDefinitions.each { server ->
