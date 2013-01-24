@@ -405,4 +405,45 @@ class UpdateJenkinsJobsTaskTest {
 			project.tasks.updateJenkinsJobs.execute()
 		}
 	}
+	
+	@Test void execute_configuresServerSpecificConfiguration() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			4.times {
+				getJobConfiguration() { String jobName ->
+					null
+				}
+				
+				createJob() { String jobName, String configXML ->
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			
+			}
+		}
+		
+		project.jenkins.jobs.each { job ->
+			job.server project.jenkins.servers.test2, { 
+				xml override { projectXml ->
+					projectXml.description = 'This is for test2'
+				}
+			}
+		}
+		
+		mockJenkinsRESTService.use {
+			project.jenkins.jobs.each { job ->
+				job.serverDefinitions.each { server ->
+					def definition = job.getServerSpecificDefinition(server)
+					if (server.name == 'test2') {
+						assert definition.xml == "<project><actions></actions><description>This is for test1</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+					} else {
+						assert definition.xml == "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+					}
+				}
+			}
+			project.tasks.updateJenkinsJobs.execute()
+		}
+	} 
 }
