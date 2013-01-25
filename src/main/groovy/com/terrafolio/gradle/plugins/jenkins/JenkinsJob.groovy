@@ -5,6 +5,7 @@ import org.gradle.util.ConfigureUtil
 class JenkinsJob {
 	def name
 	def serverDefinitions = []
+	def serverSpecificConfiguration = [:]
 	def definition
 	
 	JenkinsJob(String name) {
@@ -21,6 +22,30 @@ class JenkinsJob {
 	}
 	
 	def server(JenkinsServerDefinition server) {
-		serverDefinitions += server
+		if (! serverDefinitions.contains(server)) {
+			serverDefinitions += server
+		}
+	}
+	
+	def server(JenkinsServerDefinition server, Closure closure) {
+		this.server(server)
+		if (! serverSpecificConfiguration.containsKey(server)) {
+			serverSpecificConfiguration[server] = []
+		}
+		serverSpecificConfiguration[server] += closure
+	}
+	
+	def getServerSpecificDefinition(JenkinsServerDefinition server) {
+		if (serverSpecificConfiguration.containsKey(server)) {
+			def newDefinition = new JenkinsJobDefinition(definition.name, definition.xml)
+			
+			serverSpecificConfiguration[server].each { closure -> 
+				ConfigureUtil.configure(closure, newDefinition)
+			}
+			
+			return newDefinition
+		} else {
+			return definition
+		}
 	}
 }

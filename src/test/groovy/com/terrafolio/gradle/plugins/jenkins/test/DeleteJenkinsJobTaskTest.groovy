@@ -47,7 +47,7 @@ class DeleteJenkinsJobTaskTest {
 			jobs {
 				project.branches.eachWithIndex { branchName, map, index ->
 					"compile_${branchName}" {
-						server servers.test1
+						server servers.test1 
 						definition {
 							name "${project.name} compile (${branchName})"
 							xml templates.compile.xml
