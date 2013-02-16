@@ -13,7 +13,9 @@ dependencies {
    compile gradleApi()
    groovy localGroovy()
    
-   compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') 
+   compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
+	   exclude(module: 'groovy')
+   }
 }
 
 task wrapper(type: Wrapper) {
