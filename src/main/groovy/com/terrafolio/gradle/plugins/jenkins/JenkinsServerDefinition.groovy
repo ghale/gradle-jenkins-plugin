@@ -6,6 +6,7 @@ class JenkinsServerDefinition {
 	def username
 	def password
 	def secure = true
+	def console
 	
 	JenkinsServerDefinition(String name) {
 		this.name = name
@@ -28,7 +29,10 @@ class JenkinsServerDefinition {
 	}
 	
 	def void checkDefinitionValues() {
-		def console = System.console()
+		if (console == null) {
+			 console = ConsoleFactory.getConsole()
+		}
+		
 		if (url == null) {
 			if (console != null) {
 				url = console.readLine("\nEnter the URL for server \"${name}\": ", null)

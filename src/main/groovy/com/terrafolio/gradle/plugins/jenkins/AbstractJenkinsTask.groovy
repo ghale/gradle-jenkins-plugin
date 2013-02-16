@@ -3,7 +3,6 @@ package com.terrafolio.gradle.plugins.jenkins
 import org.gradle.api.DefaultTask
 
 abstract class AbstractJenkinsTask extends DefaultTask {
-
 	def List<JenkinsServerDefinition> getServerDefinitions(JenkinsJob job) {
 		def serverDefinitions = []
 		if (job.serverDefinitions == null || job.serverDefinitions.isEmpty()) {
@@ -36,5 +35,9 @@ abstract class AbstractJenkinsTask extends DefaultTask {
 		}
 		
 		return jobs
+	}
+	
+	def void initialize() {
+		getJobs().each { job ->	getServerDefinitions(job) }
 	}
 }

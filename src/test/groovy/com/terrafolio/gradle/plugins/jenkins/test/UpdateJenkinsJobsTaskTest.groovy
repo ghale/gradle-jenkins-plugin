@@ -12,6 +12,7 @@ import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import com.terrafolio.gradle.plugins.jenkins.JenkinsRESTServiceImpl
 import com.terrafolio.gradle.plugins.jenkins.JenkinsServiceException
 import com.terrafolio.gradle.plugins.jenkins.JenkinsConfigurationException
+import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
 
 import groovy.mock.interceptor.MockFor
 
@@ -277,6 +278,75 @@ class UpdateJenkinsJobsTaskTest {
 			} catch (TaskExecutionException e) {
 				throw e.cause
 			}
+		}
+	}
+	
+	@Test
+	def void execute_promptsForCredentialsBeforeExecution() {
+		project.ext.credentialsGathered = false
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> 	
+			}
+			
+			4.times {
+				getJobConfiguration() { String jobName ->
+					null
+				}
+				
+				createJob() { String jobName, String configXML ->
+					assert project.ext.credentialsGathered
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			
+			}
+		}
+		
+		def console = new GroovyObject() {
+							def readLine_called = 0
+							def readPassword_called = 0
+							def shouldBeCalled = 2
+							
+							def String readLine(String message, Object nothing) {
+								readLine_called++
+								if (readLine_called >= shouldBeCalled && readPassword_called >= shouldBeCalled) project.ext.credentialsGathered = true
+								return 'mockUser'
+							}
+							
+							def String readPassword(String message, Object nothing) {
+								readPassword_called++
+								if (readLine_called >= shouldBeCalled && readPassword_called >= shouldBeCalled) project.ext.credentialsGathered = true
+								return 'mockPass'
+							}
+						}
+		def mockConsoleFactory = new MockFor(ConsoleFactory.class)
+		mockConsoleFactory.demand.with {
+			2.times {
+				getConsole() {
+					return console
+				}
+			}
+			
+		}
+		
+		project.jenkins.servers.each { server ->
+			server.username = null
+			server.password = null
+		}
+		
+		project.jenkins.jobs.each { job ->
+			job.server project.jenkins.servers.test2
+		}
+		
+		mockConsoleFactory.use {
+		mockJenkinsRESTService.use {
+			try {
+				project.tasks.updateJenkinsJobs.execute()
+			} catch (TaskExecutionException e) {
+				throw e.cause
+			}
+		}
 		}
 	}
 	
