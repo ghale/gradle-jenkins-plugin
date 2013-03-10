@@ -81,4 +81,9 @@ class JenkinsPluginTest {
 	void apply_createsDumpJenkinsJobsTask() {
 		assert project.tasks.findByName('dumpJenkinsJobs') instanceof DumpJenkinsJobsTask
 	}
+	
+	@Test
+	void apply_createsRetireJenkinsJobsTask() {
+		assert project.tasks.findByName('retireJenkinsJobs') instanceof DeleteJenkinsJobsTask
+	}
 }
