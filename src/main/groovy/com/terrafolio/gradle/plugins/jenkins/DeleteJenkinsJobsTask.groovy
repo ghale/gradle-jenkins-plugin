@@ -5,8 +5,7 @@ import org.gradle.api.tasks.TaskAction
 
 class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
 
-	@TaskAction
-	def doDeleteJobs() {
+	def void doExecute() {
 		initialize()
 		getJobs().each { job ->
 			getServerDefinitions(job).each { server ->

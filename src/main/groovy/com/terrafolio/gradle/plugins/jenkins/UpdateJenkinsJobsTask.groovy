@@ -6,8 +6,7 @@ import org.gradle.api.tasks.TaskAction
 class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
 	def JenkinsService service
 
-	@TaskAction
-	def doUpdate() {
+	def void doExecute() {
 		initialize()
 		getJobs().each { job ->
 			getServerDefinitions(job).each { server ->
