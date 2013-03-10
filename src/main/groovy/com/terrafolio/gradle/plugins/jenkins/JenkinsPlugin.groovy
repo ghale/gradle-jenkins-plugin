@@ -2,11 +2,13 @@ package com.terrafolio.gradle.plugins.jenkins
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.BasePlugin
 
 class JenkinsPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
+		project.plugins.apply(BasePlugin.class)
 		applyTasks(project)
 		applyConventions(project)
 	}
