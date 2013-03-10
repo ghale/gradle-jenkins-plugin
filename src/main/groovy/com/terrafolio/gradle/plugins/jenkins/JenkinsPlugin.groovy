@@ -14,7 +14,7 @@ class JenkinsPlugin implements Plugin<Project> {
 	}
 	
 	def applyTasks(Project project) {
-		project.task('updateJenkinsJobs', type: UpdateJenkinsJobsTask)
+		project.task('updateJenkinsJobs', type: UpdateAllJenkinsJobsTask)
 		project.task('deleteJenkinsJobs', type: DeleteAllJenkinsJobsTask)
 		project.task('dumpJenkinsJobs', type: DumpJenkinsJobsTask)
 		project.task('retireJenkinsJobs', type: DeleteJenkinsJobsTask)
