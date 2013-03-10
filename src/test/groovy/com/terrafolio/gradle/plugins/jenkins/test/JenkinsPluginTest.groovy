@@ -2,6 +2,7 @@ package com.terrafolio.gradle.plugins.jenkins.test;
 
 import static org.junit.Assert.*;
 
+import com.terrafolio.gradle.plugins.jenkins.DeleteAllJenkinsJobsTask
 import com.terrafolio.gradle.plugins.jenkins.DumpJenkinsJobsTask
 import com.terrafolio.gradle.plugins.jenkins.JenkinsConfigurationConvention
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
@@ -67,7 +68,7 @@ class JenkinsPluginTest {
 	
 	@Test
 	void apply_createsDeleteJenkinsJobsTask() {
-		assert project.tasks.findByName('deleteJenkinsJobs') instanceof DeleteJenkinsJobsTask
+		assert project.tasks.findByName('deleteJenkinsJobs') instanceof DeleteAllJenkinsJobsTask
 	}
 	
 	@Test

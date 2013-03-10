@@ -7,7 +7,6 @@ class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
 	def JenkinsService service
 
 	def void doExecute() {
-		initialize()
 		getJobs().each { job ->
 			getServerDefinitions(job).each { server ->
 				def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
