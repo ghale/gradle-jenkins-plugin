@@ -6,8 +6,7 @@ import org.gradle.api.tasks.TaskAction
 class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
 	def JenkinsService service
 
-	@TaskAction
-	def doUpdate() {
+	def void doExecute() {
 		getJobs().each { job ->
 			getServerDefinitions(job).each { server ->
 				def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)

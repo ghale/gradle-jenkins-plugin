@@ -2,18 +2,22 @@ package com.terrafolio.gradle.plugins.jenkins
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.BasePlugin
 
 class JenkinsPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
+		project.plugins.apply(BasePlugin.class)
 		applyTasks(project)
 		applyConventions(project)
 	}
 	
 	def applyTasks(Project project) {
 		project.task('updateJenkinsJobs', type: UpdateJenkinsJobsTask)
-		project.task('deleteJenkinsJobs', type: DeleteJenkinsJobsTask)
+		project.task('deleteJenkinsJobs', type: DeleteAllJenkinsJobsTask)
+		project.task('dumpJenkinsJobs', type: DumpJenkinsJobsTask)
+		project.task('retireJenkinsJobs', type: DeleteJenkinsJobsTask)
 	}
 
 	def applyConventions(Project project) {

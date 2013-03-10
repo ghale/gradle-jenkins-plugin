@@ -4,10 +4,10 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
+	def jobsToDelete = []
 
-	@TaskAction
-	def doDeleteJobs() {
-		getJobs().each { job ->
+	def void doExecute() {
+		jobsToDelete.each { job ->
 			getServerDefinitions(job).each { server ->
 				def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
 				def existing = service.getJobConfiguration(job.definition.name)
@@ -19,5 +19,18 @@ class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
 				}
 			}
 		}
+	}
+	
+	def void delete(JenkinsJob job) {
+		jobsToDelete += job
+	}
+	
+	def void delete(JenkinsServerDefinition server, String jobName) {
+		def job = new JenkinsJob(jobName)
+		job.server server
+		job.definition {
+			name jobName
+		}
+		delete(job)
 	}
 }

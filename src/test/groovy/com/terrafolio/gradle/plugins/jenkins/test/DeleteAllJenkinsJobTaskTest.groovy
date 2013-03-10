@@ -11,9 +11,8 @@ import org.gradle.testfixtures.ProjectBuilder
 
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import com.terrafolio.gradle.plugins.jenkins.JenkinsRESTServiceImpl
-import com.terrafolio.gradle.plugins.jenkins.DeleteJenkinsJobsTask
 
-class DeleteJenkinsJobTaskTest {
+class DeleteAllJenkinsJobTaskTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
 	def private final JenkinsPlugin plugin = new JenkinsPlugin()
 	def MockFor mockJenkinsRESTService
@@ -62,63 +61,42 @@ class DeleteJenkinsJobTaskTest {
 	}
 	
 	@Test
-	def void execute_deletesOneJob() {
-		mockJenkinsRESTService.demand.with {
-			getJobConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-			deleteJob() { String jobName -> 
-				if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-					throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
-				}
-			}
-		}
-		
-		project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
-			delete(project.jenkins.jobs.compile_master)
-		}
-		
-		mockJenkinsRESTService.use {
-			project.tasks.deleteOneJob.execute()
-		}
-	}
-	
-	@Test
-	def void execute_deletesOneJobTuple() {
-		def jobToDelete = "${project.name} compile (master)"
-		mockJenkinsRESTService.demand.with {
-			getJobConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-			deleteJob() { String jobName ->
-				assert jobName == jobToDelete
-			}
-		}
-		
-		project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
-			delete(project.jenkins.servers.test1, jobToDelete)
-		}
-		
-		mockJenkinsRESTService.use {
-			project.tasks.deleteOneJob.execute()
-		}
-	}
-	
-	def void execute_deletesMultipleJobs() {
-		def jobToDelete = "${project.name} compile (master)"
+	def void execute_deletesJobs() {
 		mockJenkinsRESTService.demand.with {
 			2.times {
 				getJobConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-				deleteJob() { String jobName ->
-					assert jobName == jobToDelete
+				deleteJob() { String jobName -> 
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
+					}
 				}
 			}
 		}
 		
-		project.task('deleteMultipleJobs', type: DeleteJenkinsJobsTask) {
-			delete(project.jenkins.servers.test1, jobToDelete)
-			delete(project.jenkins.servers.test2, jobToDelete)
-		}
-		
 		mockJenkinsRESTService.use {
-			project.tasks.deleteMultipleJobs.execute()
+			project.tasks.deleteJenkinsJobs.execute()
 		}
 	}
 	
+	@Test 
+	def void execute_deletesJobsOnAllServers() {
+		mockJenkinsRESTService.demand.with {
+			4.times {
+				getJobConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+				deleteJob() { String jobName ->
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
+					}
+				}
+			}
+		}
+		
+		project.jenkins.jobs.each { job ->
+			job.server project.jenkins.servers.test2
+		}
+		
+		mockJenkinsRESTService.use {
+			project.tasks.deleteJenkinsJobs.execute()
+		}
+	}
 }
