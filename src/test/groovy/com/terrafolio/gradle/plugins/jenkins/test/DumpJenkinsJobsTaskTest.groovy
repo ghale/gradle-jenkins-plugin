@@ -1,6 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.test
 
 import static org.junit.Assert.*
+import groovy.lang.GroovyObject;
 import groovy.mock.interceptor.MockFor
 import groovy.xml.StreamingMarkupBuilder
 
@@ -12,6 +13,7 @@ import org.junit.Before
 import org.junit.Test
 
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
+import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
 
 class DumpJenkinsJobsTaskTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
@@ -66,6 +68,23 @@ class DumpJenkinsJobsTaskTest {
 			XMLUnit.setIgnoreWhitespace(true)
 			def xmlDiff = new Diff(job.definition.xml, jobFile.getText())
 			assert xmlDiff.similar()
+		}
+	}
+	
+	@Test
+	def void execute_doesNotPromptForCredentials() {
+		def mockConsoleFactory = new MockFor(ConsoleFactory.class)
+		mockConsoleFactory.demand.with {
+			getConsole(0)
+		}
+		
+		project.jenkins.servers.each { server ->
+			server.username = null
+			server.password = null
+		}
+		
+		mockConsoleFactory.use {
+			project.tasks.dumpJenkinsJobs.execute()
 		}
 	}
 }

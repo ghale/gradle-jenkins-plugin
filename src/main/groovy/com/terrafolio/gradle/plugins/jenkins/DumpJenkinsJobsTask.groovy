@@ -2,6 +2,11 @@ package com.terrafolio.gradle.plugins.jenkins
 
 class DumpJenkinsJobsTask extends AbstractJenkinsTask {
 
+	public DumpJenkinsJobsTask() {
+		super();
+		needsCredentials = false
+	}
+
 	@Override
 	public void doExecute() {
 		project.jenkins.jobs.each { job ->

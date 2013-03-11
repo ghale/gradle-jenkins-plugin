@@ -4,6 +4,8 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 abstract class AbstractJenkinsTask extends DefaultTask {
+	def needsCredentials = true
+	
 	@TaskAction
 	def void executeTask() {
 		initialize()
@@ -28,8 +30,10 @@ abstract class AbstractJenkinsTask extends DefaultTask {
 			}
 		}
 		
-		serverDefinitions.each { server ->
-			server.checkDefinitionValues()
+		if (needsCredentials) {
+			serverDefinitions.each { server ->
+				server.checkDefinitionValues()
+			}
 		}
 		
 		return serverDefinitions
