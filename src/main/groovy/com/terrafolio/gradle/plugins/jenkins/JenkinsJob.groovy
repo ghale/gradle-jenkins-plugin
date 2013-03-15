@@ -17,7 +17,9 @@ class JenkinsJob {
 	}
 	
 	def definition(Closure closure) {
-		this.definition = new JenkinsJobDefinition()
+		if (this.definition == null) {
+			this.definition = new JenkinsJobDefinition()
+		}
 		ConfigureUtil.configure(closure, definition)
 	}
 	
