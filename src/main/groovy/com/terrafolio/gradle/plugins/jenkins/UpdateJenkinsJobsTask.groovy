@@ -4,10 +4,10 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
-	def JenkinsService service
-
+	def jobsToUpdate = []
+	
 	def void doExecute() {
-		getJobs().each { job ->
+		jobsToUpdate.each { job ->
 			getServerDefinitions(job).each { server ->
 				def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
 				def existing = service.getJobConfiguration(job.definition.name)
@@ -20,5 +20,9 @@ class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
 				}
 			}
 		}
+	}
+	
+	def void update(JenkinsJob job) {
+		jobsToUpdate += job
 	}
 }
