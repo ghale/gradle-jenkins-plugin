@@ -10,6 +10,7 @@ import org.custommonkey.xmlunit.XMLUnit
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Before
+import org.junit.After
 import org.junit.Test
 
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
@@ -34,6 +35,7 @@ class DumpJenkinsJobsTaskTest {
 			
 			templates {
 				compile { xml "<?xml version='1.0' encoding='UTF-8'?><project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
+				compile2 { xml "<?xml version='1.0' encoding='UTF-8'?><project><actions></actions><description></description><keepDependencies>true</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
 			}
 			
 			jobs {
@@ -55,6 +57,12 @@ class DumpJenkinsJobsTaskTest {
 			}
 		}
 	}
+	
+	@After
+	def void cleanUp() {
+		def File dumpDir = new File('build/tmp/test/build/jobs')
+		dumpDir.deleteDir()
+	}
 
 	@Test
 	def void execute_dumpsJobsToFiles() {
@@ -62,7 +70,7 @@ class DumpJenkinsJobsTaskTest {
 		
 		def dumpDir = new File('build/tmp/test/build/jobs')
 		project.jenkins.jobs.each { job ->
-			def jobFile = new File(dumpDir, "${job.name}-config.xml")
+			def jobFile = new File(dumpDir, "${job.name}-config-test1.xml")
 			assert jobFile.exists()
 			
 			XMLUnit.setIgnoreWhitespace(true)
@@ -95,9 +103,37 @@ class DumpJenkinsJobsTaskTest {
 		
 		def dumpDir = new File('build/tmp/test/build/jobs')
 		project.jenkins.jobs.each { job ->
-			def jobFile = new File(dumpDir, "${job.name}-config.xml")
+			def jobFile = new File(dumpDir, "${job.name}-config-test1.xml")
 			assert jobFile.exists()
 			assert jobFile.getText() == job.definition.xml
 		}
+	}
+	
+	@Test
+	def void execute_dumpsMultipleServerConfigs() {
+		project.tasks.dumpJenkinsJobs.prettyPrint = false
+		project.jenkins.servers {
+			test3 {
+				url 'http://test3'
+			}
+		}
+		project.jenkins.jobs.job1.server(
+			project.jenkins.servers.test3,
+			{
+				xml project.jenkins.templates.compile2.xml
+			}
+		)
+		
+		project.tasks.dumpJenkinsJobs.execute()
+		
+		def dumpDir = new File('build/tmp/test/build/jobs')
+		
+		def jobFile = new File(dumpDir, "job1-config-test1.xml")
+		assert jobFile.exists()
+		assert jobFile.getText() == project.jenkins.jobs.job1.definition.xml
+		
+		jobFile = new File(dumpDir, "job1-config-test3.xml")
+		assert jobFile.exists()
+		assert jobFile.getText() == project.jenkins.templates.compile2.xml
 	}
 }
