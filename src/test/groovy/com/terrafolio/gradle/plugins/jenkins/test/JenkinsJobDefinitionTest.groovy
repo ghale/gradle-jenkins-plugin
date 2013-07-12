@@ -112,5 +112,24 @@ class JenkinsJobDefinitionTest {
 		assert project.jenkins.jobs.findByName('test').definition.xml == '<test><test2>myvalue</test2></test>'
 	}
 	
+	@Test
+	def void configure_defaultsJobDefinitionNameToJobName() {
+		project.jenkins {
+			templates {
+				test {
+					xml "<test><test2>value</test2></test>"
+				}
+			}
+			jobs {
+				test2 {
+					definition {
+						xml templates.test.xml
+					}
+				}
+			}
+		}
+		
+		assert project.jenkins.jobs.test2.definition.name == 'test2'
+	}
 
 }

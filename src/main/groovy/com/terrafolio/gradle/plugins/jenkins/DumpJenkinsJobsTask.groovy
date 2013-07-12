@@ -11,20 +11,23 @@ class DumpJenkinsJobsTask extends AbstractJenkinsTask {
 	@Override
 	public void doExecute() {
 		project.jenkins.jobs.each { job ->
-                def jobDir = new File(project.buildDir, "jobs")
-                if (! jobDir.exists()) {
-                        jobDir.mkdirs()
-                }
+			def jobDir = new File(project.buildDir, "jobs")
+			if (! jobDir.exists()) {
+				jobDir.mkdirs()
+			}
+			getServerDefinitions(job).each { server ->
 				if (prettyPrint) {
-	                new File(jobDir, "${job.name}-config.xml").withWriter { fileWriter ->
-	                        def node = new XmlParser().parseText(job.definition.xml);
-	                        new XmlNodePrinter(new PrintWriter(fileWriter)).print(node)
-	                }
+					new File(jobDir, "${job.name}-config-${server.name}.xml").withWriter { fileWriter ->
+						def node = new XmlParser().parseText(job.getServerSpecificDefinition(server).xml);
+						new XmlNodePrinter(new PrintWriter(fileWriter)).print(node)
+					}
 				} else {
-					new File(jobDir, "${job.name}-config.xml").write(job.definition.xml)
+					def xml = job.getServerSpecificDefinition(server).xml
+					new File(jobDir, "${job.name}-config-${server.name}.xml")
+						.write(xml)
 				}
-        }
-		
+			}
+		}
 	}
 
 }
