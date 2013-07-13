@@ -1,4 +1,4 @@
-package com.terrafolio.gradle.plugins.jenkins
+package com.terrafolio.gradle.plugins.jenkins;
 
 class JenkinsConfigurationException extends Exception {
 
@@ -18,5 +18,4 @@ class JenkinsConfigurationException extends Exception {
 		super(arg0);
 	}
 
-	
 }
