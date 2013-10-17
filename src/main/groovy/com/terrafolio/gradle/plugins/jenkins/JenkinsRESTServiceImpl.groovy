@@ -48,11 +48,14 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 		def lastException
 
 		def response = client.post(path: path, query: query, requestContentType: XML, body: payload)
-		if (response.success) {
-			return response.getData()
-		} else {
-			throw new Exception('REST Service call failed with response code: ' + response.status)
-		}
+		
+		if (response) {
+			if (response.success) {
+				return response.getData()
+			} else {
+				throw new Exception('REST Service call failed with response code: ' + response.status)
+			}
+		} else return null;
 	}
 	
 	@Override
@@ -106,10 +109,6 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 			response = restServicePOST("/createItem", [ name : jobName ], configXml)
 		} catch (Exception e) {
 			throw new JenkinsServiceException("Jenkins Service Call failed", e)
-		}
-		
-		if (! response.success) {
-			throw new JenkinsServiceException("Jenkins Service Call failed with status: ${response.status}")
 		}
 	}
 
