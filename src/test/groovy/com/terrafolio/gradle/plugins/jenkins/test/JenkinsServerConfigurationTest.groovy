@@ -70,11 +70,11 @@ class JenkinsServerConfigurationTest {
 			updateJobConfiguration(0) { String jobName, String configXML -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createJob() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}
@@ -211,15 +211,15 @@ class JenkinsServerConfigurationTest {
 	def void execute_promptsForCredentialsBeforeExecution() {
 		project.ext.credentialsGathered = false
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> 	
+			updateJobConfiguration(0) { String jobName, String configXML, Map overrides -> 	
 			}
 			
 			4.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createJob() { String jobName, String configXML, Map overrides ->
 					assert project.ext.credentialsGathered
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
@@ -279,14 +279,14 @@ class JenkinsServerConfigurationTest {
 	@Test
 	def void execute_allowsMissingUsernameForInsecureServer() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateJobConfiguration(0) { String jobName, String configXML, Map overrides -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createJob() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}
@@ -312,14 +312,14 @@ class JenkinsServerConfigurationTest {
 	@Test
 	def void execute_allowsMissingPasswordForInsecureServer() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateJobConfiguration(0) { String jobName, String configXML, Map overrides -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createJob() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}
@@ -347,11 +347,11 @@ class JenkinsServerConfigurationTest {
 			updateJobConfiguration(0) { String jobName, String configXML -> }
 			
 			4.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createJob() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}

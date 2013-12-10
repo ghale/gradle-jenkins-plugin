@@ -7,6 +7,7 @@ class JenkinsJob {
 	def serverDefinitions = []
 	def serverSpecificConfiguration = [:]
 	def definition
+	def serviceOverrides = new JenkinsOverrides()
 	
 	JenkinsJob(String name) {
 		this.name = name
@@ -21,6 +22,17 @@ class JenkinsJob {
 			this.definition = new JenkinsJobDefinition(name)
 		}
 		ConfigureUtil.configure(closure, definition)
+	}
+	
+	def serviceOverrides(JenkinsOverrides overrides) {
+		this.serviceOverrides = overrides
+	}
+	
+	def serviceOverrides(Closure closure) {
+		if (this.serviceOverrides == null) {
+			this.serviceOverrides = new JenkinsOverrides()
+		}
+		ConfigureUtil.configure(closure, serviceOverrides)
 	}
 	
 	def server(JenkinsServerDefinition server) {

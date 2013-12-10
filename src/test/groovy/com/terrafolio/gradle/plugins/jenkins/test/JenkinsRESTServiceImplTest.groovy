@@ -231,4 +231,92 @@ class JenkinsRESTServiceImplTest {
 			}
 		}
 	}
+	
+	@Test
+	def void createJob_postsToCustomUrl() {
+		def postMap
+		mockRESTClient.demand.with {
+			post() { Map<String, ?> map ->
+				postMap = map
+				HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+				HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
+				return response
+			}
+		}
+		
+		mockRESTClient.ignore('getClient')
+		
+		mockRESTClient.use {
+			def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
+			service.createJob("compile", "<test1><test2>srv value</test2></test1>", [ uri: "/custom/createItem", params: [ name: "mycompile" ] ])
+			assert postMap.path == "/custom/createItem"
+			assert postMap.query.name == "mycompile"
+		}
+	}
+	
+	@Test
+	def void deleteJob_postsToCustomUrl() {
+		def postMap
+		mockRESTClient.demand.with {
+			post() { Map<String, ?> map ->
+				postMap = map
+				HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+				HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
+				return response
+			}
+		}
+		
+		mockRESTClient.ignore('getClient')
+		
+		mockRESTClient.use {
+			def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
+			service.deleteJob("compile", [ uri: "/custom/doDelete", params: [ name: "mycompile" ] ])
+			assert postMap.path == "/custom/doDelete"
+			assert postMap.query.name == "mycompile"
+		}
+	}
+	
+	@Test
+	def void updateJobConfiguration_postsToCustomUrl() {
+		def postMap
+		mockRESTClient.demand.with {
+			post() { Map<String, ?> map ->
+				postMap = map
+				HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+				HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
+				return response
+			}
+		}
+		
+		mockRESTClient.ignore('getClient')
+		
+		mockRESTClient.use {
+			def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
+			service.updateJobConfiguration("compile", "<test1><test2>srv value</test2></test1>", [ uri: "/custom/job/compile", params: [ name: "mycompile" ] ])
+			assert postMap.path == "/custom/job/compile"
+			assert postMap.query.name == "mycompile"
+		}
+	}
+	
+	@Test
+	def void getJobConfiguration_getsFromCustomUrl() {
+		def getMap
+		mockRESTClient.demand.with {
+			get() { Map<String, ?> map ->
+				getMap = map
+				HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+				HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
+				return response
+			}
+		}
+		
+		mockRESTClient.ignore('getClient')
+		
+		mockRESTClient.use {
+			def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
+			service.getJobConfiguration("compile", [ uri: "/custom/job/compile", params: [ name: "mycompile" ] ])
+			assert getMap.path == "/custom/job/compile"
+			assert getMap.query.name == "mycompile"
+		}
+	}
 }

@@ -71,14 +71,69 @@ class UpdateJenkinsJobsTaskTest {
 		mockJenkinsRESTService.demand.with {
 			createJob(0) { String jobName, String configXML -> }
 			
-			getJobConfiguration() { String jobName ->
+			getJobConfiguration() { String jobName, Map overrides ->
 				"<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 			}
 			
-			updateJobConfiguration() { String jobName, String configXML -> 
+			updateJobConfiguration() { String jobName, String configXML, Map overrides -> 
 				assert jobName == project.jenkins.jobs.compile_master.definition.name
 			}
 			
+		}
+		
+		project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+			update(project.jenkins.jobs.compile_master)
+		}
+		
+		mockJenkinsRESTService.use {
+			project.tasks.updateOneJob.execute()
+		}
+	}
+	
+	@Test
+	def void execute_callsCreateOnMissingJob() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			getJobConfiguration() { String jobName, Map overrides ->
+				return null
+			}
+			
+			createJob() { String jobName, String configXML, Map overrides ->
+				assert jobName == project.jenkins.jobs.compile_master.definition.name
+			}
+			
+		}
+		
+		project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+			update(project.jenkins.jobs.compile_master)
+		}
+		
+		mockJenkinsRESTService.use {
+			project.tasks.updateOneJob.execute()
+		}
+	}
+	
+	@Test
+	def void execute_callsCreateOnMissingJobWithOverrides() {
+		mockJenkinsRESTService.demand.with {
+			updateJobConfiguration(0) { String jobName, String configXML -> }
+			
+			getJobConfiguration() { String jobName, Map overrides ->
+				return null
+			}
+			
+			createJob() { String jobName, String configXML, Map overrides ->
+				assert jobName == project.jenkins.jobs.compile_master.definition.name
+				assert overrides.uri == "testUri"
+			}
+			
+		}
+		
+		project.jenkins.jobs.compile_master {
+			serviceOverrides {
+				create = [ uri: "testUri" ]
+			}
 		}
 		
 		project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
@@ -95,19 +150,19 @@ class UpdateJenkinsJobsTaskTest {
 		mockJenkinsRESTService.demand.with {
 			createJob(0) { String jobName, String configXML -> }
 			
-			getJobConfiguration() { String jobName ->
+			getJobConfiguration() { String jobName, Map overrides ->
 				"<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 			}
 			
-			updateJobConfiguration() { String jobName, String configXML ->
+			updateJobConfiguration() { String jobName, String configXML, Map overrides ->
 				assert jobName == project.jenkins.jobs.compile_master.definition.name
 			}
 			
-			getJobConfiguration() { String jobName ->
+			getJobConfiguration() { String jobName, Map Overrides ->
 				"<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 			}
 			
-			updateJobConfiguration() { String jobName, String configXML ->
+			updateJobConfiguration() { String jobName, String configXML, Map overrides ->
 				assert jobName == project.jenkins.jobs.compile_releaseX.definition.name
 			}
 		}
@@ -120,6 +175,40 @@ class UpdateJenkinsJobsTaskTest {
 		
 		mockJenkinsRESTService.use {
 			project.tasks.updateMultipleJobs.execute()
+		}
+	}
+	
+	@Test
+	def void execute_updatesWithOverride() {
+		mockJenkinsRESTService.demand.with {
+			createJob(0) { String jobName, String configXML -> }
+			
+			getJobConfiguration() { String jobName, Map overrides ->
+				assert overrides.uri == "anotherUri"
+				"<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+			}
+			
+			updateJobConfiguration() { String jobName, String configXML, Map overrides ->
+				assert jobName == project.jenkins.jobs.compile_master.definition.name
+				assert overrides.uri == "testUri"
+				assert overrides.params.name == "test"
+			}
+			
+		}
+		
+		project.jenkins.jobs.compile_master {
+			serviceOverrides {
+				update = [ uri: "testUri", params: [ name: "test" ] ]
+				get = [ uri: "anotherUri" ]
+			}
+		}
+		
+		project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+			update(project.jenkins.jobs.compile_master)
+		}
+		
+		mockJenkinsRESTService.use {
+			project.tasks.updateOneJob.execute()
 		}
 	}
 	 

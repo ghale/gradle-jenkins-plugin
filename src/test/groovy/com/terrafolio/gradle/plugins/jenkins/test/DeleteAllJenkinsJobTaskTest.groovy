@@ -64,8 +64,8 @@ class DeleteAllJenkinsJobTaskTest {
 	def void execute_deletesJobs() {
 		mockJenkinsRESTService.demand.with {
 			2.times {
-				getJobConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-				deleteJob() { String jobName -> 
+				getJobConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+				deleteJob() { String jobName, Map overrides -> 
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
 					}
@@ -82,8 +82,8 @@ class DeleteAllJenkinsJobTaskTest {
 	def void execute_deletesJobsOnAllServers() {
 		mockJenkinsRESTService.demand.with {
 			4.times {
-				getJobConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-				deleteJob() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+				deleteJob() { String jobName, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
 					}

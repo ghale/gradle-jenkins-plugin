@@ -70,11 +70,11 @@ class UpdateAllJenkinsJobsTaskTest {
 			createJob(0) { String jobName, String configXML -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					"<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 				}
 				
-				updateJobConfiguration() { String jobName, String configXML -> 
+				updateJobConfiguration() { String jobName, String configXML, Map overrides -> 
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('updateJobConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
@@ -93,11 +93,11 @@ class UpdateAllJenkinsJobsTaskTest {
 			updateJobConfiguration(0) { String jobName, String configXML -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML -> 
+				createJob() { String jobName, String configXML, Map overrides -> 
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}
@@ -116,11 +116,11 @@ class UpdateAllJenkinsJobsTaskTest {
 			updateJobConfiguration(0) { String jobName, String configXML -> }
 			
 			4.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML -> 
+				createJob() { String jobName, String configXML, Map overrides -> 
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}

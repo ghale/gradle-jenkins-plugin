@@ -70,11 +70,11 @@ class FilterTest {
 			updateJobConfiguration(0) { String jobName, String configXML -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createJob() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}
@@ -97,14 +97,14 @@ class FilterTest {
 	@Test
 	def void execute_filtersJobs() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateJobConfiguration(0) { String jobName, String configXML, Map Overrides -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createJob() { String jobName, String configXML, Map overrides ->
 					assert jobName =~ /master/
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
