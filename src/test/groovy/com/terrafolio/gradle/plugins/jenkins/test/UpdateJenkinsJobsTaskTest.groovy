@@ -113,7 +113,7 @@ class UpdateJenkinsJobsTaskTest {
 	}
 	
 	@Test
-	def void execute_updatesOnForceUpdate() {
+	def void execute_updatesOnForceUpdateString() {
 		mockJenkinsRESTService.demand.with {
 			createJob(0) { String jobName, String configXML -> }
 			
@@ -128,6 +128,31 @@ class UpdateJenkinsJobsTaskTest {
 		}
 		
 		project.ext.forceJenkinsJobsUpdate = 'true'
+		project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+			update(project.jenkins.jobs.compile_master)
+		}
+		
+		mockJenkinsRESTService.use {
+			project.tasks.updateOneJob.execute()
+		}
+	}
+	
+	@Test
+	def void execute_updatesOnForceUpdateBoolean() {
+		mockJenkinsRESTService.demand.with {
+			createJob(0) { String jobName, String configXML -> }
+			
+			getJobConfiguration() { String jobName, Map overrides ->
+				"<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+			}
+			
+			updateJobConfiguration() { String jobName, String configXML, Map overrides ->
+				assert jobName == project.jenkins.jobs.compile_master.definition.name
+			}
+			
+		}
+		
+		project.ext.forceJenkinsJobsUpdate = true
 		project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
 			update(project.jenkins.jobs.compile_master)
 		}

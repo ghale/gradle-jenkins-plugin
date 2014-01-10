@@ -18,7 +18,7 @@ class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
 				} else {
 					XMLUnit.setIgnoreWhitespace(true)
 					def Diff xmlDiff = new Diff(job.definition.xml, existing)
-					if ((! xmlDiff.similar()) || (project.hasProperty('forceJenkinsJobsUpdate') && project.forceJenkinsJobsUpdate == 'true')) {
+					if ((! xmlDiff.similar()) || (project.hasProperty('forceJenkinsJobsUpdate') && Boolean.valueOf(project.forceJenkinsJobsUpdate))) {
 						logger.warn('Updating job ' + job.definition.name + ' on ' + server.url)
 						service.updateJobConfiguration(job.definition.name, job.getServerSpecificDefinition(server).xml, job.serviceOverrides.update)
 					} else {
