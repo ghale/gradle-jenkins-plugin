@@ -18,6 +18,7 @@ class JenkinsPlugin implements Plugin<Project> {
 		project.task('deleteJenkinsJobs', type: DeleteAllJenkinsJobsTask)
 		project.task('dumpJenkinsJobs', type: DumpJenkinsJobsTask)
 		project.task('retireJenkinsJobs', type: DeleteJenkinsJobsTask)
+		project.task('validateJenkinsJobs', type: ValidateJenkinsJobsTask)
 	}
 
 	def applyConventions(Project project) {

@@ -11,6 +11,7 @@ import com.terrafolio.gradle.plugins.jenkins.JenkinsConfiguration
 import com.terrafolio.gradle.plugins.jenkins.JenkinsJob
 import com.terrafolio.gradle.plugins.jenkins.UpdateAllJenkinsJobsTask
 import com.terrafolio.gradle.plugins.jenkins.UpdateJenkinsJobsTask
+import com.terrafolio.gradle.plugins.jenkins.ValidateJenkinsJobsTask
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
@@ -86,5 +87,10 @@ class JenkinsPluginTest {
 	@Test
 	void apply_createsRetireJenkinsJobsTask() {
 		assert project.tasks.findByName('retireJenkinsJobs') instanceof DeleteJenkinsJobsTask
+	}
+	
+	@Test
+	void apply_createValidateJenkinsJobsTask() {
+		assert project.tasks.findByName('validateJenkinsJobs') instanceof ValidateJenkinsJobsTask
 	}
 }

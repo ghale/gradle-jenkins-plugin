@@ -53,4 +53,11 @@ abstract class AbstractJenkinsTask extends DefaultTask {
 	def void initialize() {
 		getJobs().each { job ->	getServerDefinitions(job) }
 	}
+	
+	def void eachServer(JenkinsJob job, Closure closure) {
+		getServerDefinitions(job).each { server ->
+			def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
+			closure.call(server, service)
+		}
+	}
 }
