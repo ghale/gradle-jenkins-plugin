@@ -80,6 +80,17 @@ class DumpJenkinsJobsTaskTest {
 	}
 	
 	@Test
+	def void execute_observesJobFilter() {
+		project.ext.jenkinsJobFilter = 'job1'
+		project.tasks.dumpJenkinsJobs.execute()
+		
+		def dumpDir = new File('build/tmp/test/build/jobs')
+		
+		assert new File(dumpDir, "job1-config-test1.xml").exists()
+		assert ! (new File(dumpDir, "job2-config-test1.xml").exists())
+	}
+	
+	@Test
 	def void execute_doesNotPromptForCredentials() {
 		def mockConsoleFactory = new MockFor(ConsoleFactory.class)
 		mockConsoleFactory.demand.with {

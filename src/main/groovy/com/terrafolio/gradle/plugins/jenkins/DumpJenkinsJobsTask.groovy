@@ -10,7 +10,7 @@ class DumpJenkinsJobsTask extends AbstractJenkinsTask {
 
 	@Override
 	public void doExecute() {
-		project.jenkins.jobs.each { job ->
+		getJobs().each { job ->
 			def jobDir = new File(project.buildDir, "jobs")
 			if (! jobDir.exists()) {
 				jobDir.mkdirs()
