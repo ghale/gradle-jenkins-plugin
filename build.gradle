@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
    compile gradleApi()
-   groovy localGroovy()
+   compile localGroovy()
    
    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
 	   exclude(module: 'groovy')

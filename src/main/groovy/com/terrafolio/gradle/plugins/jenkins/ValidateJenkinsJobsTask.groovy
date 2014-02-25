@@ -34,7 +34,7 @@ class ValidateJenkinsJobsTask extends AbstractJenkinsTask {
 		}
 		
 		if ((! success) && failOnDifference) {
-			throw new JenkinsValidationException("Jenkins job validation failed!")
+			throw new JenkinsValidationException("Jenkins job validation failed!", null)
 		}
 	}
 

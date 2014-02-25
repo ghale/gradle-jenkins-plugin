@@ -1,6 +1,8 @@
 package com.terrafolio.gradle.plugins.jenkins;
 
-class JenkinsConfigurationException extends Exception {
+import org.gradle.api.InvalidUserDataException;
+
+class JenkinsConfigurationException extends InvalidUserDataException {
 
 	public JenkinsConfigurationException() {
 		super();
@@ -11,10 +13,6 @@ class JenkinsConfigurationException extends Exception {
 	}
 
 	public JenkinsConfigurationException(String arg0) {
-		super(arg0);
-	}
-
-	public JenkinsConfigurationException(Throwable arg0) {
 		super(arg0);
 	}
 
