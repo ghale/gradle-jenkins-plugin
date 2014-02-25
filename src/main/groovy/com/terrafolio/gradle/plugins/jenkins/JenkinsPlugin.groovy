@@ -4,6 +4,17 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
 
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfiguration;
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationConvention;
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob;
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJobDefinition;
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition;
+import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteAllJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.DumpJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateAllJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.ValidateJenkinsJobsTask;
+
 class JenkinsPlugin implements Plugin<Project> {
 
 	@Override

@@ -1,22 +1,18 @@
-package com.terrafolio.gradle.plugins.jenkins.test;
+package com.terrafolio.gradle.plugins.jenkins.test.tasks;
 
-import static org.junit.Assert.*
+import static org.junit.Assert.*;
+import groovy.mock.interceptor.MockFor;
 
 import org.gradle.api.Project
-import org.junit.Test
 import org.junit.Before
+import org.junit.Test
+
 import org.gradle.testfixtures.ProjectBuilder
-import org.gradle.api.tasks.TaskExecutionException
 
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException;
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException;
 
-import groovy.mock.interceptor.MockFor
-
-class FilterTest {
+class DeleteAllJenkinsJobTaskTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
 	def private final JenkinsPlugin plugin = new JenkinsPlugin()
 	def MockFor mockJenkinsRESTService
@@ -51,7 +47,7 @@ class FilterTest {
 			jobs {
 				project.branches.eachWithIndex { branchName, map, index ->
 					"compile_${branchName}" {
-						server servers.test1
+						server servers.test1 
 						definition {
 							name "${project.name} compile (${branchName})"
 							xml templates.compile.xml
@@ -65,62 +61,42 @@ class FilterTest {
 	}
 	
 	@Test
-	def void execute_filtersServers() {
+	def void execute_deletesJobs() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
-			
 			2.times {
-				getJobConfiguration() { String jobName, Map overrides ->
-					null
-				}
-				
-				createJob() { String jobName, String configXML, Map overrides ->
+				getJobConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+				deleteJob() { String jobName, Map overrides -> 
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
 					}
 				}
-			
 			}
 		}
 		
-		project.jenkinsServerFilter = 'test1'
-		project.jenkins.jobs.each { job ->
-			job.server project.jenkins.servers.test2
-		}
-		
 		mockJenkinsRESTService.use {
-			assert [ "test1" ] == project.tasks.updateJenkinsJobs.getServerDefinitions(project.jenkins.jobs."compile_master").collect { it.name }
-			project.tasks.updateJenkinsJobs.execute()
+			project.tasks.deleteJenkinsJobs.execute()
 		}
 	}
 	
-	@Test
-	def void execute_filtersJobs() {
+	@Test 
+	def void execute_deletesJobsOnAllServers() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML, Map Overrides -> }
-			
-			2.times {
-				getJobConfiguration() { String jobName, Map overrides ->
-					null
-				}
-				
-				createJob() { String jobName, String configXML, Map overrides ->
-					assert jobName =~ /master/
+			4.times {
+				getJobConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+				deleteJob() { String jobName, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
 					}
 				}
-			
 			}
 		}
 		
-		project.jenkinsJobFilter = '.*_master'
 		project.jenkins.jobs.each { job ->
 			job.server project.jenkins.servers.test2
 		}
 		
 		mockJenkinsRESTService.use {
-			project.tasks.updateJenkinsJobs.execute()
+			project.tasks.deleteJenkinsJobs.execute()
 		}
-	} 
+	}
 }

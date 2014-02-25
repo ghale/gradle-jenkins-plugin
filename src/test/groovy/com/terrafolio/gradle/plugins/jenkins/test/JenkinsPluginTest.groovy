@@ -2,16 +2,17 @@ package com.terrafolio.gradle.plugins.jenkins.test
 
 import static org.junit.Assert.*
 
-import com.terrafolio.gradle.plugins.jenkins.DeleteAllJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.DumpJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.JenkinsConfigurationConvention
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.DeleteJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.JenkinsConfiguration
-import com.terrafolio.gradle.plugins.jenkins.JenkinsJob
-import com.terrafolio.gradle.plugins.jenkins.UpdateAllJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.UpdateJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.ValidateJenkinsJobsTask
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfiguration;
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationConvention;
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob;
+import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteAllJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.DumpJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateAllJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.tasks.ValidateJenkinsJobsTask;
+
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin

@@ -1,4 +1,4 @@
-package com.terrafolio.gradle.plugins.jenkins.test;
+package com.terrafolio.gradle.plugins.jenkins.test.tasks;
 
 import static org.junit.Assert.*
 
@@ -16,7 +16,7 @@ import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException;
 
 import groovy.mock.interceptor.MockFor
 
-class FilterTest {
+class UpdateAllJenkinsJobsTaskTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
 	def private final JenkinsPlugin plugin = new JenkinsPlugin()
 	def MockFor mockJenkinsRESTService
@@ -65,7 +65,30 @@ class FilterTest {
 	}
 	
 	@Test
-	def void execute_filtersServers() {
+	def void execute_updatesExistingJob() {
+		mockJenkinsRESTService.demand.with {
+			createJob(0) { String jobName, String configXML -> }
+			
+			2.times {
+				getJobConfiguration() { String jobName, Map overrides ->
+					"<project><actions></actions><description>difference</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+				}
+				
+				updateJobConfiguration() { String jobName, String configXML, Map overrides -> 
+					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+						throw new Exception('updateJobConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
+					}
+				}
+			}
+		}
+		
+		mockJenkinsRESTService.use {
+			project.tasks.updateJenkinsJobs.execute()
+		}
+	}
+	
+	@Test
+	def void execute_createsNewJob() {
 		mockJenkinsRESTService.demand.with {
 			updateJobConfiguration(0) { String jobName, String configXML -> }
 			
@@ -74,38 +97,30 @@ class FilterTest {
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides ->
+				createJob() { String jobName, String configXML, Map overrides -> 
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
-			
 			}
 		}
 		
-		project.jenkinsServerFilter = 'test1'
-		project.jenkins.jobs.each { job ->
-			job.server project.jenkins.servers.test2
-		}
-		
 		mockJenkinsRESTService.use {
-			assert [ "test1" ] == project.tasks.updateJenkinsJobs.getServerDefinitions(project.jenkins.jobs."compile_master").collect { it.name }
 			project.tasks.updateJenkinsJobs.execute()
 		}
 	}
 	
 	@Test
-	def void execute_filtersJobs() {
+	def void execute_runsOnAllServers() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML, Map Overrides -> }
+			updateJobConfiguration(0) { String jobName, String configXML -> }
 			
-			2.times {
+			4.times {
 				getJobConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides ->
-					assert jobName =~ /master/
+				createJob() { String jobName, String configXML, Map overrides -> 
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
 						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
 					}
@@ -114,7 +129,6 @@ class FilterTest {
 			}
 		}
 		
-		project.jenkinsJobFilter = '.*_master'
 		project.jenkins.jobs.each { job ->
 			job.server project.jenkins.servers.test2
 		}
@@ -122,5 +136,5 @@ class FilterTest {
 		mockJenkinsRESTService.use {
 			project.tasks.updateJenkinsJobs.execute()
 		}
-	} 
+	}
 }
