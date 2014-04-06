@@ -6,5 +6,8 @@ bin
 .classpath
 .project
 .settings
-
+*.iml
+*.ipr
+*.iws
+.idea
 *.swp
