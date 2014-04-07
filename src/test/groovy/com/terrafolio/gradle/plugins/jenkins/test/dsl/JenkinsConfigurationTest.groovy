@@ -1,6 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.test.dsl
 
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
+import javaposse.jobdsl.dsl.NameNotProvidedException
 import org.custommonkey.xmlunit.DetailedDiff
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
@@ -67,6 +68,63 @@ class JenkinsConfigurationTest {
     }
 
     @Test
+    def void configure_configuresJobsUsingMultipleDslFiles() {
+        def jenkinsDir = project.file('jenkins')
+        jenkinsDir.mkdirs()
+        def dslFile1 = new File(jenkinsDir, 'test1.dsl')
+        dslFile1.write("""
+            for (i in 0..9) {
+                job {
+                    name "Test Job \${i}"
+                }
+            }
+        """)
+
+        def dslFile2 = new File(jenkinsDir, 'test2.dsl')
+        dslFile2.write("""
+            for (i in 0..9) {
+                job {
+                    name "Another Job \${i}"
+                }
+            }
+        """)
+
+        project.jenkins {
+            dsl project.fileTree("jenkins").include("*.dsl")
+        }
+
+        def expectedXml = """
+            <project>
+                <actions></actions>
+                <description></description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers></buildWrappers>
+            </project>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        assert project.jenkins.jobs.size() == 20
+        def jobNames = (0..9).collect { "Test Job ${it}" } + (0..9).collect { "Another Job ${it}" }
+        project.jenkins.jobs.each { job ->
+            assert jobNames.find { it == job.name } != null
+            jobNames.remove(job.name)
+            def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
+            assert xmlDiff.similar()
+        }
+
+    }
+
+    @Test
     def void configure_configuresJobsUsingDslClosure() {
         project.jenkins {
             dsl {
@@ -107,6 +165,38 @@ class JenkinsConfigurationTest {
             assert xmlDiff.similar()
         }
 
+    }
+
+    @Test(expected = NameNotProvidedException)
+    def void configure_dslClosureThrowsExceptionWhenNoJobNameProvided() {
+        project.jenkins {
+            dsl {
+                for (i in 0..9) {
+                    job {
+                        steps {
+                            shell("echo test")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test(expected = NameNotProvidedException)
+    def void configure_dslFileThrowsExceptionWhenNoJobNameProvided() {
+        def dslFile = project.file('test.dsl')
+        dslFile.write("""
+            for (i in 0..9) {
+                job {
+                    steps {
+                        shell "echo test"
+                    }
+                }
+            }
+        """)
+        project.jenkins {
+            dsl project.files('test.dsl')
+        }
     }
 
     @Test

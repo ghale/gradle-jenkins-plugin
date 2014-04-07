@@ -81,6 +81,7 @@ class JenkinsConfiguration {
         jobParent.with(closure)
 
         jobParent.getReferencedJobs().each { referencedJob ->
+            jm.createOrUpdateConfig(referencedJob.name, referencedJob.xml, true)
             def JenkinsJob job = jobs.findByName(referencedJob.name)
             if (job == null) {
                 job = new JenkinsJob()
