@@ -109,12 +109,6 @@ class JenkinsJobTest {
 
     @Test
     def void configure_dslClosureGeneratesXml() {
-        def dslFile = project.file('test.dsl')
-        dslFile.write("""
-            job {
-                name "\${GRADLE_JOB_NAME}"
-            }
-        """)
         project.jenkins {
             jobs {
                 test {
@@ -149,6 +143,22 @@ class JenkinsJobTest {
         assert job.definition.name == "Test Job"
         def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
         assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_dslClosureUsesJobNameWhenNotSpecified() {
+        project.jenkins {
+            jobs {
+                test {
+                    dsl {
+                        displayName "Test Job"
+                    }
+                }
+            }
+        }
+
+        def job = project.jenkins.jobs.findByName('test')
+        assert job.definition.name == "test"
     }
 
     @Test

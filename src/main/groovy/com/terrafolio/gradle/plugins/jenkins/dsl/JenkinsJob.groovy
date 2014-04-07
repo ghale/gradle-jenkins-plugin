@@ -47,7 +47,7 @@ class JenkinsJob {
             throw new JenkinsConfigurationException("The DSL script ${dslFile.path} did not generate exactly one job (${generatedItems.jobs.size()})!  Use the jobs dsl form to generate multiple jobs from dsl.")
         } else {
             GeneratedJob generatedJob = generatedItems.getJobs().iterator().next()
-            this.definition = new JenkinsJobDefinition(generatedJob.jobName)
+            this.definition = new JenkinsJobDefinition(generatedJob.jobName==null?name:generatedJob.jobName)
             this.definition.xml jm.getConfig(generatedJob.jobName)
         }
     }
@@ -67,7 +67,7 @@ class JenkinsJob {
             job.using(name)
         }
         job.with(closure)
-        this.definition = new JenkinsJobDefinition(job.name)
+        this.definition = new JenkinsJobDefinition(job.name==null?name:job.name)
         this.definition.xml job.xml
     }
 	

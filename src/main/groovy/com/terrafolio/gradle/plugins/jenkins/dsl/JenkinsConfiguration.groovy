@@ -27,7 +27,6 @@ class JenkinsConfiguration {
 	
 	def jobs(Closure closure) {
 		jobs.configure(closure)
-        println "Jobs size is ${jobs.size()}"
 	}
 	
 	def templates(Closure closure) {
