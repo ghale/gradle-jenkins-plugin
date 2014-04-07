@@ -1,14 +1,10 @@
-package com.terrafolio.gradle.plugins.jenkins.test.dsl;
+package com.terrafolio.gradle.plugins.jenkins.test.dsl
 
-import static org.junit.Assert.*;
-
-import org.gradle.api.Project;
-import org.junit.Before;
-import org.junit.Test;
+import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
+import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJobDefinition;
+import org.junit.Before
+import org.junit.Test
 
 class JenkinsJobDefinitionTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
@@ -111,7 +107,7 @@ class JenkinsJobDefinitionTest {
 		
 		assert project.jenkins.jobs.findByName('test').definition.xml == '<test><test2>myvalue</test2></test>'
 	}
-	
+
 	@Test
 	def void configure_defaultsJobDefinitionNameToJobName() {
 		project.jenkins {

@@ -1,27 +1,18 @@
-package com.terrafolio.gradle.plugins.jenkins.test.service;
+package com.terrafolio.gradle.plugins.jenkins.test.service
 
-import static org.junit.Assert.*
-
-import org.apache.http.HttpResponse
-import org.apache.http.message.BasicHttpResponse
-import org.apache.http.message.BasicStatusLine
-import org.apache.http.HttpVersion
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-
-import org.junit.Before
-import org.junit.Test
-
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfiguration;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException;
-import com.terrafolio.gradle.plugins.jenkins.service.PreemptiveAuthInterceptor;
-
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException
+import com.terrafolio.gradle.plugins.jenkins.service.PreemptiveAuthInterceptor
 import groovy.mock.interceptor.MockFor
 import groovyx.net.http.HttpResponseDecorator
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
+import org.apache.http.HttpResponse
+import org.apache.http.HttpVersion
+import org.apache.http.message.BasicHttpResponse
+import org.apache.http.message.BasicStatusLine
+import org.junit.Before
+import org.junit.Test
 
 class JenkinsRESTServiceImplTest {
 	private MockFor mockRESTClient

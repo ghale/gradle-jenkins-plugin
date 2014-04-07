@@ -1,20 +1,15 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import static org.junit.Assert.*
-import groovy.lang.GroovyObject;
+import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
+import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import groovy.mock.interceptor.MockFor
-import groovy.xml.StreamingMarkupBuilder
-
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Before
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
-
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
 
 class DumpJenkinsJobsTaskTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()

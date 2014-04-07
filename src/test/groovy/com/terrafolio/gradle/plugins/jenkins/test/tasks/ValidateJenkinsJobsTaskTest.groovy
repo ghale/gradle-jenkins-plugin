@@ -1,20 +1,14 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import groovy.mock.interceptor.MockFor;
-
-import org.gradle.api.Project
-import org.junit.Test
-import org.junit.Before
-import org.gradle.testfixtures.ProjectBuilder
-import org.gradle.api.tasks.TaskExecutionException
-
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException;
-import com.terrafolio.gradle.plugins.jenkins.tasks.JenkinsValidationException;
-import com.terrafolio.gradle.plugins.jenkins.tasks.ValidateJenkinsJobsTask;
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
+import com.terrafolio.gradle.plugins.jenkins.tasks.JenkinsValidationException
+import groovy.mock.interceptor.MockFor
+import org.gradle.api.Project
+import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Before
+import org.junit.Test
 
 class ValidateJenkinsJobsTaskTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()

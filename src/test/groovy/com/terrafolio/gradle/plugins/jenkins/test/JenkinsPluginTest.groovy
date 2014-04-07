@@ -1,24 +1,16 @@
 package com.terrafolio.gradle.plugins.jenkins.test
 
-import static org.junit.Assert.*
-
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfiguration;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationConvention;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob;
-import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteAllJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.DumpJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateAllJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.ValidateJenkinsJobsTask;
-
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfiguration
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationConvention
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
+import com.terrafolio.gradle.plugins.jenkins.tasks.*
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
-import org.junit.Test
-import org.junit.Before
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Before
+import org.junit.Test
 
 class JenkinsPluginTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
