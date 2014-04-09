@@ -420,6 +420,102 @@ class JenkinsJobTest {
     }
 
     @Test
+    def void configure_allowsIncrementalDslChangesWithClosure() {
+        project.jenkins {
+            jobs {
+                test {
+                    dsl {
+                        description "This is a description"
+                    }
+                }
+            }
+
+            jobs {
+                test {
+                    dsl {
+                        displayName "Some Display Name"
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <project>
+                <actions></actions>
+                <displayName>Some Display Name</displayName>
+                <description>This is a description</description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers></buildWrappers>
+            </project>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_allowsIncrementalDslChangesWithFile() {
+        def dslFile = project.file('test.dsl')
+        dslFile.write("""
+            job {
+                name "\${GRADLE_JOB_NAME}"
+                using "\${GRADLE_JOB_NAME}"
+                displayName "Some Display Name"
+            }
+        """)
+        project.jenkins {
+            jobs {
+                test {
+                    dsl {
+                        description "This is a description"
+                    }
+                }
+            }
+
+            jobs {
+                test {
+                    dsl dslFile
+                }
+            }
+        }
+
+        def expectedXml = """
+            <project>
+                <actions></actions>
+                <displayName>Some Display Name</displayName>
+                <description>This is a description</description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers></buildWrappers>
+            </project>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
     def void configure_dslFileAndDefinitionUsingBasisXml() {
         def dslFile = project.file('test.dsl')
         dslFile.write("""
