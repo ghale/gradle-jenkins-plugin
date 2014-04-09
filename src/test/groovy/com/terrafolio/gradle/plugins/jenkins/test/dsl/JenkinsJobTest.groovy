@@ -264,6 +264,162 @@ class JenkinsJobTest {
     }
 
     @Test
+    def void configure_dslClosureAndDefinitionUsingTemplateXml() {
+        project.jenkins {
+            templates {
+                testTemplate {
+                    xml """
+                        <project>
+                            <actions></actions>
+                            <description>This is a description</description>
+                            <keepDependencies>false</keepDependencies>
+                            <properties></properties>
+                            <scm class='hudson.scm.NullSCM'></scm>
+                            <canRoam>true</canRoam>
+                            <disabled>false</disabled>
+                            <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                            <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                            <triggers class='vector'></triggers>
+                            <concurrentBuild>false</concurrentBuild>
+                            <builders></builders>
+                            <publishers></publishers>
+                            <buildWrappers></buildWrappers>
+                        </project>
+                    """
+                }
+            }
+
+            jobs {
+                test {
+                    dsl {
+                        using 'testTemplate'
+                        displayName "Some Display Name"
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <project>
+                <actions></actions>
+                <displayName>Some Display Name</displayName>
+                <description>This is a description</description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers></buildWrappers>
+            </project>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_dslClosureUsingTemplateDsl() {
+        project.jenkins {
+            templates {
+                testTemplate {
+                    dsl {
+                        description "This is a description"
+                    }
+                }
+            }
+
+            jobs {
+                test {
+                    dsl {
+                        using "testTemplate"
+                        displayName "Some Display Name"
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <project>
+                <actions></actions>
+                <displayName>Some Display Name</displayName>
+                <description>This is a description</description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers></buildWrappers>
+            </project>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_overridesXmlFromDslTemplate() {
+        project.jenkins {
+            templates {
+                testTemplate {
+                    dsl {
+                        description "This is a description"
+                    }
+                }
+            }
+
+            jobs {
+                test {
+                    definition {
+                        xml templates.testTemplate.override { projectXml ->
+                            projectXml.appendNode {
+                                displayName("Some Display Name")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <project>
+                <actions></actions>
+                <displayName>Some Display Name</displayName>
+                <description>This is a description</description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers></buildWrappers>
+            </project>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
     def void configure_dslFileAndDefinitionUsingBasisXml() {
         def dslFile = project.file('test.dsl')
         dslFile.write("""

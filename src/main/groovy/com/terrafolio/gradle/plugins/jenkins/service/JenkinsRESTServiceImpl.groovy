@@ -1,11 +1,10 @@
 package com.terrafolio.gradle.plugins.jenkins.service
 
-import java.util.Map;
-
 import groovy.xml.StreamingMarkupBuilder
-import groovyx.net.http.RESTClient
 import groovyx.net.http.HttpResponseException
-import static groovyx.net.http.ContentType.*
+import groovyx.net.http.RESTClient
+
+import static groovyx.net.http.ContentType.XML
 
 class JenkinsRESTServiceImpl implements JenkinsService {
 	private RESTClient client

@@ -1,12 +1,11 @@
 package com.terrafolio.gradle.plugins.jenkins.tasks
 
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl;
 
 abstract class AbstractJenkinsTask extends DefaultTask {
 	def needsCredentials = true

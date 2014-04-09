@@ -1,13 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.jobdsl.MapJobManagement
 import groovy.xml.StreamingMarkupBuilder
-import javaposse.jobdsl.dsl.DslScriptLoader
-import javaposse.jobdsl.dsl.FileJobManagement
-import javaposse.jobdsl.dsl.GeneratedItems
-import javaposse.jobdsl.dsl.GeneratedJob
-import javaposse.jobdsl.dsl.JobManagement
-import javaposse.jobdsl.dsl.ScriptRequest
 
 class JenkinsJobDefinition {
 	def name

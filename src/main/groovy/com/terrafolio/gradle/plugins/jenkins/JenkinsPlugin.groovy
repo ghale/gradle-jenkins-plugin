@@ -1,19 +1,11 @@
 package com.terrafolio.gradle.plugins.jenkins
 
+import com.terrafolio.gradle.plugins.jenkins.dsl.*
+import com.terrafolio.gradle.plugins.jenkins.jobdsl.MapJobManagement
+import com.terrafolio.gradle.plugins.jenkins.tasks.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
-
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfiguration;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationConvention;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJobDefinition;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition;
-import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteAllJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.DumpJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateAllJenkinsJobsTask;
-import com.terrafolio.gradle.plugins.jenkins.tasks.ValidateJenkinsJobsTask;
 
 class JenkinsPlugin implements Plugin<Project> {
 
@@ -33,19 +25,21 @@ class JenkinsPlugin implements Plugin<Project> {
 	}
 
 	def applyConventions(Project project) {
+        def MapJobManagement jm = new MapJobManagement(new HashMap<String, String>())
+
 		def jobs = project.container(JenkinsJob) { name ->
-			new JenkinsJob(name)
+			new JenkinsJob(name, jm)
 		}
 		
-		def templates = project.container(JenkinsJobDefinition) { name ->
-			new JenkinsJobDefinition(name)
+		def templates = project.container(JenkinsJobTemplate) { name ->
+			new JenkinsJobTemplate(name, jm)
 		}
 		
 		def servers = project.container(JenkinsServerDefinition) { name ->
 			new JenkinsServerDefinition(name)
 		}
 		
-		def configuration = new JenkinsConfiguration(jobs, templates, servers)
+		def configuration = new JenkinsConfiguration(jobs, templates, servers, jm)
 		project.convention.plugins.jenkins = new JenkinsConfigurationConvention(configuration)
 	}
 }

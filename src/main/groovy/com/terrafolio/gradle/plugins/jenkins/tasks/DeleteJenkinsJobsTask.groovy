@@ -1,11 +1,8 @@
 package com.terrafolio.gradle.plugins.jenkins.tasks
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
-
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService;
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 
 class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
 	def jobsToDelete = []
@@ -29,7 +26,7 @@ class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
 	}
 	
 	def void delete(JenkinsServerDefinition server, String jobName) {
-		def job = new JenkinsJob(jobName)
+		def job = new JenkinsJob(jobName, null)
 		job.server server
 		job.definition {
 			name jobName

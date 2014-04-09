@@ -1,12 +1,11 @@
 package com.terrafolio.gradle.plugins.jenkins.tasks
 
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 import org.custommonkey.xmlunit.DetailedDiff
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.Difference
 import org.custommonkey.xmlunit.XMLUnit
-
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService;
 
 class ValidateJenkinsJobsTask extends AbstractJenkinsTask {
 	def failOnDifference = true

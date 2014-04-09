@@ -1,13 +1,10 @@
 package com.terrafolio.gradle.plugins.jenkins.tasks
 
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
-
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob;
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition;
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService;
 
 class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
 	def jobsToUpdate = []

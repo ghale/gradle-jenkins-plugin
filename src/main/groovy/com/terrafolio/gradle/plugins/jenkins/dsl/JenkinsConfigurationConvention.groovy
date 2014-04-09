@@ -1,6 +1,5 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
-import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.util.ConfigureUtil
 
 class JenkinsConfigurationConvention {

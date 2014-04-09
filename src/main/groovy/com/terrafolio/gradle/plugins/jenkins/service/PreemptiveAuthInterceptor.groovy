@@ -1,10 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.service
 
-import java.io.IOException;
-
-import com.sun.net.httpserver.HttpContext
-
-import org.apache.http.HttpException;
+import org.apache.http.HttpException
 import org.apache.http.HttpRequest
 import org.apache.http.HttpRequestInterceptor
 

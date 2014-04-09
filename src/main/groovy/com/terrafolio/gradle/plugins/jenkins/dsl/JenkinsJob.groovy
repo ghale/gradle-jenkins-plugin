@@ -1,14 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.jobdsl.MapJobManagement
-import javaposse.jobdsl.dsl.DslScriptLoader
-import javaposse.jobdsl.dsl.GeneratedItems
-import javaposse.jobdsl.dsl.GeneratedJob
-import javaposse.jobdsl.dsl.JobManagement
-import javaposse.jobdsl.dsl.Job
-import javaposse.jobdsl.dsl.ScriptRequest
+import javaposse.jobdsl.dsl.*
 import org.gradle.util.ConfigureUtil
-
 
 class JenkinsJob {
 	def name
@@ -16,28 +9,35 @@ class JenkinsJob {
 	def serverSpecificConfiguration = [:]
 	def definition
 	def serviceOverrides = new JenkinsOverrides()
+    protected JobManagement jm
 	
-	JenkinsJob(String name) {
+	JenkinsJob(String name, JobManagement jm) {
 		this.name = name
+        this.jm = jm
 	}
 	
 	def definition(JenkinsJobDefinition definition) {
-		this.definition = definition
+		setDefinition(definition)
 	}
+
+    def setDefinition(JenkinsJobDefinition definition) {
+        this.definition = definition
+        if (definition.xml != null) {
+            jm.createOrUpdateConfig(name, definition.xml, true)
+        }
+    }
 	
 	def definition(Closure closure) {
 		if (this.definition == null) {
 			this.definition = new JenkinsJobDefinition(name)
 		}
 		ConfigureUtil.configure(closure, definition)
+        if (definition.xml != null) {
+            jm.createOrUpdateConfig(name, definition.xml, true)
+        }
 	}
 
     def dsl(File dslFile) {
-        Map configMap = new HashMap<String, String>()
-        if (definition != null && definition.xml != null) {
-            configMap.put(name, definition.xml)
-        }
-        JobManagement jm = new MapJobManagement(configMap)
         jm.getParameters().put("GRADLE_JOB_NAME", name)
 
         ScriptRequest request = new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false)
@@ -53,20 +53,15 @@ class JenkinsJob {
     }
 
     def dsl(Closure closure) {
-        Map configMap = new HashMap<String, String>()
-        // Load the existing xml into the configMap
-        if (definition != null && definition.xml != null) {
-            configMap.put(name, definition.xml)
-        }
-        JobManagement jm = new MapJobManagement(configMap)
         jm.getParameters().put("GRADLE_JOB_NAME", name)
 
         def Job job = new Job(jm)
         // Load the existing xml as a template if it exists
-        if (configMap.containsKey(name) && job.templateName == null) {
+        if (jm.getConfig(name) && job.templateName == null) {
             job.using(name)
         }
         job.with(closure)
+        jm.createOrUpdateConfig(name, job.xml, true)
         this.definition = new JenkinsJobDefinition(job.name==null?name:job.name)
         this.definition.xml job.xml
     }
