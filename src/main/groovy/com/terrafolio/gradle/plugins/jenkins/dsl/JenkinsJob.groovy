@@ -3,20 +3,34 @@ package com.terrafolio.gradle.plugins.jenkins.dsl
 import javaposse.jobdsl.dsl.*
 import org.gradle.util.ConfigureUtil
 
-class JenkinsJob {
+class JenkinsJob extends JenkinsConfigurable {
 	def name
-	def serverDefinitions = []
-	def serverSpecificConfiguration = [:]
-	def definition
-	def serviceOverrides = new JenkinsOverrides()
+    def definition
     protected JobManagement jm
+
+    def defaultOverrides = {
+        create( [ uri: "/createItem", params: [ name: definition.name ] ])
+        get(    [ uri: "/job/${definition.name}/config.xml" ])
+        update( [ uri: "/job/${definition.name}/config.xml" ])
+        delete( [ uri: "/job/${definition.name}/doDelete" ])
+    }
 	
 	JenkinsJob(String name, JobManagement jm) {
 		this.name = name
         this.jm = jm
 	}
-	
-	def definition(JenkinsJobDefinition definition) {
+
+    @Override
+    def Closure getDefaultOverrides() {
+        return this.defaultOverrides
+    }
+
+    @Override
+    String getConfigurableName() {
+        return this.definition.name
+    }
+
+    def definition(JenkinsJobDefinition definition) {
 		setDefinition(definition)
 	}
 
@@ -44,7 +58,7 @@ class JenkinsJob {
         GeneratedItems generatedItems = DslScriptLoader.runDslEngine(request, jm)
 
         if (generatedItems.jobs.size() != 1) {
-            throw new JenkinsConfigurationException("The DSL script ${dslFile.path} did not generate exactly one job (${generatedItems.jobs.size()})!  Use the jobs dsl form to generate multiple jobs from dsl.")
+            throw new JenkinsConfigurationException("The DSL script ${dslFile.path} did not generate exactly one job (${generatedItems.jobs.size()})!  Use the general dsl form to generate multiple jobs from dsl.")
         } else {
             GeneratedJob generatedJob = generatedItems.getJobs().iterator().next()
             this.definition = new JenkinsJobDefinition(generatedJob.jobName==null?name:generatedJob.jobName)
@@ -65,33 +79,10 @@ class JenkinsJob {
         this.definition = new JenkinsJobDefinition(job.name==null?name:job.name)
         this.definition.xml job.xml
     }
-	
-	def serviceOverrides(JenkinsOverrides overrides) {
-		this.serviceOverrides = overrides
-	}
-	
-	def serviceOverrides(Closure closure) {
-		if (this.serviceOverrides == null) {
-			this.serviceOverrides = new JenkinsOverrides()
-		}
-		ConfigureUtil.configure(closure, serviceOverrides)
-	}
-	
-	def server(JenkinsServerDefinition server) {
-		if (! serverDefinitions.contains(server)) {
-			serverDefinitions += server
-		}
-	}
-	
-	def server(JenkinsServerDefinition server, Closure closure) {
-		this.server(server)
-		if (! serverSpecificConfiguration.containsKey(server)) {
-			serverSpecificConfiguration[server] = []
-		}
-		serverSpecificConfiguration[server] += closure
-	}
-	
-	def getServerSpecificDefinition(JenkinsServerDefinition server) {
+
+
+    @Override
+	def String getServerSpecificXml(JenkinsServerDefinition server) {
 		if (serverSpecificConfiguration.containsKey(server)) {
 			def newDefinition = new JenkinsJobDefinition(definition.name, definition.xml)
 			
@@ -99,9 +90,9 @@ class JenkinsJob {
 				ConfigureUtil.configure(closure, newDefinition)
 			}
 			
-			return newDefinition
+			return newDefinition.xml
 		} else {
-			return definition
+			return definition.xml
 		}
 	}
 }

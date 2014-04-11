@@ -54,6 +54,23 @@ class ValidateJenkinsJobsTaskTest {
 					}
 				}
 			}
+            views {
+                test {
+                    server servers.test1
+                    xml """
+                        <hudson.model.ListView>
+                          <filterExecutors>false</filterExecutors>
+                          <filterQueue>false</filterQueue>
+                          <properties class="hudson.model.View\$PropertyList"/>
+                          <jobNames class="tree-set">
+                            <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                          </jobNames>
+                          <jobFilters/>
+                          <columns/>
+                        </hudson.model.ListView>
+                    """
+                }
+            }
 		}
 		
 		mockJenkinsRESTService = new MockFor(JenkinsRESTServiceImpl.class)
@@ -62,9 +79,24 @@ class ValidateJenkinsJobsTaskTest {
 	@Test
 	def void execute_SucceedsOnNoDifference() {
 		mockJenkinsRESTService.demand.with {
-			getJobConfiguration(3) { String jobName, Map overrides ->
+			getConfiguration(3) { String jobName, Map overrides ->
 				"<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 			}
+
+            getConfiguration() { String viewName, Map overrides ->
+                """
+                    <hudson.model.ListView>
+                      <filterExecutors>false</filterExecutors>
+                      <filterQueue>false</filterQueue>
+                      <properties class="hudson.model.View\$PropertyList"/>
+                      <jobNames class="tree-set">
+                        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                      </jobNames>
+                      <jobFilters/>
+                      <columns/>
+                    </hudson.model.ListView>
+                """
+            }
 		}
 		
 		mockJenkinsRESTService.use {
@@ -75,9 +107,24 @@ class ValidateJenkinsJobsTaskTest {
 	@Test (expected = JenkinsValidationException)
 	def void execute_FailsOnDifference() {
 		mockJenkinsRESTService.demand.with {
-			getJobConfiguration(3) { String jobName, Map overrides ->
+			getConfiguration(3) { String jobName, Map overrides ->
 				"<project><actions></actions><description></description><keepDependencies>true</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 			}
+
+            getConfiguration { String viewName, Map overrides ->
+                """
+                    <hudson.model.ListView>
+                      <filterExecutors>true</filterExecutors>
+                      <filterQueue>false</filterQueue>
+                      <properties class="hudson.model.View\$PropertyList"/>
+                      <jobNames class="tree-set">
+                        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                      </jobNames>
+                      <jobFilters/>
+                      <columns/>
+                    </hudson.model.ListView>
+                """
+            }
 		}
 		
 		mockJenkinsRESTService.use {
@@ -92,9 +139,24 @@ class ValidateJenkinsJobsTaskTest {
 	@Test 
 	def void execute_SucceedsWhenFailOnDifferenceFalse() {
 		mockJenkinsRESTService.demand.with {
-			getJobConfiguration(3) { String jobName, Map overrides ->
+			getConfiguration(3) { String jobName, Map overrides ->
 				"<project><actions></actions><description>difference</description><keepDependencies>true</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 			}
+
+            getConfiguration() { String viewName, Map overrides ->
+                """
+                    <hudson.model.ListView>
+                      <filterExecutors>true</filterExecutors>
+                      <filterQueue>false</filterQueue>
+                      <properties class="hudson.model.View\$PropertyList"/>
+                      <jobNames class="tree-set">
+                        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                      </jobNames>
+                      <jobFilters/>
+                      <columns/>
+                    </hudson.model.ListView>
+                """
+            }
 		}
 		
 		project.tasks.validateJenkinsJobs.failOnDifference = false

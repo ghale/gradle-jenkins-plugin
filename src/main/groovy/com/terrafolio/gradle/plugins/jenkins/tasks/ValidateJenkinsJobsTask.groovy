@@ -1,5 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.tasks
 
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurable
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 import org.custommonkey.xmlunit.DetailedDiff
@@ -13,19 +14,19 @@ class ValidateJenkinsJobsTask extends AbstractJenkinsTask {
 	@Override
 	public void doExecute() {
 		def success = true
-		getJobs().each { job ->
-			eachServer(job) { JenkinsServerDefinition server, JenkinsService service ->
-				def serverJob = service.getJobConfiguration(job.definition.name, job.serviceOverrides.get)
+        (getJobs() + getViews()).each { JenkinsConfigurable item ->
+			eachServer(item) { JenkinsServerDefinition server, JenkinsService service ->
+				def serverJob = service.getConfiguration(item.configurableName, item.serviceOverrides.get)
 				if (serverJob == null) {
-					logger.warn('Jenkins job ' + job.definition.name + ' does not exist on ' + server.url)
+					logger.warn('Jenkins item ' + item.configurableName + ' does not exist on ' + server.url)
 					success = false
 				} else {
 					XMLUnit.setIgnoreWhitespace(true)
-					def xmlDiff = new DetailedDiff(new Diff(job.definition.xml, serverJob))
+					def xmlDiff = new DetailedDiff(new Diff(item.getServerSpecificXml(server), serverJob))
 					if (xmlDiff.similar()) {
-						logger.info('Jenkins job ' + job.definition.name + ' matches the version on ' + server.url) 
+						logger.info('Jenkins item ' + item.configurableName + ' matches the version on ' + server.url) 
 					} else {
-						logger.warn('Jenkins job ' + job.definition.name + ' differs from the version on ' + server.url)
+						logger.warn('Jenkins item ' + item.configurableName + ' differs from the version on ' + server.url)
 						xmlDiff.getAllDifferences().each { Difference difference ->
 							logger.info(difference.toString())
 						}

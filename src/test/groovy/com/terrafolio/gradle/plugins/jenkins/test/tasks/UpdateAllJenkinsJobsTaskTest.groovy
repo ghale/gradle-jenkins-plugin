@@ -51,6 +51,18 @@ class UpdateAllJenkinsJobsTaskTest {
 					}
 				}
 			}
+            views {
+                test {
+                    server servers.test1
+                    dsl {
+                        jobs {
+                            project.jenkins.jobs.each { job ->
+                                name job.definition.name
+                            }
+                        }
+                    }
+                }
+            }
 		}
 		
 		mockJenkinsRESTService = new MockFor(JenkinsRESTServiceImpl.class)
@@ -59,16 +71,16 @@ class UpdateAllJenkinsJobsTaskTest {
 	@Test
 	def void execute_updatesExistingJob() {
 		mockJenkinsRESTService.demand.with {
-			createJob(0) { String jobName, String configXML -> }
+			createConfiguration(0) { String jobName, String configXML -> }
 			
-			2.times {
-				getJobConfiguration() { String jobName, Map overrides ->
+			3.times {
+				getConfiguration() { String jobName, Map overrides ->
 					"<project><actions></actions><description>difference</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 				}
 				
-				updateJobConfiguration() { String jobName, String configXML, Map overrides -> 
-					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('updateJobConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
+				updateConfiguration() { String jobName, String configXML, Map overrides ->
+					if (! (project.jenkins.jobs.collect { it.definition.name } + project.jenkins.views.collect { it.name }).contains(jobName)) {
+						throw new Exception('updateConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			}
@@ -82,16 +94,16 @@ class UpdateAllJenkinsJobsTaskTest {
 	@Test
 	def void execute_createsNewJob() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateConfiguration(0) { String jobName, String configXML -> }
 			
-			2.times {
-				getJobConfiguration() { String jobName, Map overrides ->
+			3.times {
+				getConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides -> 
-					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+				createConfiguration() { String jobName, String configXML, Map overrides ->
+					if (! (project.jenkins.jobs.collect { it.definition.name } + project.jenkins.views.collect { it.name }).contains(jobName)) {
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			}
@@ -105,16 +117,16 @@ class UpdateAllJenkinsJobsTaskTest {
 	@Test
 	def void execute_runsOnAllServers() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateConfiguration(0) { String jobName, String configXML -> }
 			
-			4.times {
-				getJobConfiguration() { String jobName, Map overrides ->
+			6.times {
+				getConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides -> 
-					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+				createConfiguration() { String jobName, String configXML, Map overrides ->
+					if (! (project.jenkins.jobs.collect { it.definition.name } + project.jenkins.views.collect { it.name }).contains(jobName)) {
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -124,6 +136,10 @@ class UpdateAllJenkinsJobsTaskTest {
 		project.jenkins.jobs.each { job ->
 			job.server project.jenkins.servers.test2
 		}
+
+        project.jenkins.views.each { view ->
+            view.server project.jenkins.servers.test2
+        }
 		
 		mockJenkinsRESTService.use {
 			project.tasks.updateJenkinsJobs.execute()

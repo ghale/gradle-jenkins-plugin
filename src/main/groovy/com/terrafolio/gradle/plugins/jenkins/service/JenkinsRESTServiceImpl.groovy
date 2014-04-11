@@ -60,27 +60,11 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 	}
 	
 	@Override
-	public String getJobConfiguration(String jobName) throws JenkinsServiceException {
-		return getJobConfiguration(jobName, [:])
-	}
-	
-	@Override
-	public String getJobConfiguration(String jobName, Map overrides)
+	public String getConfiguration(String jobName, Map overrides)
 			throws JenkinsServiceException {
 		def responseXml
 		try {
-			def uri = "/job/${jobName}/config.xml"
-			def params = [:]
-			
-			if (overrides.containsKey("uri")) {
-				uri = overrides.uri
-			}
-			
-			if (overrides.containsKey("params")) {
-				params = overrides.params
-			}
-			
-			responseXml = restServiceGET(uri, params)
+			responseXml = restServiceGET(overrides.uri, overrides.params)
 		} catch (HttpResponseException hre) {
 			if (hre.response.status == 404) {
 				responseXml = null
@@ -98,57 +82,22 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 			return null
 		}
 	}
-
-	@Override
-	public void updateJobConfiguration(String jobName, String configXml) throws JenkinsServiceException {
-		updateJobConfiguration(jobName, configXml, [:])
-	}
 	
 	@Override
-	public void updateJobConfiguration(String jobName, String configXml,
+	public void updateConfiguration(String jobName, String configXml,
 			Map overrides) throws JenkinsServiceException {
-		def response
 		try {
-			def uri = "/job/${jobName}/config.xml"
-			def params = [:]
-			
-			if (overrides.containsKey("uri")) {
-				uri = overrides.uri
-			}
-			
-			if (overrides.containsKey("params")) {
-				params = overrides.params
-			}
-			
-			response = restServicePOST(uri, params, configXml)
+	        restServicePOST(overrides.uri, overrides.params, configXml)
 		} catch (Exception e) {
 			throw new JenkinsServiceException("Jenkins Service Call failed", e)
 		}
 	}
-
-	@Override
-	public void deleteJob(String jobName) throws JenkinsServiceException {
-		deleteJob(jobName, [:])
-	}
 	
 	@Override
-	public void deleteJob(String jobName, Map overrides)
+	public void deleteConfiguration(String jobName, Map overrides)
 			throws JenkinsServiceException {
-		def response
 		try {
-			
-			def uri = "/job/${jobName}/doDelete"
-			def params = [:]
-			
-			if (overrides.containsKey("uri")) {
-				uri = overrides.uri
-			}
-			
-			if (overrides.containsKey("params")) {
-				params = overrides.params
-			}
-			
-			response = restServicePOST(uri, params, "")
+            restServicePOST(overrides.uri, overrides.params, "")
 		} catch (Exception e) {
 			throw new JenkinsServiceException("Jenkins Service Call failed", e)
 		}
@@ -156,27 +105,10 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 	}
 
 	@Override
-	public void createJob(String jobName, String configXml) throws JenkinsServiceException {
-		createJob(jobName, configXml, [:])
-	}
-
-	@Override
-	public void createJob(String jobName, String configXml, Map overrides)
+	public void createConfiguration(String jobName, String configXml, Map overrides)
 			throws JenkinsServiceException {
-		def response
 		try {
-			def uri = "/createItem"
-			def params = [ name : jobName ]
-			
-			if (overrides.containsKey("uri")) {
-				uri = overrides.uri
-			}
-			
-			if (overrides.containsKey("params")) {
-				params = overrides.params
-			}
-			
-			response = restServicePOST(uri, params, configXml)
+			restServicePOST(overrides.uri, overrides.params, configXml)
 		} catch (Exception e) {
 			throw new JenkinsServiceException("Jenkins Service Call failed", e)
 		}

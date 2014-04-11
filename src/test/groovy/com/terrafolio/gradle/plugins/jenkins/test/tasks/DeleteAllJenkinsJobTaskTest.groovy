@@ -51,6 +51,18 @@ class DeleteAllJenkinsJobTaskTest {
 					}
 				}
 			}
+            views {
+                "test view" {
+                    server servers.test1
+                    dsl {
+                        jobs {
+                            project.jenkins.jobs.each { job ->
+                                name job.definition.name
+                            }
+                        }
+                    }
+                }
+            }
 		}
 		
 		mockJenkinsRESTService = new MockFor(JenkinsRESTServiceImpl.class)
@@ -59,11 +71,11 @@ class DeleteAllJenkinsJobTaskTest {
 	@Test
 	def void execute_deletesJobs() {
 		mockJenkinsRESTService.demand.with {
-			2.times {
-				getJobConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-				deleteJob() { String jobName, Map overrides -> 
-					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
+			3.times {
+				getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+				deleteConfiguration() { String jobName, Map overrides ->
+					if (! (project.jenkins.jobs.collect { it.definition.name } + project.jenkins.views.collect { it.name }).contains(jobName)) {
+						throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no item definition with that name!')
 					}
 				}
 			}
@@ -77,11 +89,11 @@ class DeleteAllJenkinsJobTaskTest {
 	@Test 
 	def void execute_deletesJobsOnAllServers() {
 		mockJenkinsRESTService.demand.with {
-			4.times {
-				getJobConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-				deleteJob() { String jobName, Map overrides ->
-					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('deleteJob received: ' + jobName + ' but there\'s no job definition with that name!')
+			5.times {
+				getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+				deleteConfiguration() { String jobName, Map overrides ->
+					if (! (project.jenkins.jobs.collect { it.definition.name } + project.jenkins.views.collect { it.name }).contains(jobName)) {
+						throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no item definition with that name!')
 					}
 				}
 			}

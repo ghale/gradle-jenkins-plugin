@@ -5,6 +5,7 @@ class UpdateAllJenkinsJobsTask extends UpdateJenkinsJobsTask {
 	@Override
 	def void doExecute() {
 		jobsToUpdate = getJobs()
+        viewsToUpdate = getViews()
 		super.doExecute()
 	}
 }

@@ -51,16 +51,10 @@ class JenkinsPluginTest {
 		assert project.convention.plugins.jenkins.jenkins.templates instanceof NamedDomainObjectCollection<JenkinsJobDefinition>
 	}
 
-	@Test
-	void configure_addsJenkinsJob() {
-		project.jenkins {
-			jobs {
-				testJob
-			}
-		}
-
-		assert project.convention.plugins.jenkins.jenkins.jobs.findByName('testJob') instanceof JenkinsJob
-	}
+    @Test
+    void apply_createsJenkinsViewsCollection() {
+        assert project.convention.plugins.jenkins.jenkins.views instanceof NamedDomainObjectCollection<JenkinsView>
+    }
 
 	@Test
 	void apply_createsUpdateJenkinsJobsTask() {

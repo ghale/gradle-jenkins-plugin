@@ -62,16 +62,16 @@ class JenkinsServerConfigurationTest {
 	@Test
 	def void execute_usesDefaultServer() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateConfiguration(0) { String jobName, String configXML -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName, Map overrides ->
+				getConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides ->
+				createConfiguration() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -109,16 +109,16 @@ class JenkinsServerConfigurationTest {
 	@Test(expected = JenkinsConfigurationException)
 	def void execute_throwsExceptionForMissingURL() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateConfiguration(0) { String jobName, String configXML -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getConfiguration() { String jobName ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createConfiguration() { String jobName, String configXML ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -141,16 +141,16 @@ class JenkinsServerConfigurationTest {
 	@Test(expected = JenkinsConfigurationException)
 	def void execute_throwsExceptionForMissingUsername() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateConfiguration(0) { String jobName, String configXML -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getConfiguration() { String jobName ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createConfiguration() { String jobName, String configXML ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -173,16 +173,16 @@ class JenkinsServerConfigurationTest {
 	@Test(expected = JenkinsConfigurationException)
 	def void execute_throwsExceptionForMissingPassword() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateConfiguration(0) { String jobName, String configXML -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName ->
+				getConfiguration() { String jobName ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML ->
+				createConfiguration() { String jobName, String configXML ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -206,18 +206,18 @@ class JenkinsServerConfigurationTest {
 	def void execute_promptsForCredentialsBeforeExecution() {
 		project.ext.credentialsGathered = false
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML, Map overrides -> 	
+			updateConfiguration(0) { String jobName, String configXML, Map overrides ->
 			}
 			
 			4.times {
-				getJobConfiguration() { String jobName, Map overrides ->
+				getConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides ->
+				createConfiguration() { String jobName, String configXML, Map overrides ->
 					assert project.ext.credentialsGathered
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -274,16 +274,16 @@ class JenkinsServerConfigurationTest {
 	@Test
 	def void execute_allowsMissingUsernameForInsecureServer() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML, Map overrides -> }
+			updateConfiguration(0) { String jobName, String configXML, Map overrides -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName, Map overrides ->
+				getConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides ->
+				createConfiguration() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -307,16 +307,16 @@ class JenkinsServerConfigurationTest {
 	@Test
 	def void execute_allowsMissingPasswordForInsecureServer() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML, Map overrides -> }
+			updateConfiguration(0) { String jobName, String configXML, Map overrides -> }
 			
 			2.times {
-				getJobConfiguration() { String jobName, Map overrides ->
+				getConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides ->
+				createConfiguration() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -339,16 +339,16 @@ class JenkinsServerConfigurationTest {
 
 	@Test void execute_configuresServerSpecificConfiguration() {
 		mockJenkinsRESTService.demand.with {
-			updateJobConfiguration(0) { String jobName, String configXML -> }
+			updateConfiguration(0) { String jobName, String configXML -> }
 			
 			4.times {
-				getJobConfiguration() { String jobName, Map overrides ->
+				getConfiguration() { String jobName, Map overrides ->
 					null
 				}
 				
-				createJob() { String jobName, String configXML, Map overrides ->
+				createConfiguration() { String jobName, String configXML, Map overrides ->
 					if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-						throw new Exception('createJob called with: ' + jobName + ' but no job definition exists with that name!')
+						throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
 					}
 				}
 			
@@ -366,11 +366,11 @@ class JenkinsServerConfigurationTest {
 		mockJenkinsRESTService.use {
 			project.jenkins.jobs.each { job ->
 				job.serverDefinitions.each { server ->
-					def definition = job.getServerSpecificDefinition(server)
+					def xml = job.getServerSpecificXml(server)
 					if (server.name == 'test2') {
-						assert definition.xml == "<project><actions></actions><description>This is for test2</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+						assert xml == "<project><actions></actions><description>This is for test2</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 					} else {
-						assert definition.xml == "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+						assert xml == "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
 					}
 				}
 			}

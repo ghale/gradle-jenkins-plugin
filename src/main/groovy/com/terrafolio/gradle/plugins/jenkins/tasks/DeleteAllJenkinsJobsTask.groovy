@@ -5,6 +5,7 @@ class DeleteAllJenkinsJobsTask extends DeleteJenkinsJobsTask {
 	@Override
 	def void doExecute() {
 		jobsToDelete = getJobs()
+        viewsToDelete = getViews()
 		super.doExecute()
 	}
 

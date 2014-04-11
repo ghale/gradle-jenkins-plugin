@@ -50,6 +50,18 @@ class DumpJenkinsJobsTaskTest {
 					}
 				}
 			}
+            views {
+                "test view" {
+                    server servers.test1
+                    dsl {
+                        jobs {
+                            project.jenkins.jobs.each { job ->
+                                name job.definition.name
+                            }
+                        }
+                    }
+                }
+            }
 		}
 	}
 	
@@ -60,18 +72,28 @@ class DumpJenkinsJobsTaskTest {
 	}
 
 	@Test
-	def void execute_dumpsJobsToFiles() {
+	def void execute_dumpsAllItemsToFiles() {
 		project.tasks.dumpJenkinsJobs.execute()
 		
-		def dumpDir = new File('build/tmp/test/build/jobs')
+		def jobDir = new File('build/tmp/test/build/jobs')
 		project.jenkins.jobs.each { job ->
-			def jobFile = new File(dumpDir, "${job.name}-config-test1.xml")
+			def jobFile = new File(jobDir, "${job.name}-config-test1.xml")
 			assert jobFile.exists()
 			
 			XMLUnit.setIgnoreWhitespace(true)
 			def xmlDiff = new Diff(job.definition.xml, jobFile.getText())
 			assert xmlDiff.similar()
 		}
+
+        def viewDir = new File('build/tmp/test/build/views')
+        project.jenkins.views.each { view ->
+            def viewFile = new File(viewDir, "${view.name}-config-test1.xml")
+            assert viewFile.exists()
+
+            XMLUnit.setIgnoreWhitespace(true)
+            def xmlDiff = new Diff(view.xml, viewFile.getText())
+            assert xmlDiff.similar()
+        }
 	}
 	
 	@Test
@@ -107,12 +129,19 @@ class DumpJenkinsJobsTaskTest {
 		project.tasks.dumpJenkinsJobs.prettyPrint = false
 		project.tasks.dumpJenkinsJobs.execute()
 		
-		def dumpDir = new File('build/tmp/test/build/jobs')
+		def jobDir = new File('build/tmp/test/build/jobs')
 		project.jenkins.jobs.each { job ->
-			def jobFile = new File(dumpDir, "${job.name}-config-test1.xml")
+			def jobFile = new File(jobDir, "${job.name}-config-test1.xml")
 			assert jobFile.exists()
 			assert jobFile.getText() == job.definition.xml
 		}
+
+        def viewDir = new File('build/tmp/test/build/views')
+        project.jenkins.views.each { view ->
+            def viewFile = new File(viewDir, "${view.name}-config-test1.xml")
+            assert viewFile.exists()
+            assert viewFile.getText() == view.xml
+        }
 	}
 	
 	@Test
@@ -132,13 +161,13 @@ class DumpJenkinsJobsTaskTest {
 		
 		project.tasks.dumpJenkinsJobs.execute()
 		
-		def dumpDir = new File('build/tmp/test/build/jobs')
+		def jobDir = new File('build/tmp/test/build/jobs')
 		
-		def jobFile = new File(dumpDir, "job1-config-test1.xml")
+		def jobFile = new File(jobDir, "job1-config-test1.xml")
 		assert jobFile.exists()
 		assert jobFile.getText() == project.jenkins.jobs.job1.definition.xml
 		
-		jobFile = new File(dumpDir, "job1-config-test3.xml")
+		jobFile = new File(jobDir, "job1-config-test3.xml")
 		assert jobFile.exists()
 		assert jobFile.getText() == project.jenkins.templates.compile2.xml
 	}
