@@ -1,87 +1,77 @@
+buildscript {
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+
+	dependencies {
+		classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
+	}
+}
+
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
-apply plugin: 'maven'
-apply plugin: 'signing'
-
-group = 'com.terrafolio'
+apply plugin: 'idea'
+apply plugin: 'nexus'
 
 repositories {
-	mavenCentral()
+	addAll(buildscript.repositories)
 }
 
 dependencies {
-   compile gradleApi()
-   groovy localGroovy()
-   
-   compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
+	compile (
+		gradleApi(),
+		localGroovy(),
+		'xmlunit:xmlunit:1.3',
+		'org.apache.ivy:ivy:2.2.0'
+	)
+
+	compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
 	   exclude(module: 'groovy')
-   }
-   
-   compile 'xmlunit:xmlunit:1.3'
+	}
+	compile('org.jenkins-ci.plugins:job-dsl-core:1.22') {
+	   exclude(module: 'groovy-all')
+	}
+}
+
+afterEvaluate {
+	javadocJar {
+		setDependsOn([groovydoc])
+		from groovydoc
+	}
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.3'
+	gradleVersion = '1.11'
 }
 
-task groovydocJar(type: Jar, dependsOn: groovydoc) {
-  description = 'An archive of the GroovyDocs for Maven Central'
-  classifier = 'javadoc'
-  from groovydoc
-}
- 
-task sourcesJar(type: Jar) {
-	from sourceSets.main.allSource
-	classifier = 'sources'
-}
+modifyPom {
+	project {
+		name 'gradle-jenkins-plugin'
+		description 'This is a gradle plugin for programmatically configuring Jenkins jobs.'
+		url 'https://github.com/ghale/gradle-jenkins-plugin'
+		inceptionYear '2012'
 
-artifacts {
-	archives jar
-	archives groovydocJar
-	archives sourcesJar
-}
+		scm {
+			url 'https://github.com/ghale/gradle-jenkins-plugin.git'
+			connection 'scm:https://github.com/ghale/gradle-jenkins-plugin.git'
+			developerConnection 'scm:git@github.com/ghale/gradle-jenkins-plugin.git'
+		}
 
-signing {
-	sign configurations.archives
-}
-
-uploadArchives {
-	repositories {
-		mavenDeployer {
-			beforeDeployment { MavenDeployment deployment -> signPom(deployment) }
- 
-			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-			  authentication(userName: sonatypeUsername, password: sonatypePassword)
+		licenses {
+			license {
+				name 'The Apache Software License, Version 2.0'
+				url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+				distribution 'repo'
 			}
- 
-			pom.project {
-			   name 'gradle-jenkins-plugin'
-			   packaging 'jar'
-			   description 'This is a gradle plugin for programmatically configuring Jenkins jobs.'
-			   url 'https://github.com/ghale/gradle-jenkins-plugin'
- 
-			   scm {
-				   url 'https://github.com/ghale/gradle-jenkins-plugin.git'
-				   connection 'scm:https://github.com/ghale/gradle-jenkins-plugin.git'
-				   developerConnection 'scm:git@github.com/ghale/gradle-jenkins-plugin.git'
-			   }
- 
-			   licenses {
-				   license {
-					   name 'The Apache Software License, Version 2.0'
-					   url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-					   distribution 'repo'
-				   }
-			   }
- 
-			   developers {
-				   developer {
-					   id 'ghale'
-					   name 'Gary Hale'
-					   email 'ghhale@computer.org'
-				   }
-			   }
-		   }
+		}
+
+		developers {
+			developer {
+				id 'ghale'
+				name 'Gary Hale'
+				email 'ghhale@computer.org'
+			}
 		}
 	}
 }

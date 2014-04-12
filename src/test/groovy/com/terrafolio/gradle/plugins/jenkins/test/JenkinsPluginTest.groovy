@@ -1,23 +1,16 @@
 package com.terrafolio.gradle.plugins.jenkins.test
 
-import static org.junit.Assert.*
-
-import com.terrafolio.gradle.plugins.jenkins.DeleteAllJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.DumpJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.JenkinsConfigurationConvention
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.DeleteJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.JenkinsConfiguration
-import com.terrafolio.gradle.plugins.jenkins.JenkinsJob
-import com.terrafolio.gradle.plugins.jenkins.UpdateAllJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.UpdateJenkinsJobsTask
-import com.terrafolio.gradle.plugins.jenkins.ValidateJenkinsJobsTask
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfiguration
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationConvention
+import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
+import com.terrafolio.gradle.plugins.jenkins.tasks.*
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePlugin
-import org.junit.Test
-import org.junit.Before
 import org.gradle.testfixtures.ProjectBuilder
+import org.junit.Before
+import org.junit.Test
 
 class JenkinsPluginTest {
 	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
@@ -58,16 +51,10 @@ class JenkinsPluginTest {
 		assert project.convention.plugins.jenkins.jenkins.templates instanceof NamedDomainObjectCollection<JenkinsJobDefinition>
 	}
 
-	@Test
-	void configure_addsJenkinsJob() {
-		project.jenkins {
-			jobs {
-				testJob
-			}
-		}
-
-		assert project.convention.plugins.jenkins.jenkins.jobs.findByName('testJob') instanceof JenkinsJob
-	}
+    @Test
+    void apply_createsJenkinsViewsCollection() {
+        assert project.convention.plugins.jenkins.jenkins.views instanceof NamedDomainObjectCollection<JenkinsView>
+    }
 
 	@Test
 	void apply_createsUpdateJenkinsJobsTask() {
