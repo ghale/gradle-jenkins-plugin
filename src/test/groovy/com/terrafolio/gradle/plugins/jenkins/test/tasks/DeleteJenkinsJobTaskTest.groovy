@@ -58,6 +58,11 @@ class DeleteJenkinsJobTaskTest {
                     server servers.test1
                     dsl { }
                 }
+                "another view" {
+                    type "ListView"
+                    server servers.test1
+                    dsl { }
+                }
             }
 		}
 		
@@ -102,8 +107,40 @@ class DeleteJenkinsJobTaskTest {
 			project.tasks.deleteOneJob.execute()
 		}
 	}
+
+    @Test
+    def void execute_deletesOneViewTuple() {
+        def viewToDelete = "test view"
+        mockJenkinsRESTService.demand.with {
+            getConfiguration() { String viewName, Map overrides ->
+                """
+                    <hudson.model.ListView>
+                      <filterExecutors>true</filterExecutors>
+                      <filterQueue>false</filterQueue>
+                      <properties class="hudson.model.View\$PropertyList"/>
+                      <jobNames class="tree-set">
+                        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                      </jobNames>
+                      <jobFilters/>
+                      <columns/>
+                    </hudson.model.ListView>
+                """
+            }
+            deleteConfiguration() { String viewName, Map overrides ->
+                assert viewName == viewToDelete
+            }
+        }
+
+        project.task('deleteOneView', type: DeleteJenkinsJobsTask) {
+            deleteView(project.jenkins.servers.test1, viewToDelete)
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.deleteOneView.execute()
+        }
+    }
 	
-	def void execute_deletesMultipleJobs() {
+	def void execute_deletesMultipleJobsWithTuple() {
 		def jobToDelete = "${project.name} compile (master)"
 		mockJenkinsRESTService.demand.with {
 			2.times {
@@ -123,6 +160,102 @@ class DeleteJenkinsJobTaskTest {
 			project.tasks.deleteMultipleJobs.execute()
 		}
 	}
+
+    def void execute_deletesMultipleJobs() {
+        def jobsToDelete = [ "${project.name} compile (master)", "${project.name} compile (develop)" ]
+        mockJenkinsRESTService.demand.with {
+            2.times {
+                getConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+                deleteConfiguration() { String jobName ->
+                    assert jobsToDelete.contains(jobName)
+                    jobsToDelete.remove(jobName)
+                }
+            }
+        }
+
+        project.task('deleteMultipleJobs', type: DeleteJenkinsJobsTask) {
+            delete(project.jenkins.jobs.compile_master)
+            delete(project.jenkins.jobs.compile_develop)
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.deleteMultipleJobs.execute()
+        }
+    }
+
+    @Test
+    def void execute_deletesMultipleViewsWithTuple() {
+        def viewsToDelete = [ "test view", "another view" ]
+        mockJenkinsRESTService.demand.with {
+            2.times {
+                getConfiguration() { String viewName, Map overrides ->
+                    """
+                    <hudson.model.ListView>
+                      <filterExecutors>true</filterExecutors>
+                      <filterQueue>false</filterQueue>
+                      <properties class="hudson.model.View\$PropertyList"/>
+                      <jobNames class="tree-set">
+                        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                      </jobNames>
+                      <jobFilters/>
+                      <columns/>
+                    </hudson.model.ListView>
+                """
+                }
+
+                deleteConfiguration() { String viewName, Map overrides ->
+                    assert viewsToDelete.contains(viewName)
+                    viewsToDelete.remove(viewName)
+                }
+            }
+        }
+
+        project.task('deleteMultipleViews', type: DeleteJenkinsJobsTask) {
+            deleteView(project.jenkins.servers.test1, "test view")
+            deleteView(project.jenkins.servers.test1, "another view")
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.deleteMultipleViews.execute()
+        }
+    }
+
+    @Test
+    def void execute_deletesMultipleViews() {
+        def viewsToDelete = [ "test view", "another view" ]
+        mockJenkinsRESTService.demand.with {
+            2.times {
+                getConfiguration() { String viewName, Map overrides ->
+                    """
+                    <hudson.model.ListView>
+                      <filterExecutors>true</filterExecutors>
+                      <filterQueue>false</filterQueue>
+                      <properties class="hudson.model.View\$PropertyList"/>
+                      <jobNames class="tree-set">
+                        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                      </jobNames>
+                      <jobFilters/>
+                      <columns/>
+                    </hudson.model.ListView>
+                """
+                }
+
+                deleteConfiguration() { String viewName, Map overrides ->
+                    assert viewsToDelete.contains(viewName)
+                    viewsToDelete.remove(viewName)
+                }
+            }
+        }
+
+        project.task('deleteMultipleViews', type: DeleteJenkinsJobsTask) {
+            delete(project.jenkins.views."test view")
+            delete(project.jenkins.views."another view")
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.deleteMultipleViews.execute()
+        }
+    }
 	
 	@Test
 	def void execute_deletesJobWithOverrides() {

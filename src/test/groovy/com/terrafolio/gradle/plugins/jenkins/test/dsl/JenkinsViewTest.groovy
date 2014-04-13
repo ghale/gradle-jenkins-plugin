@@ -201,4 +201,114 @@ class JenkinsViewTest {
 
         assert project.jenkins.views.test.getServerSpecificXml(project.jenkins.servers.test1) == ssxml
     }
+
+    @Test
+    def void configure_overridesXml() {
+        def String expectedXml = """
+            <hudson.model.ListView>
+              <filterExecutors>false</filterExecutors>
+              <filterQueue>false</filterQueue>
+              <properties class="hudson.model.View\$PropertyList"/>
+              <jobNames class="tree-set">
+                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+              </jobNames>
+              <jobFilters/>
+              <columns/>
+            </hudson.model.ListView>
+        """
+        File xmlFile = project.file('test.xml')
+        xmlFile.write(expectedXml)
+
+        project.jenkins.views {
+            test {
+                xml(xmlFile)
+                xml override { viewXml ->
+                    viewXml.filterExecutors = 'true'
+                }
+            }
+        }
+
+        expectedXml = """
+            <hudson.model.ListView>
+              <filterExecutors>true</filterExecutors>
+              <filterQueue>false</filterQueue>
+              <properties class="hudson.model.View\$PropertyList"/>
+              <jobNames class="tree-set">
+                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+              </jobNames>
+              <jobFilters/>
+              <columns/>
+            </hudson.model.ListView>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.views.findByName('test').xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_overridesXmlFromDsl() {
+        project.jenkins.views {
+            test {
+                dsl {
+                    name "test"
+                }
+                xml override { viewXml ->
+                    viewXml.filterExecutors = 'true'
+                }
+            }
+        }
+
+        def String expectedXml = """
+            <hudson.model.ListView>
+              <filterExecutors>true</filterExecutors>
+              <filterQueue>false</filterQueue>
+              <properties class="hudson.model.View\$PropertyList"/>
+              <jobNames class="tree-set">
+                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+              </jobNames>
+              <jobFilters/>
+              <columns/>
+            </hudson.model.ListView>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.views.findByName('test').xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_overridesXmlFromDslFile() {
+        def dslFile = project.file('test.dsl')
+        dslFile.write("""
+            view(type: ListView) {
+                name "test"
+            }
+        """)
+        project.jenkins.views {
+            test {
+                dsl dslFile
+                xml override { viewXml ->
+                    viewXml.filterExecutors = 'true'
+                }
+            }
+        }
+
+        String expectedXml = """
+            <hudson.model.ListView>
+              <filterExecutors>true</filterExecutors>
+              <filterQueue>false</filterQueue>
+              <properties class="hudson.model.View\$PropertyList"/>
+              <jobNames class="tree-set">
+                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+              </jobNames>
+              <jobFilters/>
+              <columns/>
+            </hudson.model.ListView>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.views.findByName('test').xml))
+        assert xmlDiff.similar()
+    }
 }

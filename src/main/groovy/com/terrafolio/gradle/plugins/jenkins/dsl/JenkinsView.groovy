@@ -1,5 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
+import groovy.xml.StreamingMarkupBuilder
 import javaposse.jobdsl.dsl.DslScriptLoader
 import javaposse.jobdsl.dsl.GeneratedItems
 import javaposse.jobdsl.dsl.GeneratedView
@@ -74,6 +75,13 @@ class JenkinsView extends JenkinsConfigurable {
 
     def xml(File xmlFile) {
         this.xml = xmlFile.text
+    }
+
+    def String override(Closure closure) {
+        def newXml = new XmlSlurper().parseText(xml)
+        closure.call(newXml)
+        def sbuilder = new StreamingMarkupBuilder()
+        return sbuilder.bind { mkp.yield newXml }.toString()
     }
 
     def dsl(File dslFile) {

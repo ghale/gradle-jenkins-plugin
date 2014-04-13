@@ -90,7 +90,7 @@ class UpdateJenkinsJobsTaskTest {
 	}
 	
 	@Test
-	def void execute_skipsUpdateOnNoChange() {
+	def void execute_skipsJobUpdateOnNoChange() {
 		mockJenkinsRESTService.demand.with {
 			createConfiguration(0) { String jobName, String configXML -> }
 			
@@ -110,6 +110,39 @@ class UpdateJenkinsJobsTaskTest {
 			project.tasks.updateOneJob.execute()
 		}
 	}
+
+    @Test
+    def void execute_skipsViewUpdateOnNoChange() {
+        mockJenkinsRESTService.demand.with {
+            createConfiguration(0) { String viewName, String configXML -> }
+
+            getConfiguration() { String viewName, Map overrides ->
+                """
+                    <hudson.model.ListView>
+                      <filterExecutors>false</filterExecutors>
+                      <filterQueue>false</filterQueue>
+                      <properties class="hudson.model.View\$PropertyList"/>
+                      <jobNames class="tree-set">
+                        <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                      </jobNames>
+                      <jobFilters/>
+                      <columns/>
+                    </hudson.model.ListView>
+                """
+            }
+
+            updateConfiguration(0) { String viewName, String configXML, Map overrides -> }
+
+        }
+
+        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+            update(project.jenkins.views."test view")
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.updateOneJob.execute()
+        }
+    }
 	
 	@Test
 	def void execute_updatesOnForceUpdateString() {
