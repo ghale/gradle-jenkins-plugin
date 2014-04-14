@@ -75,9 +75,10 @@ class JenkinsJob extends JenkinsConfigurable {
             job.using(name)
         }
         job.with(closure)
-        jm.createOrUpdateConfig(name, job.xml, true)
+        def String resultXml = job.xml
+        jm.createOrUpdateConfig(name, resultXml, true)
         this.definition = new JenkinsJobDefinition(job.name==null?name:job.name)
-        this.definition.xml job.xml
+        this.definition.xml resultXml
     }
 
 

@@ -596,5 +596,57 @@ class JenkinsJobTest {
             }
         }
     }
+
+    @Test
+    def void configure_doesntCallConfigureMultipleTimes() {
+        def int count = 0
+        project.jenkins {
+            jobs {
+                test {
+                    dsl {
+                        name "Test Job"
+                        wrappers {
+                            configure { root ->
+                                assert count++ == 0
+                                (root / "buildWrappers")
+                                    .appendNode("newNode")
+                                    .appendNode("testNode")
+                                        .setValue("test")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <project>
+                <actions></actions>
+                <description></description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers>
+                    <newNode>
+                        <testNode>test</testNode>
+                    </newNode>
+                </buildWrappers>
+            </project>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def job = project.jenkins.jobs.findByName('test')
+        assert job.definition.name == "Test Job"
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
+        assert xmlDiff.similar()
+    }
 	
 }
