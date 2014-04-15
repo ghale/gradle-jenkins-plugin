@@ -150,6 +150,7 @@ class JenkinsJobTest {
         project.jenkins {
             jobs {
                 test {
+                    type 'Freeform'
                     dsl {
                         name "Test Job"
                     }
@@ -308,6 +309,20 @@ class JenkinsJobTest {
         assert job.definition.name == "Test Job"
         def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
         assert xmlDiff.similar()
+    }
+
+    @Test (expected = JenkinsConfigurationException)
+    def void configure_dslClosureThrowsExceptionOnBadType() {
+        project.jenkins {
+            jobs {
+                test {
+                    type 'Junk'
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
     }
 
     @Test

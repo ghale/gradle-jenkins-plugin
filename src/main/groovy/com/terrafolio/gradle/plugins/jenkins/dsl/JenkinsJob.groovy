@@ -35,6 +35,13 @@ class JenkinsJob extends JenkinsConfigurable {
         setType(type)
     }
 
+    def void setType(String type) {
+        if (JobType.find(type) == null) {
+            throw new JenkinsConfigurationException("${type} is not a valid jenkins-job-dsl type!")
+        }
+        this.type = type
+    }
+
     def definition(JenkinsJobDefinition definition) {
 		setDefinition(definition)
 	}
