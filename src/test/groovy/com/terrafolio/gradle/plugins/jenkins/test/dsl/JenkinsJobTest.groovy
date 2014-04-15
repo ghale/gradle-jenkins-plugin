@@ -146,6 +146,171 @@ class JenkinsJobTest {
     }
 
     @Test
+    def void configure_dslClosureGeneratesFreeformXml() {
+        project.jenkins {
+            jobs {
+                test {
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <project>
+                <actions></actions>
+                <description></description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers></buildWrappers>
+            </project>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def job = project.jenkins.jobs.findByName('test')
+        assert job.definition.name == "Test Job"
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_dslClosureGeneratesMavenXml() {
+        project.jenkins {
+            jobs {
+                test {
+                    type 'Maven'
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <maven2-moduleset>
+              <actions/>
+              <description></description>
+              <keepDependencies>false</keepDependencies>
+              <properties/>
+              <scm class="hudson.scm.NullSCM"/>
+              <canRoam>true</canRoam>
+              <disabled>false</disabled>
+              <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+              <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+              <triggers class="vector"/>
+              <concurrentBuild>false</concurrentBuild>
+              <aggregatorStyleBuild>true</aggregatorStyleBuild>
+              <incrementalBuild>false</incrementalBuild>
+              <perModuleEmail>false</perModuleEmail>
+              <ignoreUpstremChanges>true</ignoreUpstremChanges>
+              <archivingDisabled>false</archivingDisabled>
+              <resolveDependencies>false</resolveDependencies>
+              <processPlugins>false</processPlugins>
+              <mavenValidationLevel>-1</mavenValidationLevel>
+              <runHeadless>false</runHeadless>
+              <publishers/>
+              <buildWrappers/>
+            </maven2-moduleset>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def job = project.jenkins.jobs.findByName('test')
+        assert job.definition.name == "Test Job"
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_dslClosureGeneratesMultijobXml() {
+        project.jenkins {
+            jobs {
+                test {
+                    type 'Multijob'
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <com.tikal.jenkins.plugins.multijob.MultiJobProject plugin="jenkins-multijob-plugin@1.8">
+              <actions/>
+              <description/>
+              <keepDependencies>false</keepDependencies>
+              <properties/>
+              <scm class="hudson.scm.NullSCM"/>
+              <canRoam>true</canRoam>
+              <disabled>false</disabled>
+              <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+              <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+              <triggers class="vector"/>
+              <concurrentBuild>false</concurrentBuild>
+              <builders/>
+              <publishers/>
+              <buildWrappers/>
+            </com.tikal.jenkins.plugins.multijob.MultiJobProject>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def job = project.jenkins.jobs.findByName('test')
+        assert job.definition.name == "Test Job"
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
+    def void configure_dslClosureGeneratesBuildFlowXml() {
+        project.jenkins {
+            jobs {
+                test {
+                    type 'BuildFlow'
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        def expectedXml = """
+            <com.cloudbees.plugins.flow.BuildFlow>
+              <actions/>
+              <description></description>
+              <keepDependencies>false</keepDependencies>
+              <properties/>
+              <scm class="hudson.scm.NullSCM"/>
+              <canRoam>true</canRoam>
+              <disabled>false</disabled>
+              <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+              <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+              <triggers class="vector"/>
+              <concurrentBuild>false</concurrentBuild>
+              <builders/>
+              <publishers/>
+              <buildWrappers/>
+              <icon/>
+              <dsl></dsl>
+            </com.cloudbees.plugins.flow.BuildFlow>
+        """
+
+        XMLUnit.setIgnoreWhitespace(true)
+        def job = project.jenkins.jobs.findByName('test')
+        assert job.definition.name == "Test Job"
+        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
+        assert xmlDiff.similar()
+    }
+
+    @Test
     def void configure_dslClosureUsesJobNameWhenNotSpecified() {
         project.jenkins {
             jobs {

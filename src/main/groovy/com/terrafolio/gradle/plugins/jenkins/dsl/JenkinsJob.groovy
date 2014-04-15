@@ -6,6 +6,7 @@ import org.gradle.util.ConfigureUtil
 class JenkinsJob extends JenkinsConfigurable {
 	def name
     def definition
+    def type
     protected JobManagement jm
 
     def defaultOverrides = {
@@ -28,6 +29,10 @@ class JenkinsJob extends JenkinsConfigurable {
     @Override
     String getConfigurableName() {
         return this.definition.name
+    }
+
+    def void type(String type) {
+        setType(type)
     }
 
     def definition(JenkinsJobDefinition definition) {
@@ -69,7 +74,7 @@ class JenkinsJob extends JenkinsConfigurable {
     def dsl(Closure closure) {
         jm.getParameters().put("GRADLE_JOB_NAME", name)
 
-        def Job job = new Job(jm)
+        def Job job = new Job(jm, ['type': type])
         // Load the existing xml as a template if it exists
         if (jm.getConfig(name) && job.templateName == null) {
             job.using(name)
