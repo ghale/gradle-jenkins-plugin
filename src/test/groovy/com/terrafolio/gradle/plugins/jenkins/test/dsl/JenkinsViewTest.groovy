@@ -82,7 +82,7 @@ class JenkinsViewTest {
         assert xmlDiff.similar()
     }
 
-    @Test (expected = JenkinsConfigurationException)
+    @Test(expected = JenkinsConfigurationException)
     def void configure_dslThrowsExceptionOnMultipleViewsInDsl() {
         def dslFile = project.file('test.dsl')
         dslFile.write("""

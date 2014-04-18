@@ -11,61 +11,61 @@ import org.junit.Before
 import org.junit.Test
 
 class JenkinsJobTest {
-	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
-	def private final JenkinsPlugin plugin = new JenkinsPlugin()
+    def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
+    def private final JenkinsPlugin plugin = new JenkinsPlugin()
 
     @Before
     def void setupProject() {
         plugin.apply(project)
     }
 
-	@Test
-	def void configure_closureAddsToDefinition() {
-		def testXml = '<test>test</test>'
-		project.jenkins {
-			jobs {
-				test {
-					definition {
-						xml testXml 
-					}
-				}
-			}
-		}
-		project.jenkins.jobs.test.definition {
-			name "test name"
-		}
-		assert project.jenkins.jobs.test.definition.name == "test name"
-		assert project.jenkins.jobs.test.definition.xml == testXml
-	}
-	
-	@Test
-	def void configure_configuresServiceOverrides() {
-		def testXml = '<test>test</test>'
-		project.jenkins {
-			jobs {
-				test {
-					definition {
-						xml testXml
-					}
-					serviceOverrides {
-						get([ uri: "getTest", params: [ test: "testGetParam"] ])
-						create([ uri: "createTest", params: [ test: "testCreateParam"] ])
-						update([ uri: "updateTest", params: [ test: "testUpdateParam"] ])
-						delete([ uri: "deleteTest", params: [ test: "testDeleteParam"] ])
-					}
-				}
-			}
-		}
+    @Test
+    def void configure_closureAddsToDefinition() {
+        def testXml = '<test>test</test>'
+        project.jenkins {
+            jobs {
+                test {
+                    definition {
+                        xml testXml
+                    }
+                }
+            }
+        }
+        project.jenkins.jobs.test.definition {
+            name "test name"
+        }
+        assert project.jenkins.jobs.test.definition.name == "test name"
+        assert project.jenkins.jobs.test.definition.xml == testXml
+    }
 
-		assert project.jenkins.jobs.test.serviceOverrides.get.uri == "getTest"
-		assert project.jenkins.jobs.test.serviceOverrides.get.params.test == "testGetParam"
-		assert project.jenkins.jobs.test.serviceOverrides.create.uri == "createTest"
-		assert project.jenkins.jobs.test.serviceOverrides.create.params.test == "testCreateParam"
-		assert project.jenkins.jobs.test.serviceOverrides.update.uri == "updateTest"
-		assert project.jenkins.jobs.test.serviceOverrides.update.params.test == "testUpdateParam"
-		assert project.jenkins.jobs.test.serviceOverrides.delete.uri == "deleteTest"
-		assert project.jenkins.jobs.test.serviceOverrides.delete.params.test == "testDeleteParam"
-	}
+    @Test
+    def void configure_configuresServiceOverrides() {
+        def testXml = '<test>test</test>'
+        project.jenkins {
+            jobs {
+                test {
+                    definition {
+                        xml testXml
+                    }
+                    serviceOverrides {
+                           get([ uri: "getTest",    params: [ test: "testGetParam" ] ])
+                        create([ uri: "createTest", params: [ test: "testCreateParam" ] ])
+                        update([ uri: "updateTest", params: [ test: "testUpdateParam" ] ])
+                        delete([ uri: "deleteTest", params: [ test: "testDeleteParam" ] ])
+                    }
+                }
+            }
+        }
+
+        assert project.jenkins.jobs.test.serviceOverrides.get.uri == "getTest"
+        assert project.jenkins.jobs.test.serviceOverrides.get.params.test == "testGetParam"
+        assert project.jenkins.jobs.test.serviceOverrides.create.uri == "createTest"
+        assert project.jenkins.jobs.test.serviceOverrides.create.params.test == "testCreateParam"
+        assert project.jenkins.jobs.test.serviceOverrides.update.uri == "updateTest"
+        assert project.jenkins.jobs.test.serviceOverrides.update.params.test == "testUpdateParam"
+        assert project.jenkins.jobs.test.serviceOverrides.delete.uri == "deleteTest"
+        assert project.jenkins.jobs.test.serviceOverrides.delete.params.test == "testDeleteParam"
+    }
 
     @Test
     def void configure_dslFileGeneratesXml() {
@@ -311,7 +311,7 @@ class JenkinsJobTest {
         assert xmlDiff.similar()
     }
 
-    @Test (expected = JenkinsConfigurationException)
+    @Test(expected = JenkinsConfigurationException)
     def void configure_dslClosureThrowsExceptionOnBadType() {
         project.jenkins {
             jobs {
@@ -758,7 +758,7 @@ class JenkinsJobTest {
         assert xmlDiff.similar()
     }
 
-    @Test (expected = JenkinsConfigurationException)
+    @Test(expected = JenkinsConfigurationException)
     def void configure_dslThrowsExceptionOnMultipleJobsInDsl() {
         def dslFile = project.file('test.dsl')
         dslFile.write("""
@@ -789,8 +789,8 @@ class JenkinsJobTest {
                             configure { root ->
                                 assert count++ == 0
                                 (root / "buildWrappers")
-                                    .appendNode("newNode")
-                                    .appendNode("testNode")
+                                        .appendNode("newNode")
+                                        .appendNode("testNode")
                                         .setValue("test")
                             }
                         }
@@ -828,5 +828,5 @@ class JenkinsJobTest {
         def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
         assert xmlDiff.similar()
     }
-	
+
 }

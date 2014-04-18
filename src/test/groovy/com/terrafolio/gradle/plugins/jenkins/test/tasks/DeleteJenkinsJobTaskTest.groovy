@@ -10,103 +10,103 @@ import org.junit.Before
 import org.junit.Test
 
 class DeleteJenkinsJobTaskTest {
-	def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
-	def private final JenkinsPlugin plugin = new JenkinsPlugin()
-	def MockFor mockJenkinsRESTService
-	
-	@Before
-	def void setupProject() {
-		plugin.apply(project)
-		
-		project.ext.branches = [
-			master: [ parents: [ ] ],
-			develop: [ parents: [ 'master' ] ]
-		]
-		
-		project.jenkins {
-			servers {
-				test1 {
-					url 'test1'
-					username 'test1'
-					password 'test1'
-				}
-				test2 {
-					url 'test2'
-					username 'test2'
-					password 'test2'
-				}
-			}
-			templates {
-				compile {
-					xml "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
-				}
-			}
-			jobs {
-				project.branches.eachWithIndex { branchName, map, index ->
-					"compile_${branchName}" {
-						server servers.test1 
-						definition {
-							name "${project.name} compile (${branchName})"
-							xml templates.compile.xml
-						}
-					}
-				}
-			}
+    def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
+    def private final JenkinsPlugin plugin = new JenkinsPlugin()
+    def MockFor mockJenkinsRESTService
+
+    @Before
+    def void setupProject() {
+        plugin.apply(project)
+
+        project.ext.branches = [
+                master : [parents: []],
+                develop: [parents: ['master']]
+        ]
+
+        project.jenkins {
+            servers {
+                test1 {
+                    url 'test1'
+                    username 'test1'
+                    password 'test1'
+                }
+                test2 {
+                    url 'test2'
+                    username 'test2'
+                    password 'test2'
+                }
+            }
+            templates {
+                compile {
+                    xml "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+                }
+            }
+            jobs {
+                project.branches.eachWithIndex { branchName, map, index ->
+                    "compile_${branchName}" {
+                        server servers.test1
+                        definition {
+                            name "${project.name} compile (${branchName})"
+                            xml templates.compile.xml
+                        }
+                    }
+                }
+            }
             views {
                 "test view" {
                     type "ListView"
                     server servers.test1
-                    dsl { }
+                    dsl {}
                 }
                 "another view" {
                     type "ListView"
                     server servers.test1
-                    dsl { }
+                    dsl {}
                 }
             }
-		}
-		
-		mockJenkinsRESTService = new MockFor(JenkinsRESTServiceImpl.class)
-	}
-	
-	@Test
-	def void execute_deletesOneJob() {
-		mockJenkinsRESTService.demand.with {
-			getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-			deleteConfiguration() { String jobName, Map overrides ->
-				if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-					throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no job definition with that name!')
-				}
-			}
-		}
-		
-		project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
-			delete(project.jenkins.jobs.compile_master)
-		}
-		
-		mockJenkinsRESTService.use {
-			project.tasks.deleteOneJob.execute()
-		}
-	}
-	
-	@Test
-	def void execute_deletesOneJobTuple() {
-		def jobToDelete = "${project.name} compile (master)"
-		mockJenkinsRESTService.demand.with {
-			getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-			deleteConfiguration() { String jobName, Map overrides ->
-				assert jobName == jobToDelete
-			}
-		}
-		
-		project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
-			delete(project.jenkins.servers.test1, jobToDelete)
-		}
-		
-		mockJenkinsRESTService.use {
-			project.tasks.deleteOneJob.execute()
-		}
-	}
+        }
+
+        mockJenkinsRESTService = new MockFor(JenkinsRESTServiceImpl.class)
+    }
+
+    @Test
+    def void execute_deletesOneJob() {
+        mockJenkinsRESTService.demand.with {
+            getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
+            deleteConfiguration() { String jobName, Map overrides ->
+                if (!project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+                    throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no job definition with that name!')
+                }
+            }
+        }
+
+        project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
+            delete(project.jenkins.jobs.compile_master)
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.deleteOneJob.execute()
+        }
+    }
+
+    @Test
+    def void execute_deletesOneJobTuple() {
+        def jobToDelete = "${project.name} compile (master)"
+        mockJenkinsRESTService.demand.with {
+            getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
+            deleteConfiguration() { String jobName, Map overrides ->
+                assert jobName == jobToDelete
+            }
+        }
+
+        project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
+            delete(project.jenkins.servers.test1, jobToDelete)
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.deleteOneJob.execute()
+        }
+    }
 
     @Test
     def void execute_deletesOneViewTuple() {
@@ -139,33 +139,33 @@ class DeleteJenkinsJobTaskTest {
             project.tasks.deleteOneView.execute()
         }
     }
-	
-	def void execute_deletesMultipleJobsWithTuple() {
-		def jobToDelete = "${project.name} compile (master)"
-		mockJenkinsRESTService.demand.with {
-			2.times {
-				getConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-				deleteConfiguration() { String jobName ->
-					assert jobName == jobToDelete
-				}
-			}
-		}
-		
-		project.task('deleteMultipleJobs', type: DeleteJenkinsJobsTask) {
-			delete(project.jenkins.servers.test1, jobToDelete)
-			delete(project.jenkins.servers.test2, jobToDelete)
-		}
-		
-		mockJenkinsRESTService.use {
-			project.tasks.deleteMultipleJobs.execute()
-		}
-	}
 
-    def void execute_deletesMultipleJobs() {
-        def jobsToDelete = [ "${project.name} compile (master)", "${project.name} compile (develop)" ]
+    def void execute_deletesMultipleJobsWithTuple() {
+        def jobToDelete = "${project.name} compile (master)"
         mockJenkinsRESTService.demand.with {
             2.times {
-                getConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
+                getConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
+                deleteConfiguration() { String jobName ->
+                    assert jobName == jobToDelete
+                }
+            }
+        }
+
+        project.task('deleteMultipleJobs', type: DeleteJenkinsJobsTask) {
+            delete(project.jenkins.servers.test1, jobToDelete)
+            delete(project.jenkins.servers.test2, jobToDelete)
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.deleteMultipleJobs.execute()
+        }
+    }
+
+    def void execute_deletesMultipleJobs() {
+        def jobsToDelete = ["${project.name} compile (master)", "${project.name} compile (develop)"]
+        mockJenkinsRESTService.demand.with {
+            2.times {
+                getConfiguration() { String jobName -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
                 deleteConfiguration() { String jobName ->
                     assert jobsToDelete.contains(jobName)
                     jobsToDelete.remove(jobName)
@@ -185,7 +185,7 @@ class DeleteJenkinsJobTaskTest {
 
     @Test
     def void execute_deletesMultipleViewsWithTuple() {
-        def viewsToDelete = [ "test view", "another view" ]
+        def viewsToDelete = ["test view", "another view"]
         mockJenkinsRESTService.demand.with {
             2.times {
                 getConfiguration() { String viewName, Map overrides ->
@@ -222,7 +222,7 @@ class DeleteJenkinsJobTaskTest {
 
     @Test
     def void execute_deletesMultipleViews() {
-        def viewsToDelete = [ "test view", "another view" ]
+        def viewsToDelete = ["test view", "another view"]
         mockJenkinsRESTService.demand.with {
             2.times {
                 getConfiguration() { String viewName, Map overrides ->
@@ -256,33 +256,33 @@ class DeleteJenkinsJobTaskTest {
             project.tasks.deleteMultipleViews.execute()
         }
     }
-	
-	@Test
-	def void execute_deletesJobWithOverrides() {
-		mockJenkinsRESTService.demand.with {
-			getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"}
-			deleteConfiguration() { String jobName, Map overrides ->
-				if (! project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
-					throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no job definition with that name!')
-				}
-				assert overrides.uri == "testUri"
-			}
-		}
-		
-		project.jenkins.jobs.compile_master {
-			serviceOverrides {
-				delete = [ uri: "testUri" ]
-			}
-		}
-		
-		project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
-			delete(project.jenkins.jobs.compile_master)
-		}
-		
-		mockJenkinsRESTService.use {
-			project.tasks.deleteOneJob.execute()
-		}
-	}
+
+    @Test
+    def void execute_deletesJobWithOverrides() {
+        mockJenkinsRESTService.demand.with {
+            getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
+            deleteConfiguration() { String jobName, Map overrides ->
+                if (!project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
+                    throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no job definition with that name!')
+                }
+                assert overrides.uri == "testUri"
+            }
+        }
+
+        project.jenkins.jobs.compile_master {
+            serviceOverrides {
+                delete = [uri: "testUri"]
+            }
+        }
+
+        project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
+            delete(project.jenkins.jobs.compile_master)
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.deleteOneJob.execute()
+        }
+    }
 
     @Test
     def void execute_deletesJobWithDefaultOverrides() {
@@ -325,5 +325,5 @@ class DeleteJenkinsJobTaskTest {
             project.tasks.deleteOneView.execute()
         }
     }
-	
+
 }

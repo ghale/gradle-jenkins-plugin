@@ -41,28 +41,28 @@ class MapJobManagementTest {
         assert jm.getConfig("test") == "<view />"
     }
 
-    @Test (expected = NameNotProvidedException)
+    @Test(expected = NameNotProvidedException)
     def void throwsExceptionOnNullJobName() {
         Map map = new HashMap<String, String>()
         def jm = new MapJobManagement(map)
         jm.createOrUpdateConfig("", "<project />", true)
     }
 
-    @Test (expected = NameNotProvidedException)
+    @Test(expected = NameNotProvidedException)
     def void throwsExceptionOnNullViewName() {
         Map map = new HashMap<String, String>()
         def jm = new MapJobManagement(map)
         jm.createOrUpdateView("", "<view />", true)
     }
 
-    @Test (expected = ConfigurationMissingException)
+    @Test(expected = ConfigurationMissingException)
     def void throwsExceptionOnNullJobConfiguration() {
         Map map = new HashMap<String, String>()
         def jm = new MapJobManagement(map)
         jm.createOrUpdateConfig("test", null, true)
     }
 
-    @Test (expected = ConfigurationMissingException)
+    @Test(expected = ConfigurationMissingException)
     def void throwsExceptionOnNullViewConfiguration() {
         Map map = new HashMap<String, String>()
         def jm = new MapJobManagement(map)

@@ -31,10 +31,10 @@ abstract class JenkinsConfigurable {
     }
 
     def server(JenkinsServerDefinition server) {
-		if (! serverDefinitions.contains(server)) {
-			serverDefinitions += server
-		}
-	}
+        if (! serverDefinitions.contains(server)) {
+            serverDefinitions += server
+        }
+    }
 
     def server(JenkinsServerDefinition server, Closure closure) {
         this.server(server)

@@ -9,42 +9,42 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 abstract class AbstractJenkinsTask extends DefaultTask {
-	def needsCredentials = true
-	
-	@TaskAction
-	def void executeTask() {
-		initialize()
-		doExecute()
-	}
-	
-	def abstract void doExecute()
-	
-	def List<JenkinsServerDefinition> getServerDefinitions(JenkinsConfigurable item) {
-		def serverDefinitions = []
-		if (item.serverDefinitions == null || item.serverDefinitions.isEmpty()) {
-			if (project.jenkins.defaultServer != null) {
-				serverDefinitions = [ project.jenkins.defaultServer ]
-			} else {
-				throw new JenkinsConfigurationException("No servers defined for item ${item.name} and no defaultServer set!")
-			}
-		} else {
-			if (project.hasProperty('jenkinsServerFilter')) {
-				serverDefinitions = item.serverDefinitions.findAll { it.name ==~ project.jenkinsServerFilter }
-			} else {
-				serverDefinitions = item.serverDefinitions
-			}
-		}
-		
-		if (needsCredentials) {
-			serverDefinitions.each { server ->
-				server.checkDefinitionValues()
-			}
-		}
-		
-		return serverDefinitions
-	}
-	
-	def List<JenkinsJob> getJobs() {
+    def needsCredentials = true
+
+    @TaskAction
+    def void executeTask() {
+        initialize()
+        doExecute()
+    }
+
+    def abstract void doExecute()
+
+    def List<JenkinsServerDefinition> getServerDefinitions(JenkinsConfigurable item) {
+        def serverDefinitions = []
+        if (item.serverDefinitions == null || item.serverDefinitions.isEmpty()) {
+            if (project.jenkins.defaultServer != null) {
+                serverDefinitions = [ project.jenkins.defaultServer ]
+            } else {
+                throw new JenkinsConfigurationException("No servers defined for item ${item.name} and no defaultServer set!")
+            }
+        } else {
+            if (project.hasProperty('jenkinsServerFilter')) {
+                serverDefinitions = item.serverDefinitions.findAll { it.name ==~ project.jenkinsServerFilter }
+            } else {
+                serverDefinitions = item.serverDefinitions
+            }
+        }
+
+        if (needsCredentials) {
+            serverDefinitions.each { server ->
+                server.checkDefinitionValues()
+            }
+        }
+
+        return serverDefinitions
+    }
+
+    def List<JenkinsJob> getJobs() {
         def jobs
         if (project.hasProperty('jenkinsJobFilter')) {
             jobs = project.jenkins.jobs.findAll { it.name ==~ project.jenkinsJobFilter } as List
@@ -65,15 +65,15 @@ abstract class AbstractJenkinsTask extends DefaultTask {
 
         return views
     }
-	
-	def void initialize() {
-		getJobs().each { job ->	getServerDefinitions(job) }
-	}
-	
-	def void eachServer(JenkinsConfigurable item, Closure closure) {
-		getServerDefinitions(item).each { server ->
-			def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
-			closure.call(server, service)
-		}
-	}
+
+    def void initialize() {
+        getJobs().each { job -> getServerDefinitions(job) }
+    }
+
+    def void eachServer(JenkinsConfigurable item, Closure closure) {
+        getServerDefinitions(item).each { server ->
+            def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
+            closure.call(server, service)
+        }
+    }
 }

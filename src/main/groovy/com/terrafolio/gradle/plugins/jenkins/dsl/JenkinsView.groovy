@@ -1,13 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
 import groovy.xml.StreamingMarkupBuilder
-import javaposse.jobdsl.dsl.DslScriptLoader
-import javaposse.jobdsl.dsl.GeneratedItems
-import javaposse.jobdsl.dsl.GeneratedView
-import javaposse.jobdsl.dsl.JobManagement
-import javaposse.jobdsl.dsl.ScriptRequest
-import javaposse.jobdsl.dsl.View
-import javaposse.jobdsl.dsl.ViewType
+import javaposse.jobdsl.dsl.*
 import javaposse.jobdsl.dsl.views.BuildPipelineView
 import javaposse.jobdsl.dsl.views.ListView
 import org.gradle.util.ConfigureUtil
@@ -22,15 +16,15 @@ class JenkinsView extends JenkinsConfigurable {
     protected JobManagement jm
 
     def defaultOverrides = {
-        create( [ uri: "/createView", params: [ name: name ] ])
-        get(    [ uri: "/view/${name}/config.xml" ])
-        update( [ uri: "/view/${name}/config.xml" ])
-        delete( [ uri: "/view/${name}/doDelete" ])
+        create([ uri: "/createView", params: [ name: name ] ])
+           get([ uri: "/view/${name}/config.xml" ])
+        update([ uri: "/view/${name}/config.xml" ])
+        delete([ uri: "/view/${name}/doDelete" ])
     }
 
     private static final Map<ViewType, Class<? extends View>> VIEW_TYPE_MAPPING = [
-            (null): ListView.class,
-            (ViewType.ListView): ListView.class,
+            (null)                      : ListView.class,
+            (ViewType.ListView)         : ListView.class,
             (ViewType.BuildPipelineView): BuildPipelineView.class,
     ]
 

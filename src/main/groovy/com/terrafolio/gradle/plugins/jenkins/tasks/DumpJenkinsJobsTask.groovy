@@ -3,22 +3,22 @@ package com.terrafolio.gradle.plugins.jenkins.tasks
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurable
 
 class DumpJenkinsJobsTask extends AbstractJenkinsTask {
-	def prettyPrint = true
+    def prettyPrint = true
 
-	public DumpJenkinsJobsTask() {
-		super();
-		needsCredentials = false
-	}
+    public DumpJenkinsJobsTask() {
+        super();
+        needsCredentials = false
+    }
 
-	@Override
-	public void doExecute() {
-		getJobs().each { job ->
-			def jobDir = new File(project.buildDir, "jobs")
-			if (! jobDir.exists()) {
-				jobDir.mkdirs()
-			}
-			writeXmlConfigurations(job, jobDir)
-		}
+    @Override
+    public void doExecute() {
+        getJobs().each { job ->
+            def jobDir = new File(project.buildDir, "jobs")
+            if (! jobDir.exists()) {
+                jobDir.mkdirs()
+            }
+            writeXmlConfigurations(job, jobDir)
+        }
 
         getViews().each { view ->
             def viewDir = new File(project.buildDir, "views")
@@ -27,7 +27,7 @@ class DumpJenkinsJobsTask extends AbstractJenkinsTask {
             }
             writeXmlConfigurations(view, viewDir)
         }
-	}
+    }
 
     public void writeXmlConfigurations(JenkinsConfigurable item, File itemDir) {
         getServerDefinitions(item).each { server ->

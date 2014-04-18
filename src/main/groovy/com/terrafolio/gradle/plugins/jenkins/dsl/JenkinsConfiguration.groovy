@@ -5,45 +5,45 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.file.FileCollection
 
 class JenkinsConfiguration {
-	private final NamedDomainObjectContainer<JenkinsJob> jobs
-	private final NamedDomainObjectContainer<JenkinsServerDefinition> servers
-	private final NamedDomainObjectContainer<JenkinsJobTemplate> templates
+    private final NamedDomainObjectContainer<JenkinsJob> jobs
+    private final NamedDomainObjectContainer<JenkinsServerDefinition> servers
+    private final NamedDomainObjectContainer<JenkinsJobTemplate> templates
     private final NamedDomainObjectContainer<JenkinsView> views
     private final JobManagement jm
-	
-	def defaultServer
-	
-	public JenkinsConfiguration(NamedDomainObjectContainer<JenkinsJob> jobs,
+
+    def defaultServer
+
+    public JenkinsConfiguration(NamedDomainObjectContainer<JenkinsJob> jobs,
                                 NamedDomainObjectContainer<JenkinsJobTemplate> templates,
                                 NamedDomainObjectContainer<JenkinsServerDefinition> servers,
                                 NamedDomainObjectContainer<JenkinsView> views,
                                 JobManagement jm) {
-		this.jobs = jobs
-		this.servers = servers
-		this.templates = templates
+        this.jobs = jobs
+        this.servers = servers
+        this.templates = templates
         this.views = views
         this.jm = jm
-	}
-	
-	def jobs(Closure closure) {
-		jobs.configure(closure)
-	}
-	
-	def templates(Closure closure) {
-		templates.configure(closure)
-	}
-	
-	def servers(Closure closure) {
-		servers.configure(closure)
-	}
+    }
+
+    def jobs(Closure closure) {
+        jobs.configure(closure)
+    }
+
+    def templates(Closure closure) {
+        templates.configure(closure)
+    }
+
+    def servers(Closure closure) {
+        servers.configure(closure)
+    }
 
     def views(Closure closure) {
         views.configure(closure)
     }
-	
-	def defaultServer(JenkinsServerDefinition server) {
-		this.defaultServer = server
-	}
+
+    def defaultServer(JenkinsServerDefinition server) {
+        this.defaultServer = server
+    }
 
     def dsl(FileCollection files) {
         jobs.each { job ->

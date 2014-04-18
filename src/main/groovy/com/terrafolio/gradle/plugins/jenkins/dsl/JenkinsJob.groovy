@@ -4,22 +4,22 @@ import javaposse.jobdsl.dsl.*
 import org.gradle.util.ConfigureUtil
 
 class JenkinsJob extends JenkinsConfigurable {
-	def name
+    def name
     def definition
     def type
     protected JobManagement jm
 
     def defaultOverrides = {
-        create( [ uri: "/createItem", params: [ name: definition.name ] ])
-        get(    [ uri: "/job/${definition.name}/config.xml" ])
-        update( [ uri: "/job/${definition.name}/config.xml" ])
-        delete( [ uri: "/job/${definition.name}/doDelete" ])
+        create([ uri: "/createItem", params: [ name: definition.name ] ])
+           get([ uri: "/job/${definition.name}/config.xml" ])
+        update([ uri: "/job/${definition.name}/config.xml" ])
+        delete([ uri: "/job/${definition.name}/doDelete" ])
     }
-	
-	JenkinsJob(String name, JobManagement jm) {
-		this.name = name
+
+    JenkinsJob(String name, JobManagement jm) {
+        this.name = name
         this.jm = jm
-	}
+    }
 
     @Override
     def Closure getDefaultOverrides() {
@@ -43,8 +43,8 @@ class JenkinsJob extends JenkinsConfigurable {
     }
 
     def definition(JenkinsJobDefinition definition) {
-		setDefinition(definition)
-	}
+        setDefinition(definition)
+    }
 
     def setDefinition(JenkinsJobDefinition definition) {
         this.definition = definition
@@ -52,16 +52,16 @@ class JenkinsJob extends JenkinsConfigurable {
             jm.createOrUpdateConfig(name, definition.xml, true)
         }
     }
-	
-	def definition(Closure closure) {
-		if (this.definition == null) {
-			this.definition = new JenkinsJobDefinition(name)
-		}
-		ConfigureUtil.configure(closure, definition)
+
+    def definition(Closure closure) {
+        if (this.definition == null) {
+            this.definition = new JenkinsJobDefinition(name)
+        }
+        ConfigureUtil.configure(closure, definition)
         if (definition.xml != null) {
             jm.createOrUpdateConfig(name, definition.xml, true)
         }
-	}
+    }
 
     def dsl(File dslFile) {
         jm.getParameters().put("GRADLE_JOB_NAME", name)
@@ -73,7 +73,7 @@ class JenkinsJob extends JenkinsConfigurable {
             throw new JenkinsConfigurationException("The DSL script ${dslFile.path} did not generate exactly one job (${generatedItems.jobs.size()})!  Use the general dsl form to generate multiple jobs from dsl.")
         } else {
             GeneratedJob generatedJob = generatedItems.getJobs().iterator().next()
-            this.definition = new JenkinsJobDefinition(generatedJob.jobName==null?name:generatedJob.jobName)
+            this.definition = new JenkinsJobDefinition(generatedJob.jobName == null ? name : generatedJob.jobName)
             this.definition.xml jm.getConfig(generatedJob.jobName)
         }
     }
@@ -89,23 +89,23 @@ class JenkinsJob extends JenkinsConfigurable {
         job.with(closure)
         def String resultXml = job.xml
         jm.createOrUpdateConfig(name, resultXml, true)
-        this.definition = new JenkinsJobDefinition(job.name==null?name:job.name)
+        this.definition = new JenkinsJobDefinition(job.name == null ? name : job.name)
         this.definition.xml resultXml
     }
 
 
     @Override
-	def String getServerSpecificXml(JenkinsServerDefinition server) {
-		if (serverSpecificConfiguration.containsKey(server)) {
-			def newDefinition = new JenkinsJobDefinition(definition.name, definition.xml)
-			
-			serverSpecificConfiguration[server].each { closure -> 
-				ConfigureUtil.configure(closure, newDefinition)
-			}
-			
-			return newDefinition.xml
-		} else {
-			return definition.xml
-		}
-	}
+    def String getServerSpecificXml(JenkinsServerDefinition server) {
+        if (serverSpecificConfiguration.containsKey(server)) {
+            def newDefinition = new JenkinsJobDefinition(definition.name, definition.xml)
+
+            serverSpecificConfiguration[server].each { closure ->
+                ConfigureUtil.configure(closure, newDefinition)
+            }
+
+            return newDefinition.xml
+        } else {
+            return definition.xml
+        }
+    }
 }

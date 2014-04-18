@@ -9,41 +9,41 @@ import org.gradle.api.plugins.BasePlugin
 
 class JenkinsPlugin implements Plugin<Project> {
 
-	@Override
-	public void apply(Project project) {
-		project.plugins.apply(BasePlugin.class)
-		applyTasks(project)
-		applyConventions(project)
-	}
-	
-	def applyTasks(Project project) {
-		project.task('updateJenkinsJobs', type: UpdateAllJenkinsJobsTask)
-		project.task('deleteJenkinsJobs', type: DeleteAllJenkinsJobsTask)
-		project.task('dumpJenkinsJobs', type: DumpJenkinsJobsTask)
-		project.task('retireJenkinsJobs', type: DeleteJenkinsJobsTask)
-		project.task('validateJenkinsJobs', type: ValidateJenkinsJobsTask)
-	}
+    @Override
+    public void apply(Project project) {
+        project.plugins.apply(BasePlugin.class)
+        applyTasks(project)
+        applyConventions(project)
+    }
 
-	def applyConventions(Project project) {
+    def applyTasks(Project project) {
+        project.task('updateJenkinsJobs', type: UpdateAllJenkinsJobsTask)
+        project.task('deleteJenkinsJobs', type: DeleteAllJenkinsJobsTask)
+        project.task('dumpJenkinsJobs', type: DumpJenkinsJobsTask)
+        project.task('retireJenkinsJobs', type: DeleteJenkinsJobsTask)
+        project.task('validateJenkinsJobs', type: ValidateJenkinsJobsTask)
+    }
+
+    def applyConventions(Project project) {
         def MapJobManagement jm = new MapJobManagement(new HashMap<String, String>())
 
-		def jobs = project.container(JenkinsJob) { name ->
-			new JenkinsJob(name, jm)
-		}
-		
-		def templates = project.container(JenkinsJobTemplate) { name ->
-			new JenkinsJobTemplate(name, jm)
-		}
-		
-		def servers = project.container(JenkinsServerDefinition) { name ->
-			new JenkinsServerDefinition(name)
-		}
+        def jobs = project.container(JenkinsJob) { name ->
+            new JenkinsJob(name, jm)
+        }
+
+        def templates = project.container(JenkinsJobTemplate) { name ->
+            new JenkinsJobTemplate(name, jm)
+        }
+
+        def servers = project.container(JenkinsServerDefinition) { name ->
+            new JenkinsServerDefinition(name)
+        }
 
         def views = project.container(JenkinsView) { name ->
             new JenkinsView(name, jm)
         }
-		
-		def configuration = new JenkinsConfiguration(jobs, templates, servers, views, jm)
-		project.convention.plugins.jenkins = new JenkinsConfigurationConvention(configuration)
-	}
+
+        def configuration = new JenkinsConfiguration(jobs, templates, servers, views, jm)
+        project.convention.plugins.jenkins = new JenkinsConfigurationConvention(configuration)
+    }
 }
