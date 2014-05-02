@@ -11,6 +11,11 @@ import org.gradle.api.tasks.TaskAction
 abstract class AbstractJenkinsTask extends DefaultTask {
     def needsCredentials = true
 
+    AbstractJenkinsTask() {
+        super()
+        group = 'Jenkins Management'
+    }
+
     @TaskAction
     def void executeTask() {
         initialize()
