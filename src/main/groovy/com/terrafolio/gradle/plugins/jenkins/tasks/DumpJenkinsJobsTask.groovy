@@ -31,15 +31,15 @@ class DumpJenkinsJobsTask extends AbstractJenkinsTask {
 
     public void writeXmlConfigurations(JenkinsConfigurable item, File itemDir) {
         getServerDefinitions(item).each { server ->
+            def file = new File(itemDir, "${item.name}-config-${server.name}.xml")
             if (prettyPrint) {
-                new File(itemDir, "${item.name}-config-${server.name}.xml").withWriter { fileWriter ->
+                file.withWriter { fileWriter ->
                     def node = new XmlParser().parseText(item.getServerSpecificXml(server));
                     new XmlNodePrinter(new PrintWriter(fileWriter)).print(node)
                 }
             } else {
                 def xml = item.getServerSpecificXml(server)
-                new File(itemDir, "${item.name}-config-${server.name}.xml")
-                        .write(xml)
+                file.write(xml)
             }
         }
     }
