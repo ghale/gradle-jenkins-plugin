@@ -10,6 +10,7 @@ abstract class JenkinsConfigurable {
     protected def serverSpecificConfiguration = [:]
     protected def serverDefinitions = []
     def JenkinsOverrides serviceOverrides
+    def String name
 
     def serviceOverrides(Closure closure) {
         if (this.serviceOverrides == null) {

@@ -28,7 +28,6 @@ class DumpRemoteJenkinsItemsTask extends AbstractJenkinsTask {
                 return
             }
 
-            // item.name is not a super class field. consider to refactor
             def file = new File(buildDir.makeAndGetDir("remotes/${server.name}/$itemTypeDir"), "${item.name}.xml")
 
             file.write(serverStrItem)

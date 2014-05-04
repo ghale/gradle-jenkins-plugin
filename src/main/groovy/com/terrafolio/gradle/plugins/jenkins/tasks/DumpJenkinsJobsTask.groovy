@@ -1,6 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.tasks
 
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurable
+import com.terrafolio.gradle.plugins.jenkins.service.BuildDirService
 
 class DumpJenkinsJobsTask extends AbstractJenkinsTask {
     def prettyPrint = true
@@ -12,26 +13,19 @@ class DumpJenkinsJobsTask extends AbstractJenkinsTask {
 
     @Override
     public void doExecute() {
+        def buildDirService = BuildDirService.forProject(project)
         getJobs().each { job ->
-            def jobDir = new File(project.buildDir, "jobs")
-            if (! jobDir.exists()) {
-                jobDir.mkdirs()
-            }
-            writeXmlConfigurations(job, jobDir)
+            writeXmlConfigurations(job, buildDirService, "jobs")
         }
 
         getViews().each { view ->
-            def viewDir = new File(project.buildDir, "views")
-            if (! viewDir.exists()) {
-                viewDir.mkdirs()
-            }
-            writeXmlConfigurations(view, viewDir)
+            writeXmlConfigurations(view, buildDirService, "views")
         }
     }
 
-    public void writeXmlConfigurations(JenkinsConfigurable item, File itemDir) {
+    public void writeXmlConfigurations(JenkinsConfigurable item, BuildDirService buildDirService, String itemType) {
         getServerDefinitions(item).each { server ->
-            def file = new File(itemDir, "${item.name}-config-${server.name}.xml")
+            def file = new File(buildDirService.makeAndGetDir("${server.name}/${itemType}"), "${item.name}.xml")
             if (prettyPrint) {
                 file.withWriter { fileWriter ->
                     def node = new XmlParser().parseText(item.getServerSpecificXml(server));
@@ -43,5 +37,4 @@ class DumpJenkinsJobsTask extends AbstractJenkinsTask {
             }
         }
     }
-
 }

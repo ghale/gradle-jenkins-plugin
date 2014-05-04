@@ -10,7 +10,6 @@ import org.gradle.util.ConfigureUtil
  * Created by ghale on 4/11/14.
  */
 class JenkinsView extends JenkinsConfigurable {
-    def String name
     def String type
     def String xml
     protected JobManagement jm

@@ -4,7 +4,6 @@ import javaposse.jobdsl.dsl.*
 import org.gradle.util.ConfigureUtil
 
 class JenkinsJob extends JenkinsConfigurable {
-    def name
     def definition
     def type
     protected JobManagement jm
