@@ -1,3 +1,5 @@
+![Build Status](https://travis-ci.org/ghale/gradle-jenkins-plugin.svg?branch=master)
+
 gradle-jenkins-plugin
 =====================
 
