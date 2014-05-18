@@ -3,26 +3,16 @@ package com.terrafolio.gradle.plugins.jenkins.tasks
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurable
 import com.terrafolio.gradle.plugins.jenkins.service.BuildDirService
 
-class DumpJenkinsJobsTask extends AbstractJenkinsTask {
+class DumpJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
     def prettyPrint = true
 
-    public DumpJenkinsJobsTask() {
+    public DumpJenkinsItemsTask() {
         super();
         needsCredentials = false
+        description = "Dumps item configurations from the local model to files."
     }
 
     @Override
-    public void doExecute() {
-        def buildDirService = BuildDirService.forProject(project)
-        getJobs().each { job ->
-            writeXmlConfigurations(job, buildDirService, "jobs")
-        }
-
-        getViews().each { view ->
-            writeXmlConfigurations(view, buildDirService, "views")
-        }
-    }
-
     public void writeXmlConfigurations(JenkinsConfigurable item, BuildDirService buildDirService, String itemType) {
         getServerDefinitions(item).each { server ->
             def file = new File(buildDirService.makeAndGetDir("${server.name}/${itemType}"), "${item.name}.xml")

@@ -6,12 +6,14 @@ import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsView
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 
-class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
-    def jobsToDelete = []
-    def viewsToDelete = []
+class DeleteJenkinsItemsTask extends AbstractJenkinsTask {
+    DeleteJenkinsItemsTask() {
+        super()
+        description = "Deletes items from the server(s)."
+    }
 
     def void doExecute() {
-        (jobsToDelete + viewsToDelete).each { JenkinsConfigurable item ->
+        getAllItems().each { JenkinsConfigurable item ->
             eachServer(item) { JenkinsServerDefinition server, JenkinsService service ->
                 def existing = service.getConfiguration(item.configurableName, item.serviceOverrides.get)
                 if (existing != null) {
@@ -25,13 +27,11 @@ class DeleteJenkinsJobsTask extends AbstractJenkinsTask {
     }
 
     def void delete(JenkinsConfigurable item) {
-        if (item instanceof JenkinsJob) {
-            jobsToDelete += item
-        }
+        items += item
+    }
 
-        if (item instanceof JenkinsView) {
-            viewsToDelete += item
-        }
+    def void delete(Closure closure) {
+        itemClosures += closure
     }
 
     def void delete(JenkinsServerDefinition server, String jobName) {

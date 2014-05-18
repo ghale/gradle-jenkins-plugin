@@ -8,13 +8,17 @@ import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.Difference
 import org.custommonkey.xmlunit.XMLUnit
 
-class ValidateJenkinsJobsTask extends AbstractJenkinsTask {
+class ValidateJenkinsItemsTask extends AbstractJenkinsTask {
     def failOnDifference = true
+
+    ValidateJenkinsItemsTask() {
+        description = "Validates item configurations in the local model against those on the server(s)."
+    }
 
     @Override
     public void doExecute() {
         def success = true
-        (getJobs() + getViews()).each { JenkinsConfigurable item ->
+        getAllItems().each { JenkinsConfigurable item ->
             eachServer(item) { JenkinsServerDefinition server, JenkinsService service ->
                 def serverJob = service.getConfiguration(item.configurableName, item.serviceOverrides.get)
                 if (serverJob == null) {
@@ -41,4 +45,11 @@ class ValidateJenkinsJobsTask extends AbstractJenkinsTask {
         }
     }
 
+    def validate(JenkinsConfigurable item) {
+        items += item
+    }
+
+    def validate(Closure closure) {
+        itemClosures += closure
+    }
 }

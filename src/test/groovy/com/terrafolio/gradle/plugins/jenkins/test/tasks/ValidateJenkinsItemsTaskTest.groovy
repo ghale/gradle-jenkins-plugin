@@ -10,7 +10,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Before
 import org.junit.Test
 
-class ValidateJenkinsJobsTaskTest {
+class ValidateJenkinsItemsTaskTest {
     def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
     def private final JenkinsPlugin plugin = new JenkinsPlugin()
     def MockFor mockJenkinsRESTService

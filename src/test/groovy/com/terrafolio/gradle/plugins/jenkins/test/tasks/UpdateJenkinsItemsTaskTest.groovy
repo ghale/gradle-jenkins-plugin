@@ -3,12 +3,13 @@ package com.terrafolio.gradle.plugins.jenkins.test.tasks
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceFactory
-import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateJenkinsJobsTask
+import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateJenkinsItemsTask
 import nebula.test.ProjectSpec
 import org.junit.Ignore
 
-class UpdateJenkinsJobsTaskTest extends ProjectSpec {
-    def mockJenkinsRESTService
+class UpdateJenkinsItemsTaskTest extends ProjectSpec {
+    def JenkinsService mockJenkinsRESTService
+    def UpdateJenkinsItemsTask taskUnderTest
 
     def void setup() {
         project.apply plugin: 'jenkins'
@@ -75,10 +76,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
         }
 
         mockJenkinsRESTService = Mock(JenkinsRESTServiceImpl)
+        taskUnderTest = project.task('taskUnderTest', type: UpdateJenkinsItemsTask)
+        injectFactory(taskUnderTest)
     }
 
     @Ignore
-    def injectFactory(UpdateJenkinsJobsTask task) {
+    def injectFactory(UpdateJenkinsItemsTask task) {
         task.serviceFactory = new JenkinsServiceFactory() {
             @Override
             JenkinsService getService(String url) {
@@ -95,13 +98,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
     def "execute updates one job" () {
         setup:
         def jobName = project.jenkins.jobs.compile_master.definition.name
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -135,13 +137,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
     def "execute skips job update when there are no changes" () {
         setup:
         def jobName = project.jenkins.jobs.compile_master.definition.name
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -173,13 +174,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
     def "execute skips view update when there are no changes" () {
         setup:
         def viewName = project.jenkins.views."test view".name
-        project.task('updateOneView', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.views."test view")
         }
-        injectFactory(project.tasks.updateOneView)
 
         when:
-        project.tasks.updateOneView.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -207,13 +207,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
         setup:
         def jobName = project.jenkins.jobs.compile_master.definition.name
         project.ext.forceJenkinsJobsUpdate = 'true'
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -246,13 +245,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
         setup:
         def jobName = project.jenkins.jobs.compile_master.definition.name
         project.ext.forceJenkinsJobsUpdate = true
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -284,13 +282,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
     def "execute calls create on missing job" () {
         setup:
         def jobName = project.jenkins.jobs.compile_master.definition.name
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -303,13 +300,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
     def "execute calls create on missing view" () {
         setup:
         def viewName = project.jenkins.views."test view".name
-        project.task('updateOneView', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.views."test view")
         }
-        injectFactory(project.tasks.updateOneView)
 
         when:
-        project.tasks.updateOneView.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -327,13 +323,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
                 create = [ uri: "testUri" ]
             }
         }
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -352,13 +347,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
                 get = [ uri: "anotherUri" ]
             }
         }
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -409,14 +403,13 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
                 <buildWrappers></buildWrappers>
             </project>
         """
-        project.task('updateMultipleJobs', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
             update(project.jenkins.jobs.compile_releaseX)
         }
-        injectFactory(project.tasks.updateMultipleJobs)
 
         when:
-        project.tasks.updateMultipleJobs.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -440,13 +433,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
         setup:
         def jobName = project.jenkins.jobs.compile_master.definition.name
 
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -480,13 +472,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
     def "execute creates job with default URI overrides" () {
         setup:
         def jobName = project.jenkins.jobs.compile_master.definition.name
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.jobs.compile_master)
         }
-        injectFactory(project.tasks.updateOneJob)
 
         when:
-        project.tasks.updateOneJob.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -501,13 +492,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
     def "execute updates view with default URI overrides" () {
         setup:
         def viewName = project.jenkins.views."test view".name
-        project.task('updateOneView', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.views."test view")
         }
-        injectFactory(project.tasks.updateOneView)
 
         when:
-        project.tasks.updateOneView.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -535,13 +525,12 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
     def "execute creates view with default URI overrides" () {
         setup:
         def viewName = project.jenkins.views."test view".name
-        project.task('updateOneView', type: UpdateJenkinsJobsTask) {
+        project.tasks.taskUnderTest {
             update(project.jenkins.views."test view")
         }
-        injectFactory(project.tasks.updateOneView)
 
         when:
-        project.tasks.updateOneView.execute()
+        taskUnderTest.execute()
 
         then:
         with(mockJenkinsRESTService) {
@@ -550,6 +539,54 @@ class UpdateJenkinsJobsTaskTest extends ProjectSpec {
             1 * getConfiguration(viewName, { it.uri == "/view/${viewName}/config.xml" })
 
             1 * createConfiguration(viewName, _, { it.uri == "/createView" && it.params.name == viewName })
+        }
+    }
+
+    def "update adds lazy closure with one item" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
+        project.tasks.taskUnderTest {
+            update { project.jenkins.jobs.compile_master }
+        }
+
+        expect:
+        taskUnderTest.items == []
+
+        when:
+        taskUnderTest.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * updateConfiguration(*_)
+            1 * createConfiguration(jobName, _, _)
+            1 * getConfiguration(jobName, _)
+        }
+    }
+
+    def "update adds lazy closure with multiple items" () {
+        setup:
+        def jobName1 = project.jenkins.jobs.compile_master.definition.name
+        def jobName2 = project.jenkins.jobs.compile_releaseX.definition.name
+
+        project.tasks.taskUnderTest {
+            update { [ project.jenkins.jobs.compile_master, project.jenkins.jobs.compile_releaseX ] }
+        }
+
+        expect:
+        taskUnderTest.items == []
+
+        when:
+        taskUnderTest.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * updateConfiguration(*_)
+
+            1 * getConfiguration(jobName1,_)
+            1 * createConfiguration(jobName1,_,_)
+
+            1 * getConfiguration(jobName2,_)
+            1 * createConfiguration(jobName2,_,_)
         }
     }
 }

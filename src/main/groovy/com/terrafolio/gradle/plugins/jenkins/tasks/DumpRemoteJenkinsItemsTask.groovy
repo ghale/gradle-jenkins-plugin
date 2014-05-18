@@ -5,21 +5,12 @@ import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
 import com.terrafolio.gradle.plugins.jenkins.service.BuildDirService
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 
-class DumpRemoteJenkinsItemsTask extends AbstractJenkinsTask {
-
-    @Override
-    void doExecute() {
-        def buildDirService = BuildDirService.forProject(project)
-
-        getJobs().each { job ->
-            writeXmlConfigurations(job, buildDirService, "jobs")
-        }
-
-        getViews().each { view ->
-            writeXmlConfigurations(view, buildDirService, "views")
-        }
+class DumpRemoteJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
+    DumpRemoteJenkinsItemsTask() {
+        description = "Dumps remote item configurations from server(s) to files."
     }
 
+    @Override
     public void writeXmlConfigurations(JenkinsConfigurable item, BuildDirService buildDir, String itemTypeDir) {
         eachServer(item) { JenkinsServerDefinition server, JenkinsService service ->
             String serverStrItem = service.getConfiguration(item.configurableName, item.serviceOverrides.get)

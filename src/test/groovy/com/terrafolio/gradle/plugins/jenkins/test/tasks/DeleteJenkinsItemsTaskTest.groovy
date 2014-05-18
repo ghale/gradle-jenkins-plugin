@@ -2,14 +2,14 @@ package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
-import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteJenkinsJobsTask
+import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteJenkinsItemsTask
 import groovy.mock.interceptor.MockFor
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Before
 import org.junit.Test
 
-class DeleteJenkinsJobTaskTest {
+class DeleteJenkinsItemsTaskTest {
     def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
     def private final JenkinsPlugin plugin = new JenkinsPlugin()
     def MockFor mockJenkinsRESTService
@@ -80,7 +80,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
+        project.task('deleteOneJob', type: DeleteJenkinsItemsTask) {
             delete(project.jenkins.jobs.compile_master)
         }
 
@@ -99,7 +99,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
+        project.task('deleteOneJob', type: DeleteJenkinsItemsTask) {
             delete(project.jenkins.servers.test1, jobToDelete)
         }
 
@@ -131,7 +131,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteOneView', type: DeleteJenkinsJobsTask) {
+        project.task('deleteOneView', type: DeleteJenkinsItemsTask) {
             deleteView(project.jenkins.servers.test1, viewToDelete)
         }
 
@@ -151,7 +151,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteMultipleJobs', type: DeleteJenkinsJobsTask) {
+        project.task('deleteMultipleJobs', type: DeleteJenkinsItemsTask) {
             delete(project.jenkins.servers.test1, jobToDelete)
             delete(project.jenkins.servers.test2, jobToDelete)
         }
@@ -173,7 +173,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteMultipleJobs', type: DeleteJenkinsJobsTask) {
+        project.task('deleteMultipleJobs', type: DeleteJenkinsItemsTask) {
             delete(project.jenkins.jobs.compile_master)
             delete(project.jenkins.jobs.compile_develop)
         }
@@ -210,7 +210,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteMultipleViews', type: DeleteJenkinsJobsTask) {
+        project.task('deleteMultipleViews', type: DeleteJenkinsItemsTask) {
             deleteView(project.jenkins.servers.test1, "test view")
             deleteView(project.jenkins.servers.test1, "another view")
         }
@@ -247,7 +247,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteMultipleViews', type: DeleteJenkinsJobsTask) {
+        project.task('deleteMultipleViews', type: DeleteJenkinsItemsTask) {
             delete(project.jenkins.views."test view")
             delete(project.jenkins.views."another view")
         }
@@ -275,7 +275,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
+        project.task('deleteOneJob', type: DeleteJenkinsItemsTask) {
             delete(project.jenkins.jobs.compile_master)
         }
 
@@ -296,7 +296,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteOneJob', type: DeleteJenkinsJobsTask) {
+        project.task('deleteOneJob', type: DeleteJenkinsItemsTask) {
             delete(project.jenkins.jobs.compile_master)
         }
 
@@ -317,7 +317,7 @@ class DeleteJenkinsJobTaskTest {
             }
         }
 
-        project.task('deleteOneView', type: DeleteJenkinsJobsTask) {
+        project.task('deleteOneView', type: DeleteJenkinsItemsTask) {
             delete(project.jenkins.views."test view")
         }
 

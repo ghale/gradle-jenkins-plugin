@@ -8,7 +8,7 @@ import org.gradle.util.ConfigureUtil
 abstract class JenkinsConfigurable {
 
     protected def serverSpecificConfiguration = [:]
-    protected def serverDefinitions = []
+    def serverDefinitions = []
     def JenkinsOverrides serviceOverrides
     def String name
 

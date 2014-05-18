@@ -11,7 +11,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-class DumpJenkinsJobsTaskTest {
+class DumpJenkinsItemsTaskTest {
     def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
     def private final JenkinsPlugin plugin = new JenkinsPlugin()
 

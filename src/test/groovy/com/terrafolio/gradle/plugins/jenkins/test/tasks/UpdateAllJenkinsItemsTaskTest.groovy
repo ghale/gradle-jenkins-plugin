@@ -8,7 +8,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import org.junit.Before
 import org.junit.Test
 
-class DeleteAllJenkinsJobTaskTest {
+class UpdateAllJenkinsItemsTaskTest {
     def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
     def private final JenkinsPlugin plugin = new JenkinsPlugin()
     def MockFor mockJenkinsRESTService
@@ -18,7 +18,7 @@ class DeleteAllJenkinsJobTaskTest {
         plugin.apply(project)
 
         project.ext.branches = [
-                master: [ parents: [ ]] ,
+                master: [ parents: [ ] ],
                 develop: [ parents: [ 'master' ] ]
         ]
 
@@ -52,7 +52,7 @@ class DeleteAllJenkinsJobTaskTest {
                 }
             }
             views {
-                "test view" {
+                test {
                     server servers.test1
                     dsl {
                         jobs {
@@ -69,33 +69,67 @@ class DeleteAllJenkinsJobTaskTest {
     }
 
     @Test
-    def void execute_deletesJobs() {
+    def void execute_updatesExistingJob() {
         mockJenkinsRESTService.demand.with {
+            createConfiguration(0) { String jobName, String configXML -> }
+
             3.times {
-                getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
-                deleteConfiguration() { String jobName, Map overrides ->
+                getConfiguration() { String jobName, Map overrides ->
+                    "<project><actions></actions><description>difference</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+                }
+
+                updateConfiguration() { String jobName, String configXML, Map overrides ->
                     if (!(project.jenkins.jobs.collect { it.definition.name } + project.jenkins.views.collect { it.name }).contains(jobName)) {
-                        throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no item definition with that name!')
+                        throw new Exception('updateConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
                     }
                 }
             }
         }
 
         mockJenkinsRESTService.use {
-            project.tasks.deleteJenkinsJobs.execute()
+            project.tasks.updateJenkinsJobs.execute()
         }
     }
 
     @Test
-    def void execute_deletesJobsOnAllServers() {
+    def void execute_createsNewJob() {
         mockJenkinsRESTService.demand.with {
-            5.times {
-                getConfiguration() { String jobName, Map overrides -> "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>" }
-                deleteConfiguration() { String jobName, Map overrides ->
+            updateConfiguration(0) { String jobName, String configXML -> }
+
+            3.times {
+                getConfiguration() { String jobName, Map overrides ->
+                    null
+                }
+
+                createConfiguration() { String jobName, String configXML, Map overrides ->
                     if (!(project.jenkins.jobs.collect { it.definition.name } + project.jenkins.views.collect { it.name }).contains(jobName)) {
-                        throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no item definition with that name!')
+                        throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
                     }
                 }
+            }
+        }
+
+        mockJenkinsRESTService.use {
+            project.tasks.updateJenkinsJobs.execute()
+        }
+    }
+
+    @Test
+    def void execute_runsOnAllServers() {
+        mockJenkinsRESTService.demand.with {
+            updateConfiguration(0) { String jobName, String configXML -> }
+
+            6.times {
+                getConfiguration() { String jobName, Map overrides ->
+                    null
+                }
+
+                createConfiguration() { String jobName, String configXML, Map overrides ->
+                    if (!(project.jenkins.jobs.collect { it.definition.name } + project.jenkins.views.collect { it.name }).contains(jobName)) {
+                        throw new Exception('createConfiguration called with: ' + jobName + ' but no job definition exists with that name!')
+                    }
+                }
+
             }
         }
 
@@ -103,8 +137,12 @@ class DeleteAllJenkinsJobTaskTest {
             job.server project.jenkins.servers.test2
         }
 
+        project.jenkins.views.each { view ->
+            view.server project.jenkins.servers.test2
+        }
+
         mockJenkinsRESTService.use {
-            project.tasks.deleteJenkinsJobs.execute()
+            project.tasks.updateJenkinsJobs.execute()
         }
     }
 }

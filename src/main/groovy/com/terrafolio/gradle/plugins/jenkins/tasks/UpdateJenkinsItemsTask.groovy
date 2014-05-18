@@ -1,19 +1,18 @@
 package com.terrafolio.gradle.plugins.jenkins.tasks
 
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurable
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsView
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
 
-class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
-    def jobsToUpdate = []
-    def viewsToUpdate = []
+class UpdateJenkinsItemsTask extends AbstractJenkinsTask {
+    UpdateJenkinsItemsTask() {
+        description = "Updates item configurations on the server(s)."
+    }
 
     def void doExecute() {
-        (jobsToUpdate + viewsToUpdate).each { JenkinsConfigurable item ->
+        getAllItems().each { JenkinsConfigurable item ->
             eachServer(item) { JenkinsServerDefinition server, JenkinsService service ->
                 def existing = service.getConfiguration(item.configurableName, item.serviceOverrides.get)
                 if (existing == null) {
@@ -34,12 +33,10 @@ class UpdateJenkinsJobsTask extends AbstractJenkinsTask {
     }
 
     def void update(JenkinsConfigurable item) {
-        if (item instanceof JenkinsJob) {
-            jobsToUpdate += item
-        }
+        items += item
+    }
 
-        if (item instanceof JenkinsView) {
-            viewsToUpdate += item
-        }
+    def void update(Closure closure) {
+        itemClosures += closure
     }
 }

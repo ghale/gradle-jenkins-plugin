@@ -1,6 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory;
+import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
+import com.terrafolio.gradle.plugins.jenkins.DefaultConsoleFactory;
 
 class JenkinsServerDefinition {
     def name
@@ -9,6 +10,7 @@ class JenkinsServerDefinition {
     def password
     def secure = true
     def console
+    def ConsoleFactory consoleFactory = new DefaultConsoleFactory()
 
     JenkinsServerDefinition(String name) {
         this.name = name
@@ -32,7 +34,7 @@ class JenkinsServerDefinition {
 
     def void checkDefinitionValues() {
         if (console == null) {
-            console = ConsoleFactory.getConsole()
+            console = consoleFactory.getConsole()
         }
 
         if (url == null) {

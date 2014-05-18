@@ -19,7 +19,7 @@ class DumpRemoteJenkinsItemsTaskTest {
         }
 
         fixtures.mockJenkinsRESTService.use {
-            fixtures.project.tasks.dumpRemoteJenkinsItems.execute()
+            fixtures.project.tasks.dumpRemoteJenkinsItemsTest1.execute()
         }
 
         def remoteDir = new File(fixtures.project.buildDir, "remotes")

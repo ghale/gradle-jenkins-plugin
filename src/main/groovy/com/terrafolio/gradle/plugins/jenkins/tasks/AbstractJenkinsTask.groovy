@@ -2,11 +2,8 @@ package com.terrafolio.gradle.plugins.jenkins.tasks
 
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurable
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
-import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceFactory
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceFactory
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
@@ -14,6 +11,9 @@ import org.gradle.api.tasks.TaskAction
 abstract class AbstractJenkinsTask extends DefaultTask {
     def needsCredentials = true
     def JenkinsServiceFactory serviceFactory = new JenkinsRESTServiceFactory()
+    def items = []
+    def itemClosures = []
+    def servers
 
     AbstractJenkinsTask() {
         super()
@@ -44,43 +44,29 @@ abstract class AbstractJenkinsTask extends DefaultTask {
             }
         }
 
-        if (needsCredentials) {
-            serverDefinitions.each { server ->
-                server.checkDefinitionValues()
-            }
-        }
-
         return serverDefinitions
     }
 
-    def List<JenkinsJob> getJobs() {
-        def jobs
+    def List<JenkinsConfigurable> getAllItems() {
+        def items = items + itemClosures.collect { it.call() }.flatten()
+
         if (project.hasProperty('jenkinsJobFilter')) {
-            jobs = project.jenkins.jobs.findAll { it.name ==~ project.jenkinsJobFilter } as List
+            return items.findAll { it.name ==~ project.jenkinsJobFilter } as List
         } else {
-            jobs = project.jenkins.jobs as List
+            return items as List
         }
-
-        return jobs
-    }
-
-    def List<JenkinsJob> getViews() {
-        def views
-        if (project.hasProperty('jenkinsJobFilter')) {
-            views = project.jenkins.views.findAll { it.name ==~ project.jenkinsJobFilter } as List
-        } else {
-            views = project.jenkins.views as List
-        }
-
-        return views
     }
 
     def void initialize() {
-        getJobs().each { job -> getServerDefinitions(job) }
+        //getAllItems().each { item -> getServerDefinitions(item) }
     }
 
     def void eachServer(JenkinsConfigurable item, Closure closure) {
-        getServerDefinitions(item).each { server ->
+        def serversToRun = servers
+        if (serversToRun == null) {
+            serversToRun = getServerDefinitions(item)
+        }
+        serversToRun.each { server ->
             def service = server.secure ? serviceFactory.getService(server.url, server.username, server.password) : serviceFactory.getService(server.url)
             closure.call(server, service)
         }
