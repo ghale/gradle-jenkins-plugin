@@ -22,7 +22,8 @@ class BuildDirServiceTest {
     def void "makeAndGetDir returns existing directory"() {
         def BuildDirService service = BuildDirService.forProject(project)
         File newDir = new File(project.buildDir, "existing")
-        assert newDir.mkdirs()
+        newDir.mkdirs()
+        assert newDir.exists()
         def File dir = service.makeAndGetDir("existing")
         assert dir.equals(newDir)
     }

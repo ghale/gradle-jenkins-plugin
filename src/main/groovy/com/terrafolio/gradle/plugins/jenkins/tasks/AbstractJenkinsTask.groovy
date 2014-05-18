@@ -4,12 +4,16 @@ import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurable
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceFactory
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceFactory
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 
 abstract class AbstractJenkinsTask extends DefaultTask {
     def needsCredentials = true
+    def JenkinsServiceFactory serviceFactory = new JenkinsRESTServiceFactory()
 
     AbstractJenkinsTask() {
         super()
@@ -77,7 +81,7 @@ abstract class AbstractJenkinsTask extends DefaultTask {
 
     def void eachServer(JenkinsConfigurable item, Closure closure) {
         getServerDefinitions(item).each { server ->
-            def service = server.secure ? new JenkinsRESTServiceImpl(server.url, server.username, server.password) : new JenkinsRESTServiceImpl(server.url)
+            def service = server.secure ? serviceFactory.getService(server.url, server.username, server.password) : serviceFactory.getService(server.url)
             closure.call(server, service)
         }
     }

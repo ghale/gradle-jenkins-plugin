@@ -1,22 +1,17 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
+import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceFactory
 import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateJenkinsJobsTask
-import groovy.mock.interceptor.MockFor
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Before
-import org.junit.Test
+import nebula.test.ProjectSpec
+import org.junit.Ignore
 
-class UpdateJenkinsJobsTaskTest {
-    def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
-    def private final JenkinsPlugin plugin = new JenkinsPlugin()
-    def MockFor mockJenkinsRESTService
+class UpdateJenkinsJobsTaskTest extends ProjectSpec {
+    def mockJenkinsRESTService
 
-    @Before
-    def void setupProject() {
-        plugin.apply(project)
+    def void setup() {
+        project.apply plugin: 'jenkins'
 
         project.ext.branches = [
                 master  : [ parents: [ ] ],
@@ -39,7 +34,24 @@ class UpdateJenkinsJobsTaskTest {
             }
             templates {
                 compile {
-                    xml "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+                    xml """
+                            <project>
+                                <actions></actions>
+                                <description></description>
+                                <keepDependencies>false</keepDependencies>
+                                <properties></properties>
+                                <scm class='hudson.scm.NullSCM'></scm>
+                                <canRoam>true</canRoam>
+                                <disabled>false</disabled>
+                                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                                <triggers class='vector'></triggers>
+                                <concurrentBuild>false</concurrentBuild>
+                                <builders></builders>
+                                <publishers></publishers>
+                                <buildWrappers></buildWrappers>
+                                </project>
+                    """
                 }
             }
             jobs {
@@ -62,61 +74,118 @@ class UpdateJenkinsJobsTaskTest {
             }
         }
 
-        mockJenkinsRESTService = new MockFor(JenkinsRESTServiceImpl.class)
+        mockJenkinsRESTService = Mock(JenkinsRESTServiceImpl)
     }
 
-    @Test
-    def void execute_updatesOneJob() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                "<project><actions></actions><description>difference</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
+    @Ignore
+    def injectFactory(UpdateJenkinsJobsTask task) {
+        task.serviceFactory = new JenkinsServiceFactory() {
+            @Override
+            JenkinsService getService(String url) {
+                return mockJenkinsRESTService
             }
 
-            updateConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
+            @Override
+            JenkinsService getService(String url, String username, String password) {
+                return mockJenkinsRESTService
             }
-
         }
+    }
 
+    def "execute updates one job" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
         project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
         }
+        injectFactory(project.tasks.updateOneJob)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
+        when:
+        project.tasks.updateOneJob.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+
+            1 * getConfiguration(jobName,_) >> {
+                """
+                    <project>
+                        <actions></actions>
+                        <description>difference</description>
+                        <keepDependencies>false</keepDependencies>
+                        <properties></properties>
+                        <scm class='hudson.scm.NullSCM'></scm>
+                        <canRoam>true</canRoam>
+                        <disabled>false</disabled>
+                        <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                        <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                        <triggers class='vector'></triggers>
+                        <concurrentBuild>false</concurrentBuild>
+                        <builders></builders>
+                        <publishers></publishers>
+                        <buildWrappers></buildWrappers>
+                    </project>
+                """
+            }
+
+            1 * updateConfiguration(jobName,_,_)
         }
     }
 
-    @Test
-    def void execute_skipsJobUpdateOnNoChange() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
-            }
-
-            updateConfiguration(0) { String jobName, String configXML, Map overrides -> }
-
-        }
-
+    def "execute skips job update when there are no changes" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
         project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
         }
+        injectFactory(project.tasks.updateOneJob)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
+        when:
+        project.tasks.updateOneJob.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+            0 * updateConfiguration(*_)
+            1 * getConfiguration(jobName, _) >> {
+                """
+                    <project>
+                        <actions></actions>
+                        <description></description>
+                        <keepDependencies>false</keepDependencies>
+                        <properties></properties>
+                        <scm class='hudson.scm.NullSCM'></scm>
+                        <canRoam>true</canRoam>
+                        <disabled>false</disabled>
+                        <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                        <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                        <triggers class='vector'></triggers>
+                        <concurrentBuild>false</concurrentBuild>
+                        <builders></builders>
+                        <publishers></publishers>
+                        <buildWrappers></buildWrappers>
+                    </project>
+                """
+            }
         }
     }
 
-    @Test
-    def void execute_skipsViewUpdateOnNoChange() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String viewName, String configXML -> }
+    def "execute skips view update when there are no changes" () {
+        setup:
+        def viewName = project.jenkins.views."test view".name
+        project.task('updateOneView', type: UpdateJenkinsJobsTask) {
+            update(project.jenkins.views."test view")
+        }
+        injectFactory(project.tasks.updateOneView)
 
-            getConfiguration() { String viewName, Map overrides ->
+        when:
+        project.tasks.updateOneView.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+            0 * updateConfiguration(*_)
+            1 * getConfiguration(viewName, _) >> {
                 """
                     <hudson.model.ListView>
                       <filterExecutors>false</filterExecutors>
@@ -130,243 +199,321 @@ class UpdateJenkinsJobsTaskTest {
                     </hudson.model.ListView>
                 """
             }
-
-            updateConfiguration(0) { String viewName, String configXML, Map overrides -> }
-
         }
 
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
-            update(project.jenkins.views."test view")
-        }
-
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
-        }
     }
 
-    @Test
-    def void execute_updatesOnForceUpdateString() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
-            }
-
-            updateConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
-            }
-
-        }
-
+    def "execute updates on forceUpdate with String" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
         project.ext.forceJenkinsJobsUpdate = 'true'
         project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
         }
+        injectFactory(project.tasks.updateOneJob)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
+        when:
+        project.tasks.updateOneJob.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+            1 * updateConfiguration(jobName,_,_)
+            1 * getConfiguration(jobName, _) >> {
+                """
+                    <project>
+                        <actions></actions>
+                        <description></description>
+                        <keepDependencies>false</keepDependencies>
+                        <properties></properties>
+                        <scm class='hudson.scm.NullSCM'></scm>
+                        <canRoam>true</canRoam>
+                        <disabled>false</disabled>
+                        <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                        <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                        <triggers class='vector'></triggers>
+                        <concurrentBuild>false</concurrentBuild>
+                        <builders></builders>
+                        <publishers></publishers>
+                        <buildWrappers></buildWrappers>
+                    </project>
+                """
+            }
         }
     }
 
-    @Test
-    def void execute_updatesOnForceUpdateBoolean() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                "<project><actions></actions><description></description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
-            }
-
-            updateConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
-            }
-
-        }
-
+    def "execute updates on forceUpdate with Boolean" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
         project.ext.forceJenkinsJobsUpdate = true
         project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
         }
+        injectFactory(project.tasks.updateOneJob)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
+        when:
+        project.tasks.updateOneJob.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+            1 * updateConfiguration(jobName,_,_)
+            1 * getConfiguration(jobName, _) >> {
+                """
+                    <project>
+                        <actions></actions>
+                        <description></description>
+                        <keepDependencies>false</keepDependencies>
+                        <properties></properties>
+                        <scm class='hudson.scm.NullSCM'></scm>
+                        <canRoam>true</canRoam>
+                        <disabled>false</disabled>
+                        <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                        <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                        <triggers class='vector'></triggers>
+                        <concurrentBuild>false</concurrentBuild>
+                        <builders></builders>
+                        <publishers></publishers>
+                        <buildWrappers></buildWrappers>
+                    </project>
+                """
+            }
         }
     }
 
-    @Test
-    def void execute_callsCreateOnMissingJob() {
-        mockJenkinsRESTService.demand.with {
-            updateConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                return null
-            }
-
-            createConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
-            }
-
-        }
-
+    def "execute calls create on missing job" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
         project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
         }
+        injectFactory(project.tasks.updateOneJob)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
+        when:
+        project.tasks.updateOneJob.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * updateConfiguration(*_)
+            1 * createConfiguration(jobName,_,_)
+            1 * getConfiguration(jobName, _)
         }
     }
 
-    @Test
-    def void execute_callsCreateOnMissingView() {
-        mockJenkinsRESTService.demand.with {
-            updateConfiguration(0) { String viewName, String configXML -> }
-
-            getConfiguration() { String viewName, Map overrides ->
-                return null
-            }
-
-            createConfiguration() { String viewName, String configXML, Map overrides ->
-                assert viewName == project.jenkins.views."test view".name
-                assert overrides.params.name == "test view"
-            }
-
-        }
-
+    def "execute calls create on missing view" () {
+        setup:
+        def viewName = project.jenkins.views."test view".name
         project.task('updateOneView', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.views."test view")
         }
+        injectFactory(project.tasks.updateOneView)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneView.execute()
+        when:
+        project.tasks.updateOneView.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * updateConfiguration(*_)
+            1 * createConfiguration(viewName, _, { it.params.name == viewName})
+            1 * getConfiguration(viewName, _)
         }
     }
 
-    @Test
-    def void execute_callsCreateOnMissingJobWithOverrides() {
-        mockJenkinsRESTService.demand.with {
-            updateConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                return null
-            }
-
-            createConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
-                assert overrides.uri == "testUri"
-            }
-
-        }
-
+    def "execute calls create on missing job with overrides" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
         project.jenkins.jobs.compile_master {
             serviceOverrides {
                 create = [ uri: "testUri" ]
             }
         }
-
         project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
         }
+        injectFactory(project.tasks.updateOneJob)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
+        when:
+        project.tasks.updateOneJob.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * updateConfiguration(*_)
+            1 * createConfiguration(jobName, _, { it.uri == "testUri" })
+            1 * getConfiguration(jobName, _)
         }
     }
 
-    @Test
-    def void execute_updatesMultipleJobs() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                "<project><actions></actions><description>difference</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
-            }
-
-            updateConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
-            }
-
-            getConfiguration() { String jobName, Map Overrides ->
-                "<project><actions></actions><description>difference</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
-            }
-
-            updateConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_releaseX.definition.name
+    def "execute calls update with overrides" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
+        project.jenkins.jobs.compile_master {
+            serviceOverrides {
+                update = [ uri: "testUri", params: [ name: "test" ] ]
+                get = [ uri: "anotherUri" ]
             }
         }
+        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
+            update(project.jenkins.jobs.compile_master)
+        }
+        injectFactory(project.tasks.updateOneJob)
 
+        when:
+        project.tasks.updateOneJob.execute()
 
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+            1 * updateConfiguration(jobName, _, { it.uri == "testUri" && it.params.name == "test" })
+            1 * getConfiguration(jobName, { it.uri == "anotherUri" }) >> {
+                """
+                    <project>
+                        <actions></actions>
+                        <description>difference</description>
+                        <keepDependencies>false</keepDependencies>
+                        <properties></properties>
+                        <scm class='hudson.scm.NullSCM'></scm>
+                        <canRoam>true</canRoam>
+                        <disabled>false</disabled>
+                        <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                        <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                        <triggers class='vector'></triggers>
+                        <concurrentBuild>false</concurrentBuild>
+                        <builders></builders>
+                        <publishers></publishers>
+                        <buildWrappers></buildWrappers>
+                    </project>
+                """
+            }
+        }
+    }
+
+    def "execute updates multiple jobs" () {
+        setup:
+        def jobName1 = project.jenkins.jobs.compile_master.definition.name
+        def jobName2 = project.jenkins.jobs.compile_releaseX.definition.name
+        def differenceXml = """
+            <project>
+                <actions></actions>
+                <description>difference</description>
+                <keepDependencies>false</keepDependencies>
+                <properties></properties>
+                <scm class='hudson.scm.NullSCM'></scm>
+                <canRoam>true</canRoam>
+                <disabled>false</disabled>
+                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers class='vector'></triggers>
+                <concurrentBuild>false</concurrentBuild>
+                <builders></builders>
+                <publishers></publishers>
+                <buildWrappers></buildWrappers>
+            </project>
+        """
         project.task('updateMultipleJobs', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
             update(project.jenkins.jobs.compile_releaseX)
         }
+        injectFactory(project.tasks.updateMultipleJobs)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateMultipleJobs.execute()
+        when:
+        project.tasks.updateMultipleJobs.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+
+            1 * getConfiguration(jobName1,_) >> { String jobName, Map overrides ->
+                differenceXml
+            }
+
+            1 * updateConfiguration(jobName1,_,_)
+
+            1 * getConfiguration(jobName2,_) >> { String jobName, Map overrides ->
+                differenceXml
+            }
+
+            1 * updateConfiguration(jobName2,_,_)
         }
     }
 
-    @Test
-    def void execute_updatesJobWithDefaultOverridesForUpdate() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                assert overrides.uri == "/job/test compile (master)/config.xml"
-                "<project><actions></actions><description>difference</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
-            }
-
-            updateConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
-                assert overrides.uri == "/job/test compile (master)/config.xml"
-            }
-
-        }
+    def "execute updates job with default URI overrides" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
 
         project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
         }
+        injectFactory(project.tasks.updateOneJob)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
+        when:
+        project.tasks.updateOneJob.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+
+            1 * getConfiguration(jobName, { it.uri == "/job/${jobName}/config.xml" }) >> {
+                """
+                    <project>
+                        <actions></actions>
+                        <description>difference</description>
+                        <keepDependencies>false</keepDependencies>
+                        <properties></properties>
+                        <scm class='hudson.scm.NullSCM'></scm>
+                        <canRoam>true</canRoam>
+                        <disabled>false</disabled>
+                        <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+                        <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                        <triggers class='vector'></triggers>
+                        <concurrentBuild>false</concurrentBuild>
+                        <builders></builders>
+                        <publishers></publishers>
+                        <buildWrappers></buildWrappers>
+                    </project>
+                """
+            }
+
+            1 * updateConfiguration(jobName, _, { it.uri == "/job/${jobName}/config.xml" })
         }
     }
 
-    @Test
-    def void execute_updatesJobWithDefaultOverridesForCreate() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                assert overrides.uri == "/job/test compile (master)/config.xml"
-                return null
-            }
-
-            createConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
-                assert overrides.uri == "/createItem"
-                assert overrides.params.name == "test compile (master)"
-            }
-
-        }
-
+    def "execute creates job with default URI overrides" () {
+        setup:
+        def jobName = project.jenkins.jobs.compile_master.definition.name
         project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.jobs.compile_master)
         }
+        injectFactory(project.tasks.updateOneJob)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
+        when:
+        project.tasks.updateOneJob.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * updateConfiguration(* _)
+
+            1 * getConfiguration(jobName, { it.uri == "/job/${jobName}/config.xml" })
+
+            1 * createConfiguration(jobName, _, { it.uri == "/createItem" && it.params.name == jobName })
         }
     }
 
-    @Test
-    def void execute_updatesViewWithDefaultOverridesForUpdate() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String viewName, String configXML -> }
+    def "execute updates view with default URI overrides" () {
+        setup:
+        def viewName = project.jenkins.views."test view".name
+        project.task('updateOneView', type: UpdateJenkinsJobsTask) {
+            update(project.jenkins.views."test view")
+        }
+        injectFactory(project.tasks.updateOneView)
 
-            getConfiguration() { String viewName, Map overrides ->
-                assert overrides.uri == "/view/test view/config.xml"
+        when:
+        project.tasks.updateOneView.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * createConfiguration(*_)
+
+            1 * getConfiguration(viewName, { it.uri == "/view/${viewName}/config.xml" }) >> {
                 """
                     <hudson.model.ListView>
                       <filterExecutors>true</filterExecutors>
@@ -381,82 +528,28 @@ class UpdateJenkinsJobsTaskTest {
                 """
             }
 
-            updateConfiguration() { String viewName, String configXML, Map overrides ->
-                assert viewName == project.jenkins.views."test view".name
-                assert overrides.uri == "/view/test view/config.xml"
-            }
-
+            1 * updateConfiguration(viewName, _, { it.uri == "/view/${viewName}/config.xml" })
         }
+    }
 
+    def "execute creates view with default URI overrides" () {
+        setup:
+        def viewName = project.jenkins.views."test view".name
         project.task('updateOneView', type: UpdateJenkinsJobsTask) {
             update(project.jenkins.views."test view")
         }
+        injectFactory(project.tasks.updateOneView)
 
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneView.execute()
+        when:
+        project.tasks.updateOneView.execute()
+
+        then:
+        with(mockJenkinsRESTService) {
+            0 * updateConfiguration(* _)
+
+            1 * getConfiguration(viewName, { it.uri == "/view/${viewName}/config.xml" })
+
+            1 * createConfiguration(viewName, _, { it.uri == "/createView" && it.params.name == viewName })
         }
     }
-
-    @Test
-    def void execute_updatesViewWithDefaultOverridesForCreate() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String viewName, String configXML -> }
-
-            getConfiguration() { String viewName, Map overrides ->
-                assert overrides.uri == "/view/test view/config.xml"
-                return null
-            }
-
-            createConfiguration() { String viewName, String configXML, Map overrides ->
-                assert viewName == project.jenkins.views."test view".name
-                assert overrides.uri == "/createView"
-                assert overrides.params.name == "test view"
-            }
-
-        }
-
-        project.task('updateOneView', type: UpdateJenkinsJobsTask) {
-            update(project.jenkins.views."test view")
-        }
-
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneView.execute()
-        }
-    }
-
-
-    @Test
-    def void execute_updatesWithOverride() {
-        mockJenkinsRESTService.demand.with {
-            createConfiguration(0) { String jobName, String configXML -> }
-
-            getConfiguration() { String jobName, Map overrides ->
-                assert overrides.uri == "anotherUri"
-                "<project><actions></actions><description>difference</description><keepDependencies>false</keepDependencies><properties></properties><scm class='hudson.scm.NullSCM'></scm><canRoam>true</canRoam><disabled>false</disabled><blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding><blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding><triggers class='vector'></triggers><concurrentBuild>false</concurrentBuild><builders></builders><publishers></publishers><buildWrappers></buildWrappers></project>"
-            }
-
-            updateConfiguration() { String jobName, String configXML, Map overrides ->
-                assert jobName == project.jenkins.jobs.compile_master.definition.name
-                assert overrides.uri == "testUri"
-                assert overrides.params.name == "test"
-            }
-
-        }
-
-        project.jenkins.jobs.compile_master {
-            serviceOverrides {
-                update = [ uri: "testUri", params: [ name: "test" ] ]
-                get = [ uri: "anotherUri" ]
-            }
-        }
-
-        project.task('updateOneJob', type: UpdateJenkinsJobsTask) {
-            update(project.jenkins.jobs.compile_master)
-        }
-
-        mockJenkinsRESTService.use {
-            project.tasks.updateOneJob.execute()
-        }
-    }
-
 }
