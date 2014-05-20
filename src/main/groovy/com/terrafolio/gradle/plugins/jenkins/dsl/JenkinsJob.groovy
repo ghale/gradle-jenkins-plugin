@@ -9,10 +9,10 @@ class JenkinsJob extends JenkinsConfigurable {
     protected JobManagement jm
 
     def defaultOverrides = {
-        create([ uri: "/createItem", params: [ name: definition.name ] ])
-           get([ uri: "/job/${definition.name}/config.xml" ])
-        update([ uri: "/job/${definition.name}/config.xml" ])
-        delete([ uri: "/job/${definition.name}/doDelete" ])
+        create([ uri: "createItem", params: [ name: definition.name ] ])
+           get([ uri: "job/${definition.name}/config.xml" ])
+        update([ uri: "job/${definition.name}/config.xml" ])
+        delete([ uri: "job/${definition.name}/doDelete" ])
     }
 
     JenkinsJob(String name, JobManagement jm) {

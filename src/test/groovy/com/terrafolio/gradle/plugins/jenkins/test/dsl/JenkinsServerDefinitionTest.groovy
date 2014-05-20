@@ -91,6 +91,17 @@ class JenkinsServerDefinitionTest {
         }
     }
 
+    @Test
+    void configure_convertsAllUrlsToEndWithSlash() {
+        project.jenkins.servers {
+            test3 { url 'test3/'}
+        }
+
+        project.jenkins.servers.each { server ->
+            assert server.url.endsWith("/")
+        }
+    }
+
     @Test(expected = JenkinsConfigurationException)
     def void execute_throwsExceptionOnMissingServer() {
         project.jenkins.jobs.each { job ->

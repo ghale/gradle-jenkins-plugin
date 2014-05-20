@@ -358,7 +358,7 @@ class UpdateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
         with(mockJenkinsRESTService) {
             0 * createConfiguration(*_)
 
-            1 * getConfiguration(jobName, { it.uri == "/job/${jobName}/config.xml" }) >> {
+            1 * getConfiguration(jobName, { it.uri == "job/${jobName}/config.xml" }) >> {
                 """
                     <project>
                         <actions></actions>
@@ -379,7 +379,7 @@ class UpdateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
                 """
             }
 
-            1 * updateConfiguration(jobName, _, { it.uri == "/job/${jobName}/config.xml" })
+            1 * updateConfiguration(jobName, _, { it.uri == "job/${jobName}/config.xml" })
         }
     }
 
@@ -397,9 +397,9 @@ class UpdateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
         with(mockJenkinsRESTService) {
             0 * updateConfiguration(* _)
 
-            1 * getConfiguration(jobName, { it.uri == "/job/${jobName}/config.xml" })
+            1 * getConfiguration(jobName, { it.uri == "job/${jobName}/config.xml" })
 
-            1 * createConfiguration(jobName, _, { it.uri == "/createItem" && it.params.name == jobName })
+            1 * createConfiguration(jobName, _, { it.uri == "createItem" && it.params.name == jobName })
         }
     }
 
@@ -417,7 +417,7 @@ class UpdateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
         with(mockJenkinsRESTService) {
             0 * createConfiguration(*_)
 
-            1 * getConfiguration(viewName, { it.uri == "/view/${viewName}/config.xml" }) >> {
+            1 * getConfiguration(viewName, { it.uri == "view/${viewName}/config.xml" }) >> {
                 """
                     <hudson.model.ListView>
                       <filterExecutors>true</filterExecutors>
@@ -432,7 +432,7 @@ class UpdateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
                 """
             }
 
-            1 * updateConfiguration(viewName, _, { it.uri == "/view/${viewName}/config.xml" })
+            1 * updateConfiguration(viewName, _, { it.uri == "view/${viewName}/config.xml" })
         }
     }
 
@@ -450,9 +450,9 @@ class UpdateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
         with(mockJenkinsRESTService) {
             0 * updateConfiguration(* _)
 
-            1 * getConfiguration(viewName, { it.uri == "/view/${viewName}/config.xml" })
+            1 * getConfiguration(viewName, { it.uri == "view/${viewName}/config.xml" })
 
-            1 * createConfiguration(viewName, _, { it.uri == "/createView" && it.params.name == viewName })
+            1 * createConfiguration(viewName, _, { it.uri == "createView" && it.params.name == viewName })
         }
     }
 

@@ -16,8 +16,16 @@ class JenkinsServerDefinition {
         this.name = name
     }
 
+    def void setUrl(String url) {
+        if (url.endsWith("/")) {
+            this.url = url
+        } else {
+            this.url = "${url}/"
+        }
+    }
+
     def url(String url) {
-        this.url = url
+        setUrl(url)
     }
 
     def username(String username) {

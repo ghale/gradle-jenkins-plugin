@@ -15,10 +15,10 @@ class JenkinsView extends JenkinsConfigurable {
     protected JobManagement jm
 
     def defaultOverrides = {
-        create([ uri: "/createView", params: [ name: name ] ])
-           get([ uri: "/view/${name}/config.xml" ])
-        update([ uri: "/view/${name}/config.xml" ])
-        delete([ uri: "/view/${name}/doDelete" ])
+        create([ uri: "createView", params: [ name: name ] ])
+           get([ uri: "view/${name}/config.xml" ])
+        update([ uri: "view/${name}/config.xml" ])
+        delete([ uri: "view/${name}/doDelete" ])
     }
 
     private static final Map<ViewType, Class<? extends View>> VIEW_TYPE_MAPPING = [

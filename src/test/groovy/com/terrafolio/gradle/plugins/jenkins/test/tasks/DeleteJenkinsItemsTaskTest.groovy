@@ -292,7 +292,7 @@ class DeleteJenkinsItemsTaskTest {
                 if (!project.jenkins.jobs.collect { it.definition.name }.contains(jobName)) {
                     throw new Exception('deleteConfiguration received: ' + jobName + ' but there\'s no job definition with that name!')
                 }
-                assert overrides.uri == "/job/test compile (master)/doDelete"
+                assert overrides.uri == "job/test compile (master)/doDelete"
             }
         }
 
@@ -313,7 +313,7 @@ class DeleteJenkinsItemsTaskTest {
                 if (!project.jenkins.views.collect { it.name }.contains(viewName)) {
                     throw new Exception('deleteConfiguration received: ' + viewName + ' but there\'s no view definition with that name!')
                 }
-                assert overrides.uri == "/view/test view/doDelete"
+                assert overrides.uri == "view/test view/doDelete"
             }
         }
 
