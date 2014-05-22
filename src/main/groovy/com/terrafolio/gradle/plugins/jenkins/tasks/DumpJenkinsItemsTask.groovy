@@ -14,7 +14,7 @@ class DumpJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
 
     @Override
     public void writeXmlConfigurations(JenkinsConfigurable item, BuildDirService buildDirService, String itemType) {
-        getServerDefinitions(item).each { server ->
+        eachServer(item) { server, service ->
             def file = new File(buildDirService.makeAndGetDir("${server.name}/${itemType}"), "${item.name}.xml")
             if (prettyPrint) {
                 file.withWriter { fileWriter ->
