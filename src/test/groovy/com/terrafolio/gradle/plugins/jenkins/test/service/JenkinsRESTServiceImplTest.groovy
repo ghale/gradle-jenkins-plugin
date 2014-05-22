@@ -4,310 +4,188 @@ import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException
 import com.terrafolio.gradle.plugins.jenkins.service.PreemptiveAuthInterceptor
 import groovy.mock.interceptor.MockFor
+import groovyx.net.http.ContentEncoding
 import groovyx.net.http.HttpResponseDecorator
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
+import org.apache.http.HttpRequestInterceptor
 import org.apache.http.HttpResponse
 import org.apache.http.HttpVersion
+import org.apache.http.client.HttpClient
+import org.apache.http.impl.client.AbstractHttpClient
 import org.apache.http.message.BasicHttpResponse
 import org.apache.http.message.BasicStatusLine
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
+import spock.lang.Specification
 
-class JenkinsRESTServiceImplTest {
-    private MockFor mockRESTClient
+class JenkinsRESTServiceImplTest extends Specification {
+    def RESTClient mockRESTClient
+    def JenkinsRESTServiceImpl service
     def url = "http://testurl.availity.com"
     def username = "testuser"
     def password = "testpassword"
 
-    @Before
-    def void setupProject() {
-        mockRESTClient = new MockFor(RESTClient.class)
+    def setup() {
+        mockRESTClient = Mock(RESTClient)
+        service = new JenkinsRESTServiceImpl(url, username, password)
+        service.client = mockRESTClient
     }
 
-    @Test
-    def void getConfiguration_returnsXmlString() {
-        mockRESTClient.demand.with {
-            get() { Map<String, ?> map ->
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
+    def "getConfiguration returns xml string" () {
+        setup:
+        def xml = "<test1><test2>srv value</test2></test1>"
+        1 * mockRESTClient.get(_) >> { Map map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText(xml))
+            return response
         }
 
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            def xml = service.getConfiguration("compile", [:])
-            assert xml == "<test1><test2>srv value</test2></test1>"
-        }
+        expect:
+        service.getConfiguration("compile", [:]) == xml
     }
 
-    @Test
-    def void getConfiguration_returnsNullOnNotFound() {
-        mockRESTClient.demand.with {
-            get() { Map<String, ?> map ->
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 404, "Not Found"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
-                throw new HttpResponseException(response)
-            }
+    def "getConfiguration returns null on not found" () {
+        setup:
+        1 * mockRESTClient.get(_) >> { Map map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 404, "Not Found"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+            throw new HttpResponseException(response)
         }
 
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            def xml = service.getConfiguration("compile", [:])
-            assert xml == null
-        }
+        expect:
+        service.getConfiguration("compile", [:]) == null
     }
 
-    @Test(expected = JenkinsServiceException.class)
-    def void getConfiguration_throwsExceptionOnFailure() {
-        mockRESTClient.demand.with {
-            get() { Map<String, ?> map ->
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 500, "Error"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
-        }
+    def "getConfiguration throws exception on failure" () {
+        when:
+        service.getConfiguration("compile", [:])
 
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            def xml = service.getConfiguration("compile", [:])
+        then:
+        1 * mockRESTClient.get(_) >> { Map map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 500, "Error"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+            return response
         }
+        thrown(JenkinsServiceException)
     }
 
-    @Test
-    def void createConfiguration_postsConfigXml() {
-        def postMap
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                postMap = map
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
-        }
+    def "createConfiguration posts correct information" () {
+        setup:
+        def xml = "<test1><test2>srv value</test2></test1>"
 
-        mockRESTClient.ignore('getClient')
+        when:
+        service.createConfiguration("compile", xml, [uri: "/createItem", params: [name: "compile"]])
 
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.createConfiguration("compile", "<test1><test2>srv value</test2></test1>", [uri: "/createItem", params: [name: "compile"]])
-            assert postMap.body == "<test1><test2>srv value</test2></test1>"
-            assert postMap.query.name == "compile"
-            assert postMap.path == "/createItem"
+        then:
+        1 * mockRESTClient.post({
+            it.body == xml &&
+            it.query.name == "compile" &&
+            it.path == "/createItem"
+        }) >> { Map<String, ?> map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+            return response
         }
     }
 
-    @Test(expected = JenkinsServiceException.class)
-    def void createConfiguration_throwsExceptionOnFailure() {
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 500, "Error"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
-                return response
-            }
+    def "createConfiguration throws exception on failure" () {
+        when:
+        service.createConfiguration("compile", "<test1><test2>srv value</test2></test1>", [:])
+
+        then:
+        1 * mockRESTClient.post(_) >> { Map map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 500, "Error"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+            return response
         }
+        thrown(JenkinsServiceException)
+    }
 
-        mockRESTClient.ignore('getClient')
+    def "updateConfiguration posts correct information" () {
+        setup:
+        def xml = "<test1><test2>srv value</test2></test1>"
 
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.createConfiguration("compile", "<test1><test2>srv value</test2></test1>", [:])
+        when:
+        service.updateConfiguration("compile", xml, [uri: "/job/compile/config.xml"])
+
+        then:
+        1 * mockRESTClient.post({
+            it.body == xml &&
+                    it.path == "/job/compile/config.xml"
+        }) >> { Map<String, ?> map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+            return response
         }
     }
 
-    @Test
-    def void updateConfiguration_postsConfigXml() {
-        def postMap
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                postMap = map
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
+    def "updateConfiguration throws exception on failure" () {
+        when:
+        service.updateConfiguration("compile", "<test1><test2>srv value</test2></test1>", [:])
+
+        then:
+        1 * mockRESTClient.post(_) >> { Map map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 500, "Error"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+            return response
         }
+        thrown(JenkinsServiceException)
+    }
 
-        mockRESTClient.ignore('getClient')
+    def "deleteConfiguration posts correct information" () {
+        when:
+        service.deleteConfiguration("compile", [uri: "/job/compile/doDelete"])
 
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.updateConfiguration("compile", "<test1><test2>srv value</test2></test1>", [uri: "/job/compile/config.xml"])
-            assert postMap.body == "<test1><test2>srv value</test2></test1>"
-            assert postMap.path == "/job/compile/config.xml"
+        then:
+        1 * mockRESTClient.post({
+            it.path == "/job/compile/doDelete"
+        }) >> { Map<String, ?> map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+            return response
         }
     }
 
-    @Test(expected = JenkinsServiceException.class)
-    def void updateConfiguration_throwsExceptionOnFailure() {
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 500, "Error"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
-                return response
-            }
-        }
+    def "deleteConfiguration throws exception on failure" () {
+        when:
+        service.deleteConfiguration("compile", [:])
 
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.updateConfiguration("compile", "<test1><test2>srv value</test2></test1>", [:])
+        then:
+        1 * mockRESTClient.post(_) >> { Map map ->
+            HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 500, "Error"))
+            HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
+            return response
         }
+        thrown(JenkinsServiceException)
     }
 
-    @Test
-    def void deleteConfiguration_postsToUrl() {
-        def postMap
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                postMap = map
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
+    @Ignore
+    def HttpRequestInterceptor getInterceptorbyType(AbstractHttpClient client, Class theclass) {
+        for (int i = 0; i < client.getRequestInterceptorCount(); i++) {
+            if (client.getRequestInterceptor(i).class == theclass) {
+                return client.getRequestInterceptor(i)
             }
         }
-
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.deleteConfiguration("compile", [uri: "/job/compile/doDelete"])
-            assert postMap.path == "/job/compile/doDelete"
-        }
+        return null
     }
 
-    @Test(expected = JenkinsServiceException.class)
-    def void deleteConfiguration_throwsExceptionOnFailure() {
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 500, "Error"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, null)
-                return response
-            }
-        }
+    def "getRestClient adds interceptor for secure server" () {
+        setup:
+        def service = new JenkinsRESTServiceImpl(url, username, password)
 
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.deleteConfiguration("compile", [:])
-        }
+        expect:
+        getInterceptorbyType(service.getRestClient().client, PreemptiveAuthInterceptor) != null
+        getInterceptorbyType(service.getRestClient().client, PreemptiveAuthInterceptor).username == username
+        getInterceptorbyType(service.getRestClient().client, PreemptiveAuthInterceptor).password == password
     }
 
-    @Test
-    def void getConfiguration_doesNotAddInterceptorForInSecureServer() {
-        mockRESTClient.demand.with {
-            get() { Map<String, ?> map ->
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
-        }
+    def "getRestClient does not add interceptor for insecure server" () {
+        setup:
+        def service = new JenkinsRESTServiceImpl(url)
 
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url)
-            def xml = service.getConfiguration("compile", [:])
-            assert xml == "<test1><test2>srv value</test2></test1>"
-            for (int i = 0; i < service.client.client.getRequestInterceptorCount(); i++) {
-                assert !(service.client.client.getRequestInterceptor(i) instanceof PreemptiveAuthInterceptor)
-            }
-        }
-    }
-
-    @Test
-    def void createConfiguration_postsToCustomUrl() {
-        def postMap
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                postMap = map
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
-        }
-
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.createConfiguration("compile", "<test1><test2>srv value</test2></test1>", [ uri: "/custom/createItem", params: [ name: "mycompile" ] ])
-            assert postMap.path == "/custom/createItem"
-            assert postMap.query.name == "mycompile"
-        }
-    }
-
-    @Test
-    def void deleteConfiguration_postsToCustomUrl() {
-        def postMap
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                postMap = map
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
-        }
-
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.deleteConfiguration("compile", [ uri: "/custom/doDelete", params: [ name: "mycompile" ] ])
-            assert postMap.path == "/custom/doDelete"
-            assert postMap.query.name == "mycompile"
-        }
-    }
-
-    @Test
-    def void updateConfiguration_postsToCustomUrl() {
-        def postMap
-        mockRESTClient.demand.with {
-            post() { Map<String, ?> map ->
-                postMap = map
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
-        }
-
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.updateConfiguration("compile", "<test1><test2>srv value</test2></test1>", [ uri: "/custom/job/compile", params: [ name: "mycompile" ] ])
-            assert postMap.path == "/custom/job/compile"
-            assert postMap.query.name == "mycompile"
-        }
-    }
-
-    @Test
-    def void getConfiguration_getsFromCustomUrl() {
-        def getMap
-        mockRESTClient.demand.with {
-            get() { Map<String, ?> map ->
-                getMap = map
-                HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 200, "OK"))
-                HttpResponseDecorator response = new HttpResponseDecorator(baseResponse, new XmlSlurper().parseText("<test1><test2>srv value</test2></test1>"))
-                return response
-            }
-        }
-
-        mockRESTClient.ignore('getClient')
-
-        mockRESTClient.use {
-            def JenkinsRESTServiceImpl service = new JenkinsRESTServiceImpl(url, username, password)
-            service.getConfiguration("compile", [ uri: "/custom/job/compile", params: [ name: "mycompile" ] ])
-            assert getMap.path == "/custom/job/compile"
-            assert getMap.query.name == "mycompile"
-        }
+        expect:
+        getInterceptorbyType(service.getRestClient().client, PreemptiveAuthInterceptor) == null
     }
 }

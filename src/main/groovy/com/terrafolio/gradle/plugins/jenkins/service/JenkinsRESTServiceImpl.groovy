@@ -7,7 +7,7 @@ import groovyx.net.http.RESTClient
 import static groovyx.net.http.ContentType.XML
 
 class JenkinsRESTServiceImpl implements JenkinsService {
-    private RESTClient client
+    def RESTClient client
     def url
     def username
     def password
@@ -46,7 +46,6 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 
     def restServicePOST(path, query, payload) {
         def client = getRestClient()
-        def lastException
 
         def response = client.post(path: path, query: query, requestContentType: XML, body: payload)
 
