@@ -1,22 +1,14 @@
 package com.terrafolio.gradle.plugins.jenkins.test.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Before
-import org.junit.Test
+import nebula.test.ProjectSpec
 
-class JenkinsJobDefinitionTest {
-    def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
-    def private final JenkinsPlugin plugin = new JenkinsPlugin()
-
-    @Before
-    def void setupProject() {
-        plugin.apply(project)
+class JenkinsJobDefinitionTest extends ProjectSpec {
+    def setup() {
+        project.apply plugin: 'jenkins'
     }
 
-    @Test
-    def void configure_setsName() {
+    def "configure sets name" () {
+        when:
         project.jenkins {
             jobs {
                 test {
@@ -27,11 +19,12 @@ class JenkinsJobDefinitionTest {
             }
         }
 
-        assert project.jenkins.jobs.findByName('test').definition.name == 'Test Job'
+        then:
+        project.jenkins.jobs.findByName('test').definition.name == 'Test Job'
     }
 
-    @Test
-    def void configure_xmlAsString() {
+    def "configure sets xml as string" () {
+        when:
         project.jenkins {
             jobs {
                 test {
@@ -43,14 +36,16 @@ class JenkinsJobDefinitionTest {
             }
         }
 
-        assert project.jenkins.jobs.findByName('test').definition.xml == '<test><test2>value</test2></test>'
+        then:
+        project.jenkins.jobs.findByName('test').definition.xml == '<test><test2>value</test2></test>'
     }
 
-    @Test
-    def void configure_xmlAsFile() {
+    def "configure sets xml as file" () {
+        setup:
         def xmlFile = project.file('test.xml')
         xmlFile.write('<test><test2>value</test2></test>')
 
+        when:
         project.jenkins {
             jobs {
                 test {
@@ -62,11 +57,12 @@ class JenkinsJobDefinitionTest {
             }
         }
 
-        assert project.jenkins.jobs.findByName('test').definition.xml == '<test><test2>value</test2></test>'
+        then:
+        project.jenkins.jobs.findByName('test').definition.xml == '<test><test2>value</test2></test>'
     }
 
-    @Test
-    def void configure_xmlAsClosure() {
+    def "configure sets xml as closure" () {
+        when:
         project.jenkins {
             jobs {
                 test {
@@ -82,11 +78,12 @@ class JenkinsJobDefinitionTest {
             }
         }
 
-        assert project.jenkins.jobs.findByName('test').definition.xml == '<test1><test2>value</test2></test1>'
+        then:
+        project.jenkins.jobs.findByName('test').definition.xml == '<test1><test2>value</test2></test1>'
     }
 
-    @Test
-    def void configure_overridesXml() {
+    def "configure overrides xml" () {
+        when:
         project.jenkins {
             templates {
                 test {
@@ -105,11 +102,12 @@ class JenkinsJobDefinitionTest {
             }
         }
 
-        assert project.jenkins.jobs.findByName('test').definition.xml == '<test><test2>myvalue</test2></test>'
+        then:
+        project.jenkins.jobs.findByName('test').definition.xml == '<test><test2>myvalue</test2></test>'
     }
 
-    @Test
-    def void configure_defaultsJobDefinitionNameToJobName() {
+    def "configure sets default definition name as job name" () {
+        when:
         project.jenkins {
             templates {
                 test {
@@ -125,7 +123,8 @@ class JenkinsJobDefinitionTest {
             }
         }
 
-        assert project.jenkins.jobs.test2.definition.name == 'test2'
+        then:
+        project.jenkins.jobs.test2.definition.name == 'test2'
     }
 
 }

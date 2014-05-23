@@ -1,30 +1,30 @@
 package com.terrafolio.gradle.plugins.jenkins.test.service
 
 import com.terrafolio.gradle.plugins.jenkins.service.BuildDirService
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Test
+import nebula.test.ProjectSpec
 
 /**
  * Created by ghale on 5/3/14.
  */
-class BuildDirServiceTest {
-    def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
+class BuildDirServiceTest extends ProjectSpec{
+    def BuildDirService service
 
-    @Test
-    def void "makeAndGetDir returns new directory"() {
-        def BuildDirService service = BuildDirService.forProject(project)
-        def File dir = service.makeAndGetDir("newdir")
-        assert dir.exists()
+    def setup() {
+        service = BuildDirService.forProject(project)
     }
 
-    @Test
+    def void "makeAndGetDir returns new directory"() {
+        expect:
+        service.makeAndGetDir("newdir").exists()
+    }
+
     def void "makeAndGetDir returns existing directory"() {
-        def BuildDirService service = BuildDirService.forProject(project)
+        setup:
         File newDir = new File(project.buildDir, "existing")
         newDir.mkdirs()
-        assert newDir.exists()
-        def File dir = service.makeAndGetDir("existing")
-        assert dir.equals(newDir)
+
+        expect:
+        newDir.exists()
+        service.makeAndGetDir("existing").equals(newDir)
     }
 }

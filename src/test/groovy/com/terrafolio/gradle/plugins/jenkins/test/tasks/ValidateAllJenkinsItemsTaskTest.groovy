@@ -1,16 +1,8 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
 import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsTask
 import com.terrafolio.gradle.plugins.jenkins.tasks.JenkinsValidationException
-import com.terrafolio.gradle.plugins.jenkins.tasks.ValidateJenkinsItemsTask
-import groovy.mock.interceptor.MockFor
-import org.gradle.api.Project
 import org.gradle.api.tasks.TaskExecutionException
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Before
-import org.junit.Test
 
 class ValidateAllJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
     @Override

@@ -2,77 +2,88 @@ package com.terrafolio.gradle.plugins.jenkins.test.jobdsl
 
 import com.terrafolio.gradle.plugins.jenkins.jobdsl.MapJobManagement
 import javaposse.jobdsl.dsl.ConfigurationMissingException
+import javaposse.jobdsl.dsl.JobManagement
 import javaposse.jobdsl.dsl.NameNotProvidedException
-import org.junit.Test
+import spock.lang.Specification
 
 /**
  * Created by ghale on 4/13/14.
  */
-class MapJobManagementTest {
-    @Test
-    def void setsNewJob() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
+class MapJobManagementTest extends Specification {
+    def HashMap<String, String> map
+    def JobManagement jm
+
+    def setup() {
+        map = new HashMap<String, String>()
+        jm = new MapJobManagement(map)
+    }
+
+    def "createOrUpdateConfig sets new config" () {
+        when:
         jm.createOrUpdateConfig("test", "<project />", true)
-        assert map.get("test") == "<project />"
+
+        then:
+        map.get("test") == "<project />"
     }
 
-    @Test
-    def void getConfig_returnsJobConfiguration() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
+    def "getConfig returns set config" () {
+        setup:
         jm.createOrUpdateConfig("test", "<project />", true)
-        assert jm.getConfig("test") == "<project />"
+
+        expect:
+        jm.getConfig("test") == "<project />"
     }
 
-    @Test
-    def void setsNewView() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
+    def "createOrUpdateView sets new view config" () {
+        when:
         jm.createOrUpdateView("test", "<view />", true)
-        assert map.get("test") == "<view />"
+
+        then:
+        map.get("test") == "<view />"
     }
 
-    @Test
-    def void getConfig_returnsViewConfiguration() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
+    def "getConfig returns set view config" () {
+        setup:
         jm.createOrUpdateView("test", "<view />", true)
-        assert jm.getConfig("test") == "<view />"
+
+        expect:
+        jm.getConfig("test") == "<view />"
     }
 
-    @Test(expected = NameNotProvidedException)
-    def void throwsExceptionOnNullJobName() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
+    def "createOrUpdateConfig throws exception on empty name" () {
+        when:
         jm.createOrUpdateConfig("", "<project />", true)
+
+        then:
+        thrown(NameNotProvidedException)
     }
 
-    @Test(expected = NameNotProvidedException)
-    def void throwsExceptionOnNullViewName() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
+    def "createOrUpdateView throws exception on empty view name" () {
+        when:
         jm.createOrUpdateView("", "<view />", true)
+
+        then:
+        thrown(NameNotProvidedException)
     }
 
-    @Test(expected = ConfigurationMissingException)
-    def void throwsExceptionOnNullJobConfiguration() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
+    def "createOrUpdateConfig throws exception on empty config" () {
+        when:
         jm.createOrUpdateConfig("test", null, true)
+
+        then:
+        thrown(ConfigurationMissingException)
     }
 
-    @Test(expected = ConfigurationMissingException)
-    def void throwsExceptionOnNullViewConfiguration() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
+    def "createOrUpdateView throws exception on empty view config" () {
+        when:
         jm.createOrUpdateView("test", "", true)
+
+        then:
+        thrown(ConfigurationMissingException)
     }
 
-    @Test
-    def void returnsNullOnMissingConfiguration() {
-        Map map = new HashMap<String, String>()
-        def jm = new MapJobManagement(map)
-        assert jm.getConfig("test") == null
+    def "getConfig returns null for missing configuration" () {
+        expect:
+        jm.getConfig("test") == null
     }
 }

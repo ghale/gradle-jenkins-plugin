@@ -1,14 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
-import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
 import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsTask
 import com.terrafolio.gradle.plugins.jenkins.tasks.DeleteJenkinsItemsTask
-import groovy.mock.interceptor.MockFor
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Before
-import org.junit.Test
 
 class DeleteJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
     @Override

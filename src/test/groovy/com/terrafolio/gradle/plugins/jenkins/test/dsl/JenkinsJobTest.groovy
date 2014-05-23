@@ -1,89 +1,12 @@
 package com.terrafolio.gradle.plugins.jenkins.test.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
-import org.custommonkey.xmlunit.DetailedDiff
+import nebula.test.ProjectSpec
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Before
-import org.junit.Test
 
-class JenkinsJobTest {
-    def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
-    def private final JenkinsPlugin plugin = new JenkinsPlugin()
-
-    @Before
-    def void setupProject() {
-        plugin.apply(project)
-    }
-
-    @Test
-    def void configure_closureAddsToDefinition() {
-        def testXml = '<test>test</test>'
-        project.jenkins {
-            jobs {
-                test {
-                    definition {
-                        xml testXml
-                    }
-                }
-            }
-        }
-        project.jenkins.jobs.test.definition {
-            name "test name"
-        }
-        assert project.jenkins.jobs.test.definition.name == "test name"
-        assert project.jenkins.jobs.test.definition.xml == testXml
-    }
-
-    @Test
-    def void configure_configuresServiceOverrides() {
-        def testXml = '<test>test</test>'
-        project.jenkins {
-            jobs {
-                test {
-                    definition {
-                        xml testXml
-                    }
-                    serviceOverrides {
-                           get([ uri: "getTest",    params: [ test: "testGetParam" ] ])
-                        create([ uri: "createTest", params: [ test: "testCreateParam" ] ])
-                        update([ uri: "updateTest", params: [ test: "testUpdateParam" ] ])
-                        delete([ uri: "deleteTest", params: [ test: "testDeleteParam" ] ])
-                    }
-                }
-            }
-        }
-
-        assert project.jenkins.jobs.test.serviceOverrides.get.uri == "getTest"
-        assert project.jenkins.jobs.test.serviceOverrides.get.params.test == "testGetParam"
-        assert project.jenkins.jobs.test.serviceOverrides.create.uri == "createTest"
-        assert project.jenkins.jobs.test.serviceOverrides.create.params.test == "testCreateParam"
-        assert project.jenkins.jobs.test.serviceOverrides.update.uri == "updateTest"
-        assert project.jenkins.jobs.test.serviceOverrides.update.params.test == "testUpdateParam"
-        assert project.jenkins.jobs.test.serviceOverrides.delete.uri == "deleteTest"
-        assert project.jenkins.jobs.test.serviceOverrides.delete.params.test == "testDeleteParam"
-    }
-
-    @Test
-    def void configure_dslFileGeneratesXml() {
-        def dslFile = project.file('test.dsl')
-        dslFile.write("""
-            job {
-                name "\${GRADLE_JOB_NAME}"
-            }
-        """)
-        project.jenkins {
-            jobs {
-                test {
-                    dsl dslFile
-                }
-            }
-        }
-
-        def expectedXml = """
+class JenkinsJobTest extends ProjectSpec {
+    static final String FREEFORM_DSL_JOB_XML = """
             <project>
                 <actions></actions>
                 <description></description>
@@ -100,104 +23,9 @@ class JenkinsJobTest {
                 <publishers></publishers>
                 <buildWrappers></buildWrappers>
             </project>
-        """
+    """
 
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
-    }
-
-    @Test
-    def void configure_dslClosureGeneratesXml() {
-        project.jenkins {
-            jobs {
-                test {
-                    dsl {
-                        name "Test Job"
-                    }
-                }
-            }
-        }
-
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <description></description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def job = project.jenkins.jobs.findByName('test')
-        assert job.definition.name == "Test Job"
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-        assert xmlDiff.similar()
-    }
-
-    @Test
-    def void configure_dslClosureGeneratesFreeformXml() {
-        project.jenkins {
-            jobs {
-                test {
-                    type 'Freeform'
-                    dsl {
-                        name "Test Job"
-                    }
-                }
-            }
-        }
-
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <description></description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def job = project.jenkins.jobs.findByName('test')
-        assert job.definition.name == "Test Job"
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-        assert xmlDiff.similar()
-    }
-
-    @Test
-    def void configure_dslClosureGeneratesMavenXml() {
-        project.jenkins {
-            jobs {
-                test {
-                    type 'Maven'
-                    dsl {
-                        name "Test Job"
-                    }
-                }
-            }
-        }
-
-        def expectedXml = """
+    static final String MAVEN_DSL_JOB_XML = """
             <maven2-moduleset>
               <actions/>
               <description></description>
@@ -222,29 +50,9 @@ class JenkinsJobTest {
               <publishers/>
               <buildWrappers/>
             </maven2-moduleset>
-        """
+    """
 
-        XMLUnit.setIgnoreWhitespace(true)
-        def job = project.jenkins.jobs.findByName('test')
-        assert job.definition.name == "Test Job"
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-        assert xmlDiff.similar()
-    }
-
-    @Test
-    def void configure_dslClosureGeneratesMultijobXml() {
-        project.jenkins {
-            jobs {
-                test {
-                    type 'Multijob'
-                    dsl {
-                        name "Test Job"
-                    }
-                }
-            }
-        }
-
-        def expectedXml = """
+    static final String MULTIJOB_DSL_JOB_XML = """
             <com.tikal.jenkins.plugins.multijob.MultiJobProject plugin="jenkins-multijob-plugin@1.8">
               <actions/>
               <description/>
@@ -261,29 +69,9 @@ class JenkinsJobTest {
               <publishers/>
               <buildWrappers/>
             </com.tikal.jenkins.plugins.multijob.MultiJobProject>
-        """
+    """
 
-        XMLUnit.setIgnoreWhitespace(true)
-        def job = project.jenkins.jobs.findByName('test')
-        assert job.definition.name == "Test Job"
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-        assert xmlDiff.similar()
-    }
-
-    @Test
-    def void configure_dslClosureGeneratesBuildFlowXml() {
-        project.jenkins {
-            jobs {
-                test {
-                    type 'BuildFlow'
-                    dsl {
-                        name "Test Job"
-                    }
-                }
-            }
-        }
-
-        def expectedXml = """
+    static final String BUILDFLOW_DSL_JOB_XML = """
             <com.cloudbees.plugins.flow.BuildFlow>
               <actions/>
               <description></description>
@@ -302,17 +90,188 @@ class JenkinsJobTest {
               <icon/>
               <dsl></dsl>
             </com.cloudbees.plugins.flow.BuildFlow>
-        """
+    """
 
-        XMLUnit.setIgnoreWhitespace(true)
-        def job = project.jenkins.jobs.findByName('test')
-        assert job.definition.name == "Test Job"
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-        assert xmlDiff.similar()
+    def setup() {
+        project.apply plugin: 'jenkins'
     }
 
-    @Test(expected = JenkinsConfigurationException)
-    def void configure_dslClosureThrowsExceptionOnBadType() {
+    def "configure adds to definition"() {
+        setup:
+        def testXml = '<test>test</test>'
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    definition {
+                        xml testXml
+                    }
+                }
+            }
+        }
+        project.jenkins.jobs.test.definition {
+            name "test name"
+        }
+
+        then:
+        project.jenkins.jobs.test.definition.name == "test name"
+        project.jenkins.jobs.test.definition.xml == testXml
+    }
+
+    def "configure configures service overrides"() {
+        setup:
+        def testXml = '<test>test</test>'
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    serviceOverrides {
+                           get([ uri: "getTest",    params: [ test: "testGetParam" ] ])
+                        create([ uri: "createTest", params: [ test: "testCreateParam" ] ])
+                        update([ uri: "updateTest", params: [ test: "testUpdateParam" ] ])
+                        delete([ uri: "deleteTest", params: [ test: "testDeleteParam" ] ])
+                    }
+                }
+            }
+        }
+
+        then:
+        project.jenkins.jobs.test.serviceOverrides.get.uri == "getTest"
+        project.jenkins.jobs.test.serviceOverrides.get.params.test == "testGetParam"
+        project.jenkins.jobs.test.serviceOverrides.create.uri == "createTest"
+        project.jenkins.jobs.test.serviceOverrides.create.params.test == "testCreateParam"
+        project.jenkins.jobs.test.serviceOverrides.update.uri == "updateTest"
+        project.jenkins.jobs.test.serviceOverrides.update.params.test == "testUpdateParam"
+        project.jenkins.jobs.test.serviceOverrides.delete.uri == "deleteTest"
+        project.jenkins.jobs.test.serviceOverrides.delete.params.test == "testDeleteParam"
+    }
+
+    def "configure with dsl file generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def dslFile = project.file('test.dsl')
+        dslFile.write("""
+            job {
+                name "\${GRADLE_JOB_NAME}"
+            }
+        """)
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    dsl dslFile
+                }
+            }
+        }
+
+        then:
+        new Diff(FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+    }
+
+    def "configure with dsl closure generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        then:
+        new Diff(FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+    }
+
+    def "configure with dsl closure generates correct freeform xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    type 'Freeform'
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        then:
+        new Diff(FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+    }
+
+    def "configure with dsl closure generates correct maven xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    type 'Maven'
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        then:
+        new Diff(MAVEN_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+    }
+
+    def "configure with dsl closure generates correct multijob xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    type 'Multijob'
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        then:
+        new Diff(MULTIJOB_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+    }
+
+    def "configure with dsl closure generates correct buildflow xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    type 'BuildFlow'
+                    dsl {
+                        name "Test Job"
+                    }
+                }
+            }
+        }
+
+        then:
+        new Diff(BUILDFLOW_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+    }
+
+    def "configure with dsl closure throws exception on bad type" () {
+        when:
         project.jenkins {
             jobs {
                 test {
@@ -323,10 +282,13 @@ class JenkinsJobTest {
                 }
             }
         }
+
+        then:
+        thrown(JenkinsConfigurationException)
     }
 
-    @Test
-    def void configure_dslClosureUsesJobNameWhenNotSpecified() {
+    def "configure with dsl closure uses job name when not specified" () {
+        when:
         project.jenkins {
             jobs {
                 test {
@@ -337,135 +299,72 @@ class JenkinsJobTest {
             }
         }
 
-        def job = project.jenkins.jobs.findByName('test')
-        assert job.definition.name == "test"
+        then:
+        project.jenkins.jobs.findByName('test').definition.name == "test"
     }
 
-    @Test
-    def void configure_dslAndDefinitionOverridesGeneratedXml() {
+    def "configure with dsl file and definition overrides xml"() {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('true', 'false')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             job {
                 name "\${GRADLE_JOB_NAME}"
             }
         """)
+
+        when:
         project.jenkins {
             jobs {
                 test {
                     dsl dslFile
                     definition {
                         xml override { projectXml ->
-                            projectXml.description = "This is a description"
+                            projectXml.canRoam = "false"
                         }
                     }
                 }
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <description>This is a description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
-    @Test
-    def void configure_dslClosureAndDefinitionUsingBasisXml() {
+    def "configure with dsl closure and definition generates correct xml"() {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+
+        when:
         project.jenkins {
             jobs {
                 test {
                     definition {
-                        xml """
-                            <project>
-                                <actions></actions>
-                                <description>This is a description</description>
-                                <keepDependencies>false</keepDependencies>
-                                <properties></properties>
-                                <scm class='hudson.scm.NullSCM'></scm>
-                                <canRoam>true</canRoam>
-                                <disabled>false</disabled>
-                                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                                <triggers class='vector'></triggers>
-                                <concurrentBuild>false</concurrentBuild>
-                                <builders></builders>
-                                <publishers></publishers>
-                                <buildWrappers></buildWrappers>
-                            </project>
-                        """
+                        xml FREEFORM_DSL_JOB_XML
                     }
                     dsl {
-                        displayName "Some Display Name"
+                        keepDependencies true
                     }
                 }
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>This is a description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
-    @Test
-    def void configure_dslClosureAndDefinitionUsingTemplateXml() {
+    def "configure with dsl closure using template definition generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+
+        when:
         project.jenkins {
             templates {
                 testTemplate {
-                    xml """
-                        <project>
-                            <actions></actions>
-                            <description>This is a description</description>
-                            <keepDependencies>false</keepDependencies>
-                            <properties></properties>
-                            <scm class='hudson.scm.NullSCM'></scm>
-                            <canRoam>true</canRoam>
-                            <disabled>false</disabled>
-                            <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                            <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                            <triggers class='vector'></triggers>
-                            <concurrentBuild>false</concurrentBuild>
-                            <builders></builders>
-                            <publishers></publishers>
-                            <buildWrappers></buildWrappers>
-                        </project>
-                    """
+                    xml newXml
                 }
             }
 
@@ -473,91 +372,51 @@ class JenkinsJobTest {
                 test {
                     dsl {
                         using 'testTemplate'
-                        displayName "Some Display Name"
                     }
                 }
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>This is a description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
-    @Test
-    def void configure_dslClosureUsingTemplateDsl() {
+    def "configure with dsl closure using template dsl generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+
+        when:
         project.jenkins {
             templates {
                 testTemplate {
-                    dsl {
-                        description "This is a description"
-                    }
+                    dsl { keepDependencies true }
                 }
             }
 
             jobs {
                 test {
                     dsl {
-                        using "testTemplate"
-                        displayName "Some Display Name"
+                        using 'testTemplate'
                     }
                 }
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>This is a description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
-    @Test
-    def void configure_overridesXmlFromDslTemplate() {
+    def "configure with definition overrides xml from dsl template" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+
+        when:
         project.jenkins {
             templates {
                 testTemplate {
-                    dsl {
-                        description "This is a description"
-                    }
+                    dsl { }
                 }
             }
 
@@ -565,47 +424,28 @@ class JenkinsJobTest {
                 test {
                     definition {
                         xml templates.testTemplate.override { projectXml ->
-                            projectXml.appendNode {
-                                displayName("Some Display Name")
-                            }
+                            projectXml.keepDependencies = 'true'
                         }
                     }
                 }
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>This is a description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
-    @Test
-    def void configure_allowsIncrementalDslChangesWithClosure() {
+    def "configure allows incremental dsl changes with closure" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
+
+        when:
         project.jenkins {
             jobs {
                 test {
                     dsl {
-                        description "This is a description"
+                        description "test"
                     }
                 }
             }
@@ -613,52 +453,35 @@ class JenkinsJobTest {
             jobs {
                 test {
                     dsl {
-                        displayName "Some Display Name"
+                        keepDependencies true
                     }
                 }
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>This is a description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
-    @Test
-    def void configure_allowsIncrementalDslChangesWithFile() {
+    def "configure allows incremental dsl changes with file" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             job {
                 name "\${GRADLE_JOB_NAME}"
                 using "\${GRADLE_JOB_NAME}"
-                displayName "Some Display Name"
+                keepDependencies true
             }
         """)
+
+        when:
         project.jenkins {
             jobs {
                 test {
                     dsl {
-                        description "This is a description"
+                        description "test"
                     }
                 }
             }
@@ -670,96 +493,41 @@ class JenkinsJobTest {
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>This is a description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
-    @Test
-    def void configure_dslFileAndDefinitionUsingBasisXml() {
+    def "configure with dsl file and definition generates correct xml"() {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             job {
                 name "\${GRADLE_JOB_NAME}"
                 using "\${GRADLE_JOB_NAME}"
-                displayName "Some Display Name"
+                keepDependencies true
             }
         """)
+
+        when:
         project.jenkins {
             jobs {
                 test {
                     definition {
-                        xml """
-                            <project>
-                                <actions></actions>
-                                <description>This is a description</description>
-                                <keepDependencies>false</keepDependencies>
-                                <properties></properties>
-                                <scm class='hudson.scm.NullSCM'></scm>
-                                <canRoam>true</canRoam>
-                                <disabled>false</disabled>
-                                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                                <triggers class='vector'></triggers>
-                                <concurrentBuild>false</concurrentBuild>
-                                <builders></builders>
-                                <publishers></publishers>
-                                <buildWrappers></buildWrappers>
-                            </project>
-                        """
+                        xml FREEFORM_DSL_JOB_XML.replaceFirst('n><', 'n>test<')
                     }
                     dsl dslFile
                 }
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>This is a description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.jobs.findByName('test').definition.xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
-    @Test(expected = JenkinsConfigurationException)
-    def void configure_dslThrowsExceptionOnMultipleJobsInDsl() {
+    def "configure with dsl file throws exception on multiple jobs" () {
+        setup:
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             for (i in 0..1) {
@@ -768,6 +536,8 @@ class JenkinsJobTest {
                 }
             }
         """)
+
+        when:
         project.jenkins {
             jobs {
                 test {
@@ -775,11 +545,16 @@ class JenkinsJobTest {
                 }
             }
         }
+
+        then:
+        thrown(JenkinsConfigurationException)
     }
 
-    @Test
-    def void configure_doesntCallConfigureMultipleTimes() {
+    def "configure doesn't call dsl.configure multiple times" () {
+        setup:
         def int count = 0
+
+        when:
         project.jenkins {
             jobs {
                 test {
@@ -787,7 +562,7 @@ class JenkinsJobTest {
                         name "Test Job"
                         wrappers {
                             configure { root ->
-                                assert count++ == 0
+                                count++
                                 (root / "buildWrappers")
                                         .appendNode("newNode")
                                         .appendNode("testNode")
@@ -799,34 +574,7 @@ class JenkinsJobTest {
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <description></description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers>
-                    <newNode>
-                        <testNode>test</testNode>
-                    </newNode>
-                </buildWrappers>
-            </project>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def job = project.jenkins.jobs.findByName('test')
-        assert job.definition.name == "Test Job"
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-        assert xmlDiff.similar()
+        then:
+        count == 1
     }
-
 }

@@ -1,6 +1,5 @@
 package com.terrafolio.gradle.plugins.jenkins.test.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
 import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl

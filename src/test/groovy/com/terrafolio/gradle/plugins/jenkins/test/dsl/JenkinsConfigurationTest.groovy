@@ -1,67 +1,18 @@
 package com.terrafolio.gradle.plugins.jenkins.test.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsView
 import javaposse.jobdsl.dsl.NameNotProvidedException
 import javaposse.jobdsl.dsl.ViewType
-import org.custommonkey.xmlunit.DetailedDiff
+import nebula.test.ProjectSpec
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Before
-import org.junit.Test
 
 /**
  * Created by ghale on 4/7/14.
  */
-class JenkinsConfigurationTest {
-    def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
-    def private final JenkinsPlugin plugin = new JenkinsPlugin()
-
-    @Before
-    def void setupProject() {
-        plugin.apply(project)
-    }
-
-    @Test
-    void configure_addsJenkinsJob() {
-        project.jenkins {
-            jobs {
-                testJob
-            }
-        }
-
-        assert project.convention.plugins.jenkins.jenkins.jobs.findByName('testJob') instanceof JenkinsJob
-    }
-
-    @Test
-    void configure_addsJenkinsView() {
-        project.jenkins {
-            views {
-                test
-            }
-        }
-
-        assert project.convention.plugins.jenkins.jenkins.views.findByName('test') instanceof JenkinsView
-    }
-
-    @Test
-    def void configure_configuresJobsUsingDslFile() {
-        def dslFile = project.file('test.dsl')
-        dslFile.write("""
-            for (i in 0..9) {
-                job {
-                    name "Test Job \${i}"
-                }
-            }
-        """)
-        project.jenkins {
-            dsl project.files('test.dsl')
-        }
-
-        def expectedXml = """
+class JenkinsConfigurationTest extends ProjectSpec {
+    static final String EMPTY_DSL_JOB_XML = """
             <project>
                 <actions></actions>
                 <description></description>
@@ -78,27 +29,83 @@ class JenkinsConfigurationTest {
                 <publishers></publishers>
                 <buildWrappers></buildWrappers>
             </project>
-        """
+    """
 
-        XMLUnit.setIgnoreWhitespace(true)
-        assert project.jenkins.jobs.size() == 10
-        def jobNames = (0..9).collect { "Test Job ${it}" }
-        project.jenkins.jobs.each { job ->
-            assert jobNames.find { it == job.name } != null
-            jobNames.remove(job.name)
-            def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-            assert xmlDiff.similar()
-        }
+    static final String EMPTY_DSL_VIEW_XML = """
+            <hudson.model.ListView>
+              <filterExecutors>false</filterExecutors>
+              <filterQueue>false</filterQueue>
+              <properties class="hudson.model.View\$PropertyList"/>
+              <jobNames class="tree-set">
+                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+              </jobNames>
+              <jobFilters/>
+              <columns/>
+            </hudson.model.ListView>
+    """
 
+    def setup() {
+        project.apply plugin: 'jenkins'
     }
 
-    @Test
-    def void configure_configuresJobsUsingMultipleDslFiles() {
+    def "configure adds jenkins job" () {
+        when:
+        project.jenkins {
+            jobs {
+                testJob
+            }
+        }
+
+        then:
+        project.convention.plugins.jenkins.jenkins.jobs.findByName('testJob') instanceof JenkinsJob
+    }
+
+    def "configure adds jenkins view" () {
+        when:
+        project.jenkins {
+            views {
+                test
+            }
+        }
+
+        then:
+        project.convention.plugins.jenkins.jenkins.views.findByName('test') instanceof JenkinsView
+    }
+
+    def "configure configures jobs using dsl file" (jobName, xml) {
+        setup:
+        def dslFile = project.file('test.dsl')
+        dslFile.write("""
+            for (i in 0..2) {
+                job {
+                    name "Test Job \${i}"
+                }
+            }
+        """)
+        XMLUnit.setIgnoreWhitespace(true)
+        project.jenkins {
+            dsl project.files('test.dsl')
+        }
+
+        expect:
+        project.jenkins.jobs.findByName(jobName) != null
+        new Diff(xml, project.jenkins.jobs.findByName(jobName).definition.xml).similar()
+
+        where:
+        jobName      | xml
+        "Test Job 0" | EMPTY_DSL_JOB_XML
+        "Test Job 1" | EMPTY_DSL_JOB_XML
+        "Test Job 2" | EMPTY_DSL_JOB_XML
+    }
+
+    def "configure configures jobs using multiple dsl files" (jobName, xml) {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
         def jenkinsDir = project.file('jenkins')
         jenkinsDir.mkdirs()
         def dslFile1 = new File(jenkinsDir, 'test1.dsl')
         dslFile1.write("""
-            for (i in 0..9) {
+            for (i in 0..2) {
                 job {
                     name "Test Job \${i}"
                 }
@@ -107,7 +114,7 @@ class JenkinsConfigurationTest {
 
         def dslFile2 = new File(jenkinsDir, 'test2.dsl')
         dslFile2.write("""
-            for (i in 0..9) {
+            for (i in 0..2) {
                 job {
                     name "Another Job \${i}"
                 }
@@ -118,41 +125,26 @@ class JenkinsConfigurationTest {
             dsl project.fileTree("jenkins").include("*.dsl")
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <description></description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
+        expect:
+        project.jenkins.jobs.findByName(jobName) != null
+        new Diff(xml, project.jenkins.jobs.findByName(jobName).definition.xml).similar()
 
-        XMLUnit.setIgnoreWhitespace(true)
-        assert project.jenkins.jobs.size() == 20
-        def jobNames = (0..9).collect { "Test Job ${it}" } + (0..9).collect { "Another Job ${it}" }
-        project.jenkins.jobs.each { job ->
-            assert jobNames.find { it == job.name } != null
-            jobNames.remove(job.name)
-            def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-            assert xmlDiff.similar()
-        }
+        where:
+        jobName         | xml
+        "Test Job 0"    | EMPTY_DSL_JOB_XML
+        "Test Job 1"    | EMPTY_DSL_JOB_XML
+        "Test Job 2"    | EMPTY_DSL_JOB_XML
+        "Another Job 0" | EMPTY_DSL_JOB_XML
+        "Another Job 1" | EMPTY_DSL_JOB_XML
+        "Another Job 2" | EMPTY_DSL_JOB_XML
     }
 
-    @Test
-    def void configure_configuresViewsUsingDslFile() {
+    def "configure configures views using dsl file" (viewName, xml) {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            for (i in 0..9) {
+            for (i in 0..2) {
                 view(type: ListView) {
                     name("test view \${i}")
                 }
@@ -162,37 +154,25 @@ class JenkinsConfigurationTest {
             dsl project.files('test.dsl')
         }
 
-        def expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
+        expect:
+        project.jenkins.views.findByName(viewName) != null
+        new Diff(xml, project.jenkins.views.findByName(viewName).xml).similar()
 
-        XMLUnit.setIgnoreWhitespace(true)
-        assert project.jenkins.views.size() == 10
-        def viewNames = (0..9).collect { "test view ${it}" }
-        project.jenkins.views.each { view ->
-            assert viewNames.find { it == view.name } != null
-            viewNames.remove(view.name)
-            def xmlDiff = new DetailedDiff(new Diff(expectedXml, view.xml))
-            assert xmlDiff.similar()
-        }
+        where:
+        viewName      | xml
+        "test view 0" | EMPTY_DSL_VIEW_XML
+        "test view 1" | EMPTY_DSL_VIEW_XML
+        "test view 2" | EMPTY_DSL_VIEW_XML
     }
 
-    @Test
-    def void configure_configuresViewsUsingMultipleDslFiles() {
+    def "configure configures views using multiple dsl files" (viewName, xml) {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
         def jenkinsDir = project.file('jenkins')
         jenkinsDir.mkdirs()
         def dslFile1 = new File(jenkinsDir, 'test1.dsl')
         dslFile1.write("""
-            for (i in 0..9) {
+            for (i in 0..2) {
                 view(type: ListView) {
                     name "test view \${i}"
                 }
@@ -201,7 +181,7 @@ class JenkinsConfigurationTest {
 
         def dslFile2 = new File(jenkinsDir, 'test2.dsl')
         dslFile2.write("""
-            for (i in 0..9) {
+            for (i in 0..2) {
                 view(type: ListView) {
                     name "another view \${i}"
                 }
@@ -212,35 +192,26 @@ class JenkinsConfigurationTest {
             dsl project.fileTree("jenkins").include("*.dsl")
         }
 
-        def expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
+        expect:
+        project.jenkins.views.findByName(viewName) != null
+        new Diff(xml, project.jenkins.views.findByName(viewName).xml).similar()
 
-        XMLUnit.setIgnoreWhitespace(true)
-        assert project.jenkins.views.size() == 20
-        def viewNames = (0..9).collect { "test view ${it}" } + (0..9).collect { "another view ${it}" }
-        project.jenkins.jobs.each { view ->
-            assert viewNames.find { it == view.name } != null
-            viewNames.remove(view.name)
-            def xmlDiff = new DetailedDiff(new Diff(expectedXml, view.xml))
-            assert xmlDiff.similar()
-        }
+        where:
+        viewName         | xml
+        "test view 0"    | EMPTY_DSL_VIEW_XML
+        "test view 1"    | EMPTY_DSL_VIEW_XML
+        "test view 2"    | EMPTY_DSL_VIEW_XML
+        "another view 0" | EMPTY_DSL_VIEW_XML
+        "another view 1" | EMPTY_DSL_VIEW_XML
+        "another view 2" | EMPTY_DSL_VIEW_XML
     }
 
-    @Test
-    def void configure_configuresJobsUsingDslClosure() {
+    def "configure configures jobs using dsl closure"(jobName, xml) {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
         project.jenkins {
             dsl {
-                for (i in 0..9) {
+                for (i in 0..2) {
                     job {
                         name "Test Job ${i}"
                     }
@@ -248,42 +219,23 @@ class JenkinsConfigurationTest {
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <description></description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
+        expect:
+        project.jenkins.jobs.findByName(jobName) != null
+        new Diff(xml, project.jenkins.jobs.findByName(jobName).definition.xml).similar()
 
-        XMLUnit.setIgnoreWhitespace(true)
-        assert project.jenkins.jobs.size() == 10
-        def jobNames = (0..9).collect { "Test Job ${it}" }
-        project.jenkins.jobs.each { job ->
-            assert jobNames.find { it == job.name } != null
-            jobNames.remove(job.name)
-            def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-            assert xmlDiff.similar()
-        }
-
+        where:
+        jobName      | xml
+        "Test Job 0" | EMPTY_DSL_JOB_XML
+        "Test Job 1" | EMPTY_DSL_JOB_XML
+        "Test Job 2" | EMPTY_DSL_JOB_XML
     }
 
-    @Test
-    def void configure_configuresViewsUsingDslClosure() {
+    def "configure configures views using dsl closure" (viewName, xml) {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
         project.jenkins {
             dsl {
-                for (i in 0..9) {
+                for (i in 0..2) {
                     view(type: ViewType.ListView) {
                         name "test view ${i}"
                     }
@@ -291,36 +243,22 @@ class JenkinsConfigurationTest {
             }
         }
 
-        def expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
+        expect:
+        project.jenkins.views.findByName(viewName) != null
+        new Diff(xml, project.jenkins.views.findByName(viewName).xml).similar()
 
-        XMLUnit.setIgnoreWhitespace(true)
-        assert project.jenkins.views.size() == 10
-        def viewNames = (0..9).collect { "test view ${it}" }
-        project.jenkins.views.each { view ->
-            assert viewNames.find { it == view.name } != null
-            viewNames.remove(view.name)
-            def xmlDiff = new DetailedDiff(new Diff(expectedXml, view.xml))
-            assert xmlDiff.similar()
-        }
-
+        where:
+        viewName      | xml
+        "test view 0" | EMPTY_DSL_VIEW_XML
+        "test view 1" | EMPTY_DSL_VIEW_XML
+        "test view 2" | EMPTY_DSL_VIEW_XML
     }
 
-    @Test(expected = NameNotProvidedException)
-    def void configure_dslClosureThrowsExceptionWhenNoJobNameProvided() {
+    def "configure throws exeception when no job name provided with dsl closure"() {
+        when:
         project.jenkins {
             dsl {
-                for (i in 0..9) {
+                for (i in 0..2) {
                     job {
                         steps {
                             shell("echo test")
@@ -329,10 +267,13 @@ class JenkinsConfigurationTest {
                 }
             }
         }
+
+        then:
+        thrown(NameNotProvidedException)
     }
 
-    @Test(expected = NameNotProvidedException)
-    def void configure_dslFileThrowsExceptionWhenNoJobNameProvided() {
+    def "configure throws exeception when no job name provided with dsl file"() {
+        setup:
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             for (i in 0..9) {
@@ -343,155 +284,77 @@ class JenkinsConfigurationTest {
                 }
             }
         """)
+
+        when:
         project.jenkins {
             dsl project.files('test.dsl')
         }
+
+        then:
+        thrown(NameNotProvidedException)
     }
 
-    @Test
-    def void configure_configuresJobsUsingDslClosureWithBasisXml() {
+    def "configure configures jobs using dsl closure with basis xml"(jobName, xml) {
+        setup:
         project.jenkins {
             jobs {
-                for (i in 0..9) {
-                    "Test Job ${i}" {
-                        definition {
-                            xml """
-                                <project>
-                                    <actions></actions>
-                                    <description>A Description</description>
-                                    <keepDependencies>false</keepDependencies>
-                                    <properties></properties>
-                                    <scm class='hudson.scm.NullSCM'></scm>
-                                    <canRoam>true</canRoam>
-                                    <disabled>false</disabled>
-                                    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                                    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                                    <triggers class='vector'></triggers>
-                                    <concurrentBuild>false</concurrentBuild>
-                                    <builders></builders>
-                                    <publishers></publishers>
-                                    <buildWrappers></buildWrappers>
-                                </project>
-                            """
-                        }
+                "Test Job" {
+                    definition {
+                        delegate.xml EMPTY_DSL_JOB_XML.replaceFirst('true', 'false')
                     }
                 }
             }
             dsl {
-                for (i in 0..9) {
+                for (i in 0..2) {
                     job {
-                        using "Test Job ${i}"
-                        name "Test Job ${i}"
-                        displayName "Some Display Name"
+                        using "Test Job"
+                        name "Another Job ${i}"
                     }
                 }
             }
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>A Description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
+        expect:
+        project.jenkins.jobs.findByName(jobName) != null
+        new Diff(xml, project.jenkins.jobs.findByName(jobName).definition.xml).similar()
 
-        XMLUnit.setIgnoreWhitespace(true)
-        assert project.jenkins.jobs.size() == 10
-        def jobNames = (0..9).collect { "Test Job ${it}" }
-        project.jenkins.jobs.each { job ->
-            assert jobNames.find { it == job.name } != null
-            jobNames.remove(job.name)
-            def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-            assert xmlDiff.similar()
-        }
-
+        where:
+        jobName         | xml
+        "Another Job 0" | EMPTY_DSL_JOB_XML.replaceFirst('true', 'false')
+        "Another Job 1" | EMPTY_DSL_JOB_XML.replaceFirst('true', 'false')
+        "Another Job 2" | EMPTY_DSL_JOB_XML.replaceFirst('true', 'false')
     }
 
-    @Test
-    def void configure_configuresJobsUsingDslFileWithBasisXml() {
+    def "configure configures jobs using dsl file with basis xml" (jobName, xml) {
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            for (i in 0..9) {
+            for (i in 0..2) {
                 job {
-                    name "Test Job \${i}"
-                    using "Test Job \${i}"
-                    displayName "Some Display Name"
+                    using "Test Job"
+                    name "Another Job \${i}"
                 }
             }
         """)
 
         project.jenkins {
             jobs {
-                for (i in 0..9) {
-                    "Test Job ${i}" {
-                        definition {
-                            xml """
-                                <project>
-                                    <actions></actions>
-                                    <description>A Description</description>
-                                    <keepDependencies>false</keepDependencies>
-                                    <properties></properties>
-                                    <scm class='hudson.scm.NullSCM'></scm>
-                                    <canRoam>true</canRoam>
-                                    <disabled>false</disabled>
-                                    <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                                    <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                                    <triggers class='vector'></triggers>
-                                    <concurrentBuild>false</concurrentBuild>
-                                    <builders></builders>
-                                    <publishers></publishers>
-                                    <buildWrappers></buildWrappers>
-                                </project>
-                            """
-                        }
+                "Test Job" {
+                    definition {
+                        delegate.xml EMPTY_DSL_JOB_XML.replaceFirst('true', 'false')
                     }
                 }
             }
             dsl project.files('test.dsl')
         }
 
-        def expectedXml = """
-            <project>
-                <actions></actions>
-                <displayName>Some Display Name</displayName>
-                <description>A Description</description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-        """
+        expect:
+        project.jenkins.jobs.findByName(jobName) != null
+        new Diff(xml, project.jenkins.jobs.findByName(jobName).definition.xml).similar()
 
-        XMLUnit.setIgnoreWhitespace(true)
-        assert project.jenkins.jobs.size() == 10
-        def jobNames = (0..9).collect { "Test Job ${it}" }
-        project.jenkins.jobs.each { job ->
-            assert jobNames.find { it == job.name } != null
-            jobNames.remove(job.name)
-            def xmlDiff = new DetailedDiff(new Diff(expectedXml, job.definition.xml))
-            assert xmlDiff.similar()
-        }
-
+        where:
+        jobName         | xml
+        "Another Job 0" | EMPTY_DSL_JOB_XML.replaceFirst('true', 'false')
+        "Another Job 1" | EMPTY_DSL_JOB_XML.replaceFirst('true', 'false')
+        "Another Job 2" | EMPTY_DSL_JOB_XML.replaceFirst('true', 'false')
     }
 }

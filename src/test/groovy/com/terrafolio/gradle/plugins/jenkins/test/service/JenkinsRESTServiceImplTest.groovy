@@ -3,21 +3,16 @@ package com.terrafolio.gradle.plugins.jenkins.test.service
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException
 import com.terrafolio.gradle.plugins.jenkins.service.PreemptiveAuthInterceptor
-import groovy.mock.interceptor.MockFor
-import groovyx.net.http.ContentEncoding
 import groovyx.net.http.HttpResponseDecorator
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 import org.apache.http.HttpRequestInterceptor
 import org.apache.http.HttpResponse
 import org.apache.http.HttpVersion
-import org.apache.http.client.HttpClient
 import org.apache.http.impl.client.AbstractHttpClient
 import org.apache.http.message.BasicHttpResponse
 import org.apache.http.message.BasicStatusLine
-import org.junit.Before
 import org.junit.Ignore
-import org.junit.Test
 import spock.lang.Specification
 
 class JenkinsRESTServiceImplTest extends Specification {
