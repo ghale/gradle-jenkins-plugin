@@ -2,7 +2,7 @@ package com.terrafolio.gradle.plugins.jenkins.dsl;
 
 import org.gradle.api.InvalidUserDataException;
 
-class JenkinsConfigurationException extends InvalidUserDataException {
+public class JenkinsConfigurationException extends InvalidUserDataException {
 
     public JenkinsConfigurationException() {
         super();

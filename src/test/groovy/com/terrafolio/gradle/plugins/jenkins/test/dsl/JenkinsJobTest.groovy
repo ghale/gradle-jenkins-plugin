@@ -577,4 +577,33 @@ class JenkinsJobTest extends ProjectSpec {
         then:
         count == 1
     }
+
+    def "getServerSpecificXml uses server-specific configuration" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+
+        when:
+        project.jenkins {
+            servers {
+                test_server { }
+            }
+            jobs {
+                test {
+                    server servers.test_server, {
+                        xml override { projectXml ->
+                            projectXml.keepDependencies = 'true'
+                        }
+                    }
+                    definition {
+                        xml FREEFORM_DSL_JOB_XML
+                    }
+
+                }
+            }
+        }
+
+        then:
+        new Diff(newXml, project.jenkins.jobs.findByName('test').getServerSpecificXml(project.jenkins.servers.test_server)).similar()
+    }
 }

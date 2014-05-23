@@ -1,29 +1,36 @@
 package com.terrafolio.gradle.plugins.jenkins.test.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.JenkinsPlugin
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
-import org.custommonkey.xmlunit.DetailedDiff
+import nebula.test.ProjectSpec
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
-import org.gradle.api.Project
-import org.gradle.testfixtures.ProjectBuilder
-import org.junit.Before
-import org.junit.Test
 
 /**
  * Created by ghale on 4/11/14.
  */
-class JenkinsViewTest {
-    def private final Project project = ProjectBuilder.builder().withProjectDir(new File('build/tmp/test')).build()
-    def private final JenkinsPlugin plugin = new JenkinsPlugin()
+class JenkinsViewTest extends ProjectSpec {
+    static final String LIST_DSL_VIEW_XML = """
+            <hudson.model.ListView>
+              <filterExecutors>false</filterExecutors>
+              <filterQueue>false</filterQueue>
+              <properties class="hudson.model.View\$PropertyList"/>
+              <jobNames class="tree-set">
+                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+              </jobNames>
+              <jobFilters/>
+              <columns/>
+            </hudson.model.ListView>
+    """
 
-    @Before
-    def void setupProject() {
-        plugin.apply(project)
+    def setup() {
+        project.apply plugin: 'jenkins'
     }
 
-    @Test
-    def void configure_generatesViewFromDslClosure() {
+    def "configure with dsl closure generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+
+        when:
         project.jenkins.views {
             test {
                 dsl {
@@ -32,152 +39,86 @@ class JenkinsViewTest {
             }
         }
 
-        String expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.views.findByName('test').xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(LIST_DSL_VIEW_XML, project.jenkins.views.findByName('test').xml).similar()
     }
 
-    @Test
-    def void configure_generatesViewFromDslFile() {
+    def "configure with dsl file generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             view(type: ListView) {
                 name "test"
             }
         """)
+
+        when:
         project.jenkins.views {
             test {
                 dsl dslFile
             }
         }
 
-        String expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.views.findByName('test').xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(LIST_DSL_VIEW_XML, project.jenkins.views.findByName('test').xml).similar()
     }
 
-    @Test(expected = JenkinsConfigurationException)
-    def void configure_dslThrowsExceptionOnMultipleViewsInDsl() {
+    def "configure throws exception when multiple views are generated" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            for (i in 0..1) {
                 view {
-                    name "Test Job \${i}"
+                    name "Test View 1"
                 }
-            }
+                view {
+                    name "Test View 2"
+                }
         """)
 
+        when:
         project.jenkins.views {
             test {
                 dsl dslFile
             }
         }
+
+        then:
+        thrown(JenkinsConfigurationException)
     }
 
-    @Test
-    def void configure_loadsXmlFromFile() {
-        def String expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-        File xmlFile = project.file('test.xml')
-        xmlFile.write(expectedXml)
+    def "configure loads xml from file" () {
+        setup:
+        def File xmlFile = project.file('test.xml')
+        xmlFile.write(LIST_DSL_VIEW_XML)
 
+        when:
         project.jenkins.views {
             test {
                 xml(xmlFile)
             }
         }
 
-        assert project.jenkins.views.test.xml == expectedXml
+        then:
+        project.jenkins.views.test.xml == LIST_DSL_VIEW_XML
     }
 
-    @Test
-    def void configure_loadsXmlFromString() {
-        def String expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-
+    def "configure loads xml from string" () {
+        when:
         project.jenkins.views {
             test {
-                xml(expectedXml)
+                xml(LIST_DSL_VIEW_XML)
             }
         }
 
-        assert project.jenkins.views.test.xml == expectedXml
+        then:
+        project.jenkins.views.test.xml == LIST_DSL_VIEW_XML
     }
 
-    @Test
-    def void getServerSpecificXml_createsCorrectXml() {
-        def String expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-
-        def String ssxml = """
-            <hudson.model.ListView>
-              <filterExecutors>true</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-
+    def "getServerSpecificXml uses server-specific overrides" () {
+        setup:
+        def newXml = LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
         project.jenkins {
             servers {
                 test1 {
@@ -192,33 +133,27 @@ class JenkinsViewTest {
             views {
                 test {
                     server(project.jenkins.servers.test1) {
-                        xml(ssxml)
+                        xml(newXml)
                     }
-                    xml(expectedXml)
+                    server project.jenkins.servers.test2
+                    xml(LIST_DSL_VIEW_XML)
                 }
             }
         }
 
-        assert project.jenkins.views.test.getServerSpecificXml(project.jenkins.servers.test1) == ssxml
+        expect:
+        project.jenkins.views.test.getServerSpecificXml(project.jenkins.servers.test1) == newXml
+        project.jenkins.views.test.getServerSpecificXml(project.jenkins.servers.test2) == LIST_DSL_VIEW_XML
     }
 
-    @Test
-    def void configure_overridesXml() {
-        def String expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
+    def "configure with xml override generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
         File xmlFile = project.file('test.xml')
-        xmlFile.write(expectedXml)
+        xmlFile.write(LIST_DSL_VIEW_XML)
 
+        when:
         project.jenkins.views {
             test {
                 xml(xmlFile)
@@ -228,26 +163,16 @@ class JenkinsViewTest {
             }
         }
 
-        expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>true</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.views.findByName('test').xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.views.findByName('test').xml).similar()
     }
 
-    @Test
-    def void configure_overridesXmlFromDsl() {
+    def "configure with xml override from dsl generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
+
+        when:
         project.jenkins.views {
             test {
                 dsl {
@@ -259,32 +184,22 @@ class JenkinsViewTest {
             }
         }
 
-        def String expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>true</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.views.findByName('test').xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.views.findByName('test').xml).similar()
     }
 
-    @Test
-    def void configure_overridesXmlFromDslFile() {
+    def "configure with xml override from dsl file generates correct xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+        def newXml = LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             view(type: ListView) {
                 name "test"
             }
         """)
+
+        when:
         project.jenkins.views {
             test {
                 dsl dslFile
@@ -294,21 +209,7 @@ class JenkinsViewTest {
             }
         }
 
-        String expectedXml = """
-            <hudson.model.ListView>
-              <filterExecutors>true</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-        """
-
-        XMLUnit.setIgnoreWhitespace(true)
-        def xmlDiff = new DetailedDiff(new Diff(expectedXml, project.jenkins.views.findByName('test').xml))
-        assert xmlDiff.similar()
+        then:
+        new Diff(newXml, project.jenkins.views.findByName('test').xml).similar()
     }
 }
