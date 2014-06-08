@@ -1,12 +1,14 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
-import javaposse.jobdsl.dsl.*
+import groovy.xml.StreamingMarkupBuilder
+import javaposse.jobdsl.dsl.JobManagement
+import javaposse.jobdsl.dsl.JobType
 import org.gradle.util.ConfigureUtil
 
-class JenkinsJob extends JenkinsConfigurable {
+class JenkinsJob extends AbstractJenkinsConfigurable implements DSLConfigurable, XMLConfigurable {
     def definition
     def type
-    protected JobManagement jm
+    protected DSLSupport dslSupport
 
     def defaultOverrides = {
         create([ uri: "createItem", params: [ name: definition.name ] ])
@@ -17,7 +19,7 @@ class JenkinsJob extends JenkinsConfigurable {
 
     JenkinsJob(String name, JobManagement jm) {
         this.name = name
-        this.jm = jm
+        this.dslSupport = new JobDSLSupport(jm)
     }
 
     @Override
@@ -48,7 +50,7 @@ class JenkinsJob extends JenkinsConfigurable {
     def setDefinition(JenkinsJobDefinition definition) {
         this.definition = definition
         if (definition.xml != null) {
-            jm.createOrUpdateConfig(name, definition.xml, true)
+            dslSupport.addConfig(name, definition.xml)
         }
     }
 
@@ -58,40 +60,39 @@ class JenkinsJob extends JenkinsConfigurable {
         }
         ConfigureUtil.configure(closure, definition)
         if (definition.xml != null) {
-            jm.createOrUpdateConfig(name, definition.xml, true)
+            dslSupport.addConfig(name, definition.xml)
         }
     }
 
-    def dsl(File dslFile) {
-        jm.getParameters().put("GRADLE_JOB_NAME", name)
+    @Override
+    def void dsl(File dslFile) {
+        dslSupport.setParameter("GRADLE_JOB_NAME", name)
 
-        ScriptRequest request = new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false)
-        GeneratedItems generatedItems = DslScriptLoader.runDslEngine(request, jm)
-
-        if (generatedItems.jobs.size() != 1) {
-            throw new JenkinsConfigurationException("The DSL script ${dslFile.path} did not generate exactly one job (${generatedItems.jobs.size()})!  Use the general dsl form to generate multiple jobs from dsl.")
-        } else {
-            GeneratedJob generatedJob = generatedItems.getJobs().iterator().next()
-            this.definition = new JenkinsJobDefinition(generatedJob.jobName == null ? name : generatedJob.jobName)
-            this.definition.xml jm.getConfig(generatedJob.jobName)
-        }
+        def jobName = dslSupport.evaluateDSL(dslFile)
+        def definition = new JenkinsJobDefinition(jobName == null ? name : jobName)
+        definition.xml dslSupport.getConfig(jobName)
+        setDefinition(definition)
     }
 
-    def dsl(Closure closure) {
-        jm.getParameters().put("GRADLE_JOB_NAME", name)
+    @Override
+    def void dsl(Closure closure) {
+        dslSupport.setParameter("GRADLE_JOB_NAME", name)
 
-        def Job job = new Job(jm, ['type': type])
-        // Load the existing xml as a template if it exists
-        if (jm.getConfig(name) && job.templateName == null) {
-            job.using(name)
-        }
-        job.with(closure)
-        def String resultXml = job.xml
-        jm.createOrUpdateConfig(name, resultXml, true)
-        this.definition = new JenkinsJobDefinition(job.name == null ? name : job.name)
-        this.definition.xml resultXml
+        def jobName = dslSupport.evaluateDSL(name, type, closure)
+        def definition = new JenkinsJobDefinition(jobName)
+        definition.xml dslSupport.getConfig(jobName)
+        setDefinition(definition)
     }
 
+    @Override
+    DSLSupport getDSLSupport() {
+        return dslSupport
+    }
+
+    @Override
+    void setDSLSupport(DSLSupport support) {
+        this.dslSupport = support
+    }
 
     @Override
     def String getServerSpecificXml(JenkinsServerDefinition server) {
@@ -106,5 +107,53 @@ class JenkinsJob extends JenkinsConfigurable {
         } else {
             return definition.xml
         }
+    }
+
+    @Override
+    String override(Closure closure) {
+        if (this.definition == null) {
+            this.definition = new JenkinsJobDefinition()
+        }
+        return this.definition.override(closure)
+    }
+
+    @Override
+    String getXml() {
+        return definition.getXml()
+    }
+
+    @Override
+    void setXml(String xml) {
+        def defn = this.definition
+        if (defn == null) {
+            defn = new JenkinsJobDefinition()
+        }
+        defn.xml = xml
+        setDefinition(defn)
+    }
+
+    @Override
+    void xml(String xml) {
+        setXml(xml)
+    }
+
+    @Override
+    void xml(File xmlFile) {
+        setXml(xmlFile.getText())
+    }
+
+    @Override
+    void xml(Closure closure) {
+        setXml(new StreamingMarkupBuilder().bind(closure).toString())
+    }
+
+    @Override
+    XMLSupport getXMLSupport() {
+        return definition
+    }
+
+    @Override
+    void setXMLSupport(XMLSupport support) {
+        this.definition = support
     }
 }

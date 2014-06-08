@@ -9,18 +9,6 @@ import org.custommonkey.xmlunit.XMLUnit
  * Created by ghale on 4/11/14.
  */
 class JenkinsViewTest extends ProjectSpec {
-    static final String LIST_DSL_VIEW_XML = """
-            <hudson.model.ListView>
-              <filterExecutors>false</filterExecutors>
-              <filterQueue>false</filterQueue>
-              <properties class="hudson.model.View\$PropertyList"/>
-              <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
-              </jobNames>
-              <jobFilters/>
-              <columns/>
-            </hudson.model.ListView>
-    """
 
     def setup() {
         project.apply plugin: 'jenkins'
@@ -40,7 +28,7 @@ class JenkinsViewTest extends ProjectSpec {
         }
 
         then:
-        new Diff(LIST_DSL_VIEW_XML, project.jenkins.views.findByName('test').xml).similar()
+        new Diff(ViewFixtures.LIST_DSL_VIEW_XML, project.jenkins.views.findByName('test').xml).similar()
     }
 
     def "configure with dsl file generates correct xml" () {
@@ -61,7 +49,7 @@ class JenkinsViewTest extends ProjectSpec {
         }
 
         then:
-        new Diff(LIST_DSL_VIEW_XML, project.jenkins.views.findByName('test').xml).similar()
+        new Diff(ViewFixtures.LIST_DSL_VIEW_XML, project.jenkins.views.findByName('test').xml).similar()
     }
 
     def "configure throws exception when multiple views are generated" () {
@@ -91,7 +79,7 @@ class JenkinsViewTest extends ProjectSpec {
     def "configure loads xml from file" () {
         setup:
         def File xmlFile = project.file('test.xml')
-        xmlFile.write(LIST_DSL_VIEW_XML)
+        xmlFile.write(ViewFixtures.LIST_DSL_VIEW_XML)
 
         when:
         project.jenkins.views {
@@ -101,24 +89,24 @@ class JenkinsViewTest extends ProjectSpec {
         }
 
         then:
-        project.jenkins.views.test.xml == LIST_DSL_VIEW_XML
+        project.jenkins.views.test.xml == ViewFixtures.LIST_DSL_VIEW_XML
     }
 
     def "configure loads xml from string" () {
         when:
         project.jenkins.views {
             test {
-                xml(LIST_DSL_VIEW_XML)
+                xml(ViewFixtures.LIST_DSL_VIEW_XML)
             }
         }
 
         then:
-        project.jenkins.views.test.xml == LIST_DSL_VIEW_XML
+        project.jenkins.views.test.xml == ViewFixtures.LIST_DSL_VIEW_XML
     }
 
     def "getServerSpecificXml uses server-specific overrides" () {
         setup:
-        def newXml = LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
+        def newXml = ViewFixtures.LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
         project.jenkins {
             servers {
                 test1 {
@@ -136,22 +124,22 @@ class JenkinsViewTest extends ProjectSpec {
                         xml(newXml)
                     }
                     server project.jenkins.servers.test2
-                    xml(LIST_DSL_VIEW_XML)
+                    xml(ViewFixtures.LIST_DSL_VIEW_XML)
                 }
             }
         }
 
         expect:
         project.jenkins.views.test.getServerSpecificXml(project.jenkins.servers.test1) == newXml
-        project.jenkins.views.test.getServerSpecificXml(project.jenkins.servers.test2) == LIST_DSL_VIEW_XML
+        project.jenkins.views.test.getServerSpecificXml(project.jenkins.servers.test2) == ViewFixtures.LIST_DSL_VIEW_XML
     }
 
     def "configure with xml override generates correct xml" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
+        def newXml = ViewFixtures.LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
         File xmlFile = project.file('test.xml')
-        xmlFile.write(LIST_DSL_VIEW_XML)
+        xmlFile.write(ViewFixtures.LIST_DSL_VIEW_XML)
 
         when:
         project.jenkins.views {
@@ -170,7 +158,7 @@ class JenkinsViewTest extends ProjectSpec {
     def "configure with xml override from dsl generates correct xml" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
+        def newXml = ViewFixtures.LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
 
         when:
         project.jenkins.views {
@@ -191,7 +179,7 @@ class JenkinsViewTest extends ProjectSpec {
     def "configure with xml override from dsl file generates correct xml" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
+        def newXml = ViewFixtures.LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             view(type: ListView) {

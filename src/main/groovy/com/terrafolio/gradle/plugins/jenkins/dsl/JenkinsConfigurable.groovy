@@ -1,53 +1,23 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
-import org.gradle.util.ConfigureUtil
-
 /**
- * Created by ghale on 4/11/14.
+ * Created by ghale on 6/2/14.
  */
-abstract class JenkinsConfigurable {
+public interface JenkinsConfigurable {
 
-    protected def serverSpecificConfiguration = [:]
-    def serverDefinitions = []
-    def JenkinsOverrides serviceOverrides
-    def String name
+    def void serviceOverrides(Closure closure)
 
-    def serviceOverrides(Closure closure) {
-        if (this.serviceOverrides == null) {
-            this.serviceOverrides = new JenkinsOverrides()
-        }
-        ConfigureUtil.configure(closure, serviceOverrides)
-    }
+    def void serviceOverrides(JenkinsOverrides overrides)
 
-    def serviceOverrides(JenkinsOverrides overrides) {
-        this.serviceOverrides = overrides
-    }
+    def JenkinsOverrides getServiceOverrides()
 
-    def JenkinsOverrides getServiceOverrides() {
-        if (! serviceOverrides) {
-            serviceOverrides getDefaultOverrides()
-        }
+    def void server(JenkinsServerDefinition server)
 
-        return serviceOverrides
-    }
+    def void server(JenkinsServerDefinition server, Closure closure)
 
-    def server(JenkinsServerDefinition server) {
-        if (! serverDefinitions.contains(server)) {
-            serverDefinitions += server
-        }
-    }
+    def String getServerSpecificXml(JenkinsServerDefinition server)
 
-    def server(JenkinsServerDefinition server, Closure closure) {
-        this.server(server)
-        if (! serverSpecificConfiguration.containsKey(server)) {
-            serverSpecificConfiguration[server] = []
-        }
-        serverSpecificConfiguration[server] += closure
-    }
+    def Closure getDefaultOverrides()
 
-    def abstract String getServerSpecificXml(JenkinsServerDefinition server)
-
-    def abstract Closure getDefaultOverrides()
-
-    def abstract String getConfigurableName()
+    def String getConfigurableName()
 }

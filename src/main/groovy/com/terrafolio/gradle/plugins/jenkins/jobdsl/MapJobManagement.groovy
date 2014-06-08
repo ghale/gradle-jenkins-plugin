@@ -36,4 +36,9 @@ class MapJobManagement extends AbstractJobManagement {
         validateUpdateArgs(viewName, config)
         map.put(viewName, config)
     }
+
+    @Override
+    String getCredentialsId(String credentialsDescription) {
+        return credentialsDescription
+    }
 }

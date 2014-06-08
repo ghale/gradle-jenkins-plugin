@@ -1,18 +1,15 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
-import groovy.xml.StreamingMarkupBuilder
-import javaposse.jobdsl.dsl.*
-import javaposse.jobdsl.dsl.views.BuildPipelineView
-import javaposse.jobdsl.dsl.views.ListView
+import javaposse.jobdsl.dsl.JobManagement
 import org.gradle.util.ConfigureUtil
 
 /**
  * Created by ghale on 4/11/14.
  */
-class JenkinsView extends JenkinsConfigurable {
+class JenkinsView extends AbstractJenkinsConfigurable implements DSLConfigurable, XMLConfigurable {
     def String type
-    def String xml
-    protected JobManagement jm
+    def DSLSupport dslSupport
+    def XMLSupport xmlSupport
 
     def defaultOverrides = {
         create([ uri: "createView", params: [ name: name ] ])
@@ -21,15 +18,23 @@ class JenkinsView extends JenkinsConfigurable {
         delete([ uri: "view/${name}/doDelete" ])
     }
 
-    private static final Map<ViewType, Class<? extends View>> VIEW_TYPE_MAPPING = [
-            (null)                      : ListView.class,
-            (ViewType.ListView)         : ListView.class,
-            (ViewType.BuildPipelineView): BuildPipelineView.class,
-    ]
+    JenkinsView(String name) {
+        this.name = name
+        this.xmlSupport = new DefaultXMLSupport()
+    }
 
     JenkinsView(String name, JobManagement jm) {
-        this.name = name
-        this.jm = jm
+        this(name)
+        this.dslSupport = new ViewDSLSupport(jm)
+    }
+
+    def type(String type) {
+        this.type = type
+    }
+
+    void setViewXml(String xml) {
+        xmlSupport.setXml(xml)
+        dslSupport.addConfig(name, xml)
     }
 
     @Override
@@ -45,7 +50,9 @@ class JenkinsView extends JenkinsConfigurable {
     @Override
     String getServerSpecificXml(JenkinsServerDefinition server) {
         if (serverSpecificConfiguration.containsKey(server)) {
-            def JenkinsView serverSpecificView = new JenkinsView(name, jm)
+            def JenkinsView serverSpecificView = new JenkinsView(name)
+            serverSpecificView.setDslSupport(dslSupport)
+
             serverSpecificView.xml = xml
 
             serverSpecificConfiguration[server].each { closure ->
@@ -58,42 +65,67 @@ class JenkinsView extends JenkinsConfigurable {
         }
     }
 
-    def type(String type) {
-        this.type = type
+    @Override
+    def void dsl(File dslFile) {
+        def viewName = dslSupport.evaluateDSL(dslFile)
+        setViewXml(dslSupport.getConfig(viewName))
     }
 
-    def xml(String xml) {
-        this.xml = xml
+    @Override
+    def void dsl(Closure closure) {
+        def viewName = dslSupport.evaluateDSL(name, type, closure)
+        setViewXml(dslSupport.getConfig(viewName))
     }
 
-    def xml(File xmlFile) {
-        this.xml = xmlFile.text
+    @Override
+    DSLSupport getDSLSupport() {
+        return dslSupport
     }
 
-    def String override(Closure closure) {
-        def newXml = new XmlSlurper().parseText(xml)
-        closure.call(newXml)
-        def sbuilder = new StreamingMarkupBuilder()
-        return sbuilder.bind { mkp.yield newXml }.toString()
+    @Override
+    void setDSLSupport(DSLSupport support) {
+        this.dslSupport = support
     }
 
-    def dsl(File dslFile) {
-        ScriptRequest request = new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false)
-        GeneratedItems generatedItems = DslScriptLoader.runDslEngine(request, jm)
-
-        if (generatedItems.views.size() != 1) {
-            throw new JenkinsConfigurationException("The DSL script ${dslFile.path} did not generate exactly one view (${generatedItems.views.size()})!  Use the general dsl form to generate multiple jobs from dsl.")
-        } else {
-            GeneratedView generatedView = generatedItems.getViews().iterator().next()
-            xml = jm.getConfig(generatedView.name)
-        }
+    @Override
+    XMLSupport getXMLSupport() {
+        return xmlSupport
     }
 
-    def dsl(Closure closure) {
-        Class<? extends View> viewClass = VIEW_TYPE_MAPPING[type as ViewType]
-        View view = viewClass.newInstance()
-        view.with(closure)
-        xml = view.xml
-        jm.createOrUpdateView(name, view.xml, true)
+    @Override
+    void setXMLSupport(XMLSupport support) {
+        this.xmlSupport = support
+    }
+
+    @Override
+    String override(Closure closure) {
+        return xmlSupport.override(closure)
+    }
+
+    @Override
+    String getXml() {
+        return xmlSupport.xml
+    }
+
+    @Override
+    void setXml(String xml) {
+        setViewXml(xml)
+    }
+
+    @Override
+    void xml(String xml) {
+        setViewXml(xml)
+    }
+
+    @Override
+    void xml(File xmlFile) {
+        xmlSupport.xml(xmlFile)
+        setViewXml(xmlSupport.xml)
+    }
+
+    @Override
+    void xml(Closure closure) {
+        xmlSupport.xml(closure)
+        setViewXml(xmlSupport.xml)
     }
 }

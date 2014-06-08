@@ -6,91 +6,6 @@ import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
 
 class JenkinsJobTest extends ProjectSpec {
-    static final String FREEFORM_DSL_JOB_XML = """
-            <project>
-                <actions></actions>
-                <description></description>
-                <keepDependencies>false</keepDependencies>
-                <properties></properties>
-                <scm class='hudson.scm.NullSCM'></scm>
-                <canRoam>true</canRoam>
-                <disabled>false</disabled>
-                <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-                <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
-                <concurrentBuild>false</concurrentBuild>
-                <builders></builders>
-                <publishers></publishers>
-                <buildWrappers></buildWrappers>
-            </project>
-    """
-
-    static final String MAVEN_DSL_JOB_XML = """
-            <maven2-moduleset>
-              <actions/>
-              <description></description>
-              <keepDependencies>false</keepDependencies>
-              <properties/>
-              <scm class="hudson.scm.NullSCM"/>
-              <canRoam>true</canRoam>
-              <disabled>false</disabled>
-              <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-              <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-              <triggers class="vector"/>
-              <concurrentBuild>false</concurrentBuild>
-              <aggregatorStyleBuild>true</aggregatorStyleBuild>
-              <incrementalBuild>false</incrementalBuild>
-              <perModuleEmail>false</perModuleEmail>
-              <ignoreUpstremChanges>true</ignoreUpstremChanges>
-              <archivingDisabled>false</archivingDisabled>
-              <resolveDependencies>false</resolveDependencies>
-              <processPlugins>false</processPlugins>
-              <mavenValidationLevel>-1</mavenValidationLevel>
-              <runHeadless>false</runHeadless>
-              <publishers/>
-              <buildWrappers/>
-            </maven2-moduleset>
-    """
-
-    static final String MULTIJOB_DSL_JOB_XML = """
-            <com.tikal.jenkins.plugins.multijob.MultiJobProject plugin="jenkins-multijob-plugin@1.8">
-              <actions/>
-              <description/>
-              <keepDependencies>false</keepDependencies>
-              <properties/>
-              <scm class="hudson.scm.NullSCM"/>
-              <canRoam>true</canRoam>
-              <disabled>false</disabled>
-              <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-              <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-              <triggers class="vector"/>
-              <concurrentBuild>false</concurrentBuild>
-              <builders/>
-              <publishers/>
-              <buildWrappers/>
-            </com.tikal.jenkins.plugins.multijob.MultiJobProject>
-    """
-
-    static final String BUILDFLOW_DSL_JOB_XML = """
-            <com.cloudbees.plugins.flow.BuildFlow>
-              <actions/>
-              <description></description>
-              <keepDependencies>false</keepDependencies>
-              <properties/>
-              <scm class="hudson.scm.NullSCM"/>
-              <canRoam>true</canRoam>
-              <disabled>false</disabled>
-              <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-              <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-              <triggers class="vector"/>
-              <concurrentBuild>false</concurrentBuild>
-              <builders/>
-              <publishers/>
-              <buildWrappers/>
-              <icon/>
-              <dsl></dsl>
-            </com.cloudbees.plugins.flow.BuildFlow>
-    """
 
     def setup() {
         project.apply plugin: 'jenkins'
@@ -168,7 +83,7 @@ class JenkinsJobTest extends ProjectSpec {
         }
 
         then:
-        new Diff(FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+        new Diff(JobFixtures.FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
     def "configure with dsl closure generates correct xml" () {
@@ -187,7 +102,7 @@ class JenkinsJobTest extends ProjectSpec {
         }
 
         then:
-        new Diff(FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+        new Diff(JobFixtures.FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
     def "configure with dsl closure generates correct freeform xml" () {
@@ -207,7 +122,7 @@ class JenkinsJobTest extends ProjectSpec {
         }
 
         then:
-        new Diff(FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+        new Diff(JobFixtures.FREEFORM_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
     def "configure with dsl closure generates correct maven xml" () {
@@ -227,7 +142,7 @@ class JenkinsJobTest extends ProjectSpec {
         }
 
         then:
-        new Diff(MAVEN_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+        new Diff(JobFixtures.MAVEN_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
     def "configure with dsl closure generates correct multijob xml" () {
@@ -247,7 +162,7 @@ class JenkinsJobTest extends ProjectSpec {
         }
 
         then:
-        new Diff(MULTIJOB_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+        new Diff(JobFixtures.MULTIJOB_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
     def "configure with dsl closure generates correct buildflow xml" () {
@@ -267,7 +182,7 @@ class JenkinsJobTest extends ProjectSpec {
         }
 
         then:
-        new Diff(BUILDFLOW_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+        new Diff(JobFixtures.BUILDFLOW_DSL_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
     }
 
     def "configure with dsl closure throws exception on bad type" () {
@@ -306,7 +221,7 @@ class JenkinsJobTest extends ProjectSpec {
     def "configure with dsl file and definition overrides xml"() {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('true', 'false')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('true', 'false')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             job {
@@ -335,14 +250,14 @@ class JenkinsJobTest extends ProjectSpec {
     def "configure with dsl closure and definition generates correct xml"() {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
 
         when:
         project.jenkins {
             jobs {
                 test {
                     definition {
-                        xml FREEFORM_DSL_JOB_XML
+                        xml JobFixtures.FREEFORM_DSL_JOB_XML
                     }
                     dsl {
                         keepDependencies true
@@ -358,7 +273,7 @@ class JenkinsJobTest extends ProjectSpec {
     def "configure with dsl closure using template definition generates correct xml" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
 
         when:
         project.jenkins {
@@ -384,7 +299,7 @@ class JenkinsJobTest extends ProjectSpec {
     def "configure with dsl closure using template dsl generates correct xml" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
 
         when:
         project.jenkins {
@@ -410,7 +325,7 @@ class JenkinsJobTest extends ProjectSpec {
     def "configure with definition overrides xml from dsl template" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
 
         when:
         project.jenkins {
@@ -438,7 +353,7 @@ class JenkinsJobTest extends ProjectSpec {
     def "configure allows incremental dsl changes with closure" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
 
         when:
         project.jenkins {
@@ -466,7 +381,7 @@ class JenkinsJobTest extends ProjectSpec {
     def "configure allows incremental dsl changes with file" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             job {
@@ -500,7 +415,7 @@ class JenkinsJobTest extends ProjectSpec {
     def "configure with dsl file and definition generates correct xml"() {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             job {
@@ -515,7 +430,7 @@ class JenkinsJobTest extends ProjectSpec {
             jobs {
                 test {
                     definition {
-                        xml FREEFORM_DSL_JOB_XML.replaceFirst('n><', 'n>test<')
+                        xml JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('n><', 'n>test<')
                     }
                     dsl dslFile
                 }
@@ -581,7 +496,7 @@ class JenkinsJobTest extends ProjectSpec {
     def "getServerSpecificXml uses server-specific configuration" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
-        def newXml = FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
+        def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true')
 
         when:
         project.jenkins {
@@ -596,7 +511,7 @@ class JenkinsJobTest extends ProjectSpec {
                         }
                     }
                     definition {
-                        xml FREEFORM_DSL_JOB_XML
+                        xml JobFixtures.FREEFORM_DSL_JOB_XML
                     }
 
                 }

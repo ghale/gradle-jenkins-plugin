@@ -1,48 +1,101 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.jobdsl.MapJobManagement
+import javaposse.jobdsl.dsl.JobManagement
+import javaposse.jobdsl.dsl.JobType
 
 /**
  * Created by ghale on 4/8/14.
  */
-class JenkinsJobTemplate extends JenkinsJob {
-    JenkinsJobTemplate(String name, MapJobManagement jm) {
-        super(name, jm)
-        this.definition = new JenkinsJobDefinition(name)
+class JenkinsJobTemplate implements DSLConfigurable, XMLConfigurable {
+    def String name
+    def String type
+
+    protected DSLSupport dslSupport
+    protected XMLSupport xmlSupport
+
+    JenkinsJobTemplate(String name, JobManagement jm) {
+        this.name = name
+        dslSupport = new JobDSLSupport(jm)
+        xmlSupport = new DefaultXMLSupport()
+    }
+
+    def void type(String type) {
+        setType(type)
+    }
+
+    def void setType(String type) {
+        if (JobType.find(type) == null) {
+            throw new JenkinsConfigurationException("${type} is not a valid jenkins-job-dsl type!")
+        }
+        this.type = type
+    }
+
+    def void setTemplateXml(String xml) {
+        xmlSupport.setXml(xml)
+        dslSupport.addConfig(name, xml)
     }
 
     @Override
-    void setName(Object name) {
-        super.setName(name)
-        definition.name = name
+    void dsl(File dslFile) {
+        dslSupport.setParameter("GRADLE_JOB_NAME", name)
+        def jobName = dslSupport.evaluateDSL(dslFile)
+        setTemplateXml(dslSupport.getConfig(jobName))
     }
 
-    // This junk is for backwards compatibility.
-    // No, I'm not proud of it.
-    def String getXml() {
-        return definition.xml
+    @Override
+    void dsl(Closure closure) {
+        dslSupport.setParameter("GRADLE_JOB_NAME", name)
+        def jobName = dslSupport.evaluateDSL(name, type, closure)
+        setTemplateXml(dslSupport.getConfig(jobName))
     }
 
-    def void setXml(String xml) {
-        definition.xml = xml
-        jm.createOrUpdateConfig(name, xml, true)
+    @Override
+    DSLSupport getDSLSupport() {
+        return dslSupport
     }
 
-    def void xml(String xml) {
-        setXml(xml)
+    @Override
+    void setDSLSupport(DSLSupport support) {
+        this.dslSupport = support
     }
 
-    def void xml(File xmlFile) {
-        definition.xml(xmlFile)
-        jm.createOrUpdateConfig(name, definition.xml, true)
+    @Override
+    String override(Closure closure) {
+        return xmlSupport.override(closure)
     }
 
-    def xml(Closure closure) {
-        definition.xml(closure)
-        jm.createOrUpdateConfig(name, definition.xml, true)
+    @Override
+    String getXml() {
+        return xmlSupport.getXml()
     }
 
-    def String override(Closure closure) {
-        return definition.override(closure)
+    @Override
+    void setXml(String xml) {
+        setTemplateXml(xml)
+    }
+
+    @Override
+    void xml(String xml) {
+        setTemplateXml(xml)
+    }
+
+    @Override
+    void xml(File xmlFile) {
+        setTemplateXml(xmlSupport.xml)
+    }
+
+    @Override
+    void xml(Closure closure) {
+        setTemplateXml(xmlSupport.xml)
+    }
+
+    @Override
+    XMLSupport getXMLSupport() {
+        return xmlSupport
+    }
+
+    @Override
+    void setXMLSupport(XMLSupport support) {
+        this.xmlSupport = support
     }
 }
