@@ -11,7 +11,7 @@ import org.custommonkey.xmlunit.XMLUnit
 class JenkinsViewTest extends ProjectSpec {
 
     def setup() {
-        project.apply plugin: 'jenkins'
+        project.apply plugin: 'com.terrafolio.jenkins'
     }
 
     def "configure with dsl closure generates correct xml" () {

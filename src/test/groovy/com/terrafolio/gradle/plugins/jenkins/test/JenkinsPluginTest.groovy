@@ -10,9 +10,11 @@ import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.plugins.BasePlugin
 
 class JenkinsPluginTest extends PluginProjectSpec {
+    static final String PLUGINID = 'com.terrafolio.jenkins'
+
     @Override
     String getPluginName() {
-        return 'jenkins'
+        return PLUGINID
     }
 
     def setup() {
@@ -122,7 +124,7 @@ class JenkinsPluginTest extends PluginProjectSpec {
 
     def "checkAllServerValues checks only selected servers" () {
         setup:
-        def JenkinsPlugin plugin = project.plugins.findPlugin('jenkins')
+        def JenkinsPlugin plugin = project.plugins.findPlugin(PLUGINID)
         def mockConsole = Mock(MockConsoleInterface)
         def testFactory = new DefaultConsoleFactory() {
             def Object getConsole() {
@@ -155,7 +157,7 @@ class JenkinsPluginTest extends PluginProjectSpec {
 
     def "checkAllServerValues handles only insecure servers" () {
         setup:
-        def JenkinsPlugin plugin = project.plugins.findPlugin('jenkins')
+        def JenkinsPlugin plugin = project.plugins.findPlugin(PLUGINID)
         def mockConsole = Mock(MockConsoleInterface)
         def testFactory = new DefaultConsoleFactory() {
             def Object getConsole() {
@@ -187,7 +189,7 @@ class JenkinsPluginTest extends PluginProjectSpec {
 
     def "checkAllServerValues handles task that does not need credentials" () {
         setup:
-        def JenkinsPlugin plugin = project.plugins.findPlugin('jenkins')
+        def JenkinsPlugin plugin = project.plugins.findPlugin(PLUGINID)
         def mockConsole = Mock(MockConsoleInterface)
         def testFactory = new DefaultConsoleFactory() {
             def Object getConsole() {
@@ -224,7 +226,7 @@ class JenkinsPluginTest extends PluginProjectSpec {
 
     def "checkAllServerValues checks all secure servers" () {
         setup:
-        def JenkinsPlugin plugin = project.plugins.findPlugin('jenkins')
+        def JenkinsPlugin plugin = project.plugins.findPlugin(PLUGINID)
         def mockConsole = Mock(MockConsoleInterface)
         def testFactory = new DefaultConsoleFactory() {
             def Object getConsole() {
@@ -281,7 +283,7 @@ class JenkinsPluginTest extends PluginProjectSpec {
 
     def "checkAllServerValues throws exception on missing username" () {
         setup:
-        def JenkinsPlugin plugin = project.plugins.findPlugin('jenkins')
+        def JenkinsPlugin plugin = project.plugins.findPlugin(PLUGINID)
         project.jenkins.servers {
             test1 {
                 url 'testUrl'
@@ -303,7 +305,7 @@ class JenkinsPluginTest extends PluginProjectSpec {
 
     def "checkAllServerValues throws exception on missing password" () {
         setup:
-        def JenkinsPlugin plugin = project.plugins.findPlugin('jenkins')
+        def JenkinsPlugin plugin = project.plugins.findPlugin(PLUGINID)
         project.jenkins.servers {
             test1 {
                 url 'testUrl'
@@ -325,7 +327,7 @@ class JenkinsPluginTest extends PluginProjectSpec {
 
     def "checkAllServerValues throws exception on missing url" () {
         setup:
-        def JenkinsPlugin plugin = project.plugins.findPlugin('jenkins')
+        def JenkinsPlugin plugin = project.plugins.findPlugin(PLUGINID)
         project.jenkins.servers {
             test1 {
                 username 'testuser'
