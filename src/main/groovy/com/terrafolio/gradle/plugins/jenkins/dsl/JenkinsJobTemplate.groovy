@@ -81,11 +81,13 @@ class JenkinsJobTemplate implements DSLConfigurable, XMLConfigurable {
 
     @Override
     void xml(File xmlFile) {
+        xmlSupport.xml(xmlFile)
         setTemplateXml(xmlSupport.xml)
     }
 
     @Override
     void xml(Closure closure) {
+        xmlSupport.xml(closure)
         setTemplateXml(xmlSupport.xml)
     }
 
