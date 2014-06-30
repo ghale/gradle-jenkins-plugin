@@ -5,9 +5,11 @@ buildscript {
 
 	dependencies {
 		classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.4.1'
 	}
 }
 
+apply plugin: 'com.jfrog.bintray'
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -76,3 +78,23 @@ modifyPom {
 		}
 	}
 }
+
+bintray {
+    user = project.hasProperty('bintrayUsername') ? project.getProperty('bintrayUsername') : ''
+    key =  project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
+
+    configurations = [ 'archives' ]
+
+    pkg {
+        repo = 'gradle-plugins'
+        name = 'gradle-jenkins-plugin'
+        licenses = [ 'Apache-2.0' ]
+        desc = 'A Gradle plugin for programmatically managing Jenkins instances.'
+        websiteUrl = 'https://github.com/ghale/gradle-jenkins-plugin'
+        issueTrackerUrl = 'https://github.com/ghale/gradle-jenkins-plugin/issues'
+        vcsUrl = 'https://github.com/ghale/gradle-jenkins-plugin.git'
+        labels = [ 'jenkins', 'gradle' ]
+        publicDownloadNumbers = true
+    }
+}
+
