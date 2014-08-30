@@ -41,4 +41,8 @@ class MapJobManagement extends AbstractJobManagement {
     String getCredentialsId(String credentialsDescription) {
         return credentialsDescription
     }
+
+    @Override
+    void requireMinimumPluginVersion(String pluginShortName, String version){
+    }
 }
