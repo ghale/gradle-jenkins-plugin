@@ -1,12 +1,12 @@
 buildscript {
-	repositories {
-		jcenter()
-	}
+    repositories {
+        jcenter()
+    }
 
-	dependencies {
-		classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.4.1'
-	}
+    dependencies {
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+    }
 }
 
 apply plugin: 'com.jfrog.bintray'
@@ -16,85 +16,86 @@ apply plugin: 'idea'
 apply plugin: 'nexus'
 
 repositories {
-	addAll(buildscript.repositories)
+    addAll(buildscript.repositories)
 }
 
 dependencies {
-	compile (
-		gradleApi(),
-		localGroovy(),
-		'xmlunit:xmlunit:1.3',
-		'org.apache.ivy:ivy:2.2.0'
-	)
+    compile(
+        gradleApi(),
+        localGroovy(),
+        'xmlunit:xmlunit:1.3',
+        'org.apache.ivy:ivy:2.2.0'
+    )
 
-	compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
-	   exclude(module: 'groovy')
-	}
-	compile('org.jenkins-ci.plugins:job-dsl-core:1.24') {
-	   exclude(module: 'groovy-all')
-	}
+    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
+        exclude(module: 'groovy')
+    }
+    compile('org.jenkins-ci.plugins:job-dsl-core:1.24') {
+        exclude(module: 'groovy-all')
+    }
 
-    testCompile 'com.netflix.nebula:nebula-test:1.9.8'
+    testCompile 'com.netflix.nebula:nebula-test:1.12.2'
 }
 
 afterEvaluate {
-	javadocJar {
-		setDependsOn([groovydoc])
-		from groovydoc
-	}
+    javadocJar {
+        setDependsOn([groovydoc])
+        from groovydoc
+    }
 }
 
 task wrapper(type: Wrapper) {
-	gradleVersion = '1.11'
+    gradleVersion = '1.11'
 }
 
 modifyPom {
-	project {
-		name 'gradle-jenkins-plugin'
-		description 'This is a gradle plugin for programmatically configuring Jenkins jobs.'
-		url 'https://github.com/ghale/gradle-jenkins-plugin'
-		inceptionYear '2012'
+    project {
+        name 'gradle-jenkins-plugin'
+        description 'This is a gradle plugin for programmatically configuring Jenkins jobs.'
+        url 'https://github.com/ghale/gradle-jenkins-plugin'
+        inceptionYear '2012'
 
-		scm {
-			url 'https://github.com/ghale/gradle-jenkins-plugin.git'
-			connection 'scm:https://github.com/ghale/gradle-jenkins-plugin.git'
-			developerConnection 'scm:git@github.com/ghale/gradle-jenkins-plugin.git'
-		}
+        scm {
+            url 'https://github.com/ghale/gradle-jenkins-plugin.git'
+            connection 'scm:https://github.com/ghale/gradle-jenkins-plugin.git'
+            developerConnection 'scm:git@github.com/ghale/gradle-jenkins-plugin.git'
+        }
 
-		licenses {
-			license {
-				name 'The Apache Software License, Version 2.0'
-				url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-				distribution 'repo'
-			}
-		}
+        licenses {
+            license {
+                name 'The Apache Software License, Version 2.0'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution 'repo'
+            }
+        }
 
-		developers {
-			developer {
-				id 'ghale'
-				name 'Gary Hale'
-				email 'ghhale@computer.org'
-			}
-		}
-	}
+        developers {
+            developer {
+                id 'ghale'
+                name 'Gary Hale'
+                email 'ghhale@computer.org'
+            }
+        }
+    }
 }
 
 bintray {
     user = project.hasProperty('bintrayUsername') ? project.getProperty('bintrayUsername') : ''
-    key =  project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
+    key = project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
 
-    configurations = [ 'archives' ]
+    configurations = ['archives']
 
     pkg {
         repo = 'gradle-plugins'
         name = 'gradle-jenkins-plugin'
-        licenses = [ 'Apache-2.0' ]
+        licenses = ['Apache-2.0']
         desc = 'A Gradle plugin for programmatically managing Jenkins instances.'
         websiteUrl = 'https://github.com/ghale/gradle-jenkins-plugin'
         issueTrackerUrl = 'https://github.com/ghale/gradle-jenkins-plugin/issues'
         vcsUrl = 'https://github.com/ghale/gradle-jenkins-plugin.git'
-        labels = [ 'jenkins', 'gradle' ]
+        labels = ['jenkins', 'gradle']
         publicDownloadNumbers = true
+        attributes = ['gradle-plugin': 'com.terrafolio.jenkins:com.terrafolio:gradle-jenkins-plugin']
     }
 }
 
