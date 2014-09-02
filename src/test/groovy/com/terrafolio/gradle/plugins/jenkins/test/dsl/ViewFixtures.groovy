@@ -34,4 +34,26 @@ class ViewFixtures {
                 <showPipelineDefinitionHeader>false</showPipelineDefinitionHeader>
             </au.com.centrumsystems.hudson.plugin.buildpipeline.BuildPipelineView>
 """
+
+    protected static final String NESTED_DSL_VIEW_XML = """
+            <hudson.plugins.nested__view.NestedView>
+                <name>nested</name>
+                <filterExecutors>false</filterExecutors>
+                <filterQueue>false</filterQueue>
+                <properties class="hudson.model.View\$PropertyList"></properties>
+                <views></views>
+            </hudson.plugins.nested__view.NestedView>
+    """
+
+    protected static final String SECTIONED_DSL_VIEW_XML = """
+            <hudson.plugins.sectioned__view.SectionedView>
+                <filterExecutors>false</filterExecutors>
+                <filterQueue>false</filterQueue>
+                <properties class="hudson.model.View\$PropertyList"/>
+                <sections/>
+            </hudson.plugins.sectioned__view.SectionedView>
+    """
 }
+
+
+
