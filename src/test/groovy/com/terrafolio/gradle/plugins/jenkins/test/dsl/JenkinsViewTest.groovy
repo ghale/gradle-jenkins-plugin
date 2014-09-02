@@ -21,6 +21,9 @@ class JenkinsViewTest extends ProjectSpec {
         when:
         project.jenkins.views {
             test {
+                if (viewType) {
+                    type viewType
+                }
                 dsl {
                     name "test"
                 }
@@ -28,7 +31,13 @@ class JenkinsViewTest extends ProjectSpec {
         }
 
         then:
-        new Diff(ViewFixtures.LIST_DSL_VIEW_XML, project.jenkins.views.findByName('test').xml).similar()
+        new Diff(expectedXml, project.jenkins.views.findByName('test').xml).similar()
+
+        where:
+        viewType            | expectedXml
+        null                | ViewFixtures.LIST_DSL_VIEW_XML
+        'ListView'          | ViewFixtures.LIST_DSL_VIEW_XML
+        'BuildPipelineView' | ViewFixtures.BUILD_PIPELINE_VIEW_XML
     }
 
     def "configure with dsl file generates correct xml" () {

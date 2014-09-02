@@ -73,7 +73,13 @@ class ViewDSLSupportTest extends TempDirSpec {
         XMLUnit.setIgnoreWhitespace(true)
 
         expect:
-        support.evaluateDSL('test', null, dsl) == 'test'
-        new Diff(ViewFixtures.LIST_DSL_VIEW_XML, support.getConfig('test')).similar()
+        support.evaluateDSL('test', viewType, dsl) == 'test'
+        new Diff(xmlToMatch, support.getConfig('test')).similar()
+
+        where:
+        viewType            | xmlToMatch
+        null                | ViewFixtures.LIST_DSL_VIEW_XML
+        'ListView'          | ViewFixtures.LIST_DSL_VIEW_XML
+        'BuildPipelineView' | ViewFixtures.BUILD_PIPELINE_VIEW_XML
     }
 }
