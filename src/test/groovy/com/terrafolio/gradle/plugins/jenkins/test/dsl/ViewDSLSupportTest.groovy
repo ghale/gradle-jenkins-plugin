@@ -64,6 +64,40 @@ class ViewDSLSupportTest extends TempDirSpec {
         new Diff(ViewFixtures.LIST_DSL_VIEW_XML, support.getConfig('test')).similar()
     }
 
+    def "evaluateDSL from file creates correct XML (nestedView)" () {
+        setup:
+        File file = file("test.dsl",
+                """
+                    view(type: NestedView) {
+                        name 'test'
+                    }
+                """
+        )
+        support.jobManagement = new MapJobManagement(new HashMap<String, String>())
+        XMLUnit.setIgnoreWhitespace(true)
+
+        expect:
+        support.evaluateDSL(file) == 'test'
+        new Diff(ViewFixtures.NESTED_DSL_VIEW_XML, support.getConfig('test')).similar()
+    }
+
+    def "evaluateDSL from file creates correct XML (sectionedView)" () {
+        setup:
+        File file = file("test.dsl",
+                """
+                    view(type: SectionedView) {
+                        name 'test'
+                    }
+                """
+        )
+        support.jobManagement = new MapJobManagement(new HashMap<String, String>())
+        XMLUnit.setIgnoreWhitespace(true)
+
+        expect:
+        support.evaluateDSL(file) == 'test'
+        new Diff(ViewFixtures.SECTIONED_DSL_VIEW_XML, support.getConfig('test')).similar()
+    }
+
     def "evaluateDSL from closure creates correct XML" () {
         setup:
         Closure dsl = {
@@ -81,5 +115,7 @@ class ViewDSLSupportTest extends TempDirSpec {
         null                | ViewFixtures.LIST_DSL_VIEW_XML
         'ListView'          | ViewFixtures.LIST_DSL_VIEW_XML
         'BuildPipelineView' | ViewFixtures.BUILD_PIPELINE_VIEW_XML
+        'NestedView'        | ViewFixtures.NESTED_DSL_VIEW_XML
+        'SectionedView'     | ViewFixtures.SECTIONED_DSL_VIEW_XML
     }
 }

@@ -3,6 +3,8 @@ package com.terrafolio.gradle.plugins.jenkins.dsl
 import javaposse.jobdsl.dsl.*
 import javaposse.jobdsl.dsl.views.BuildPipelineView
 import javaposse.jobdsl.dsl.views.ListView
+import javaposse.jobdsl.dsl.views.NestedView
+import javaposse.jobdsl.dsl.views.SectionedView
 
 /**
  * Created by ghale on 6/2/14.
@@ -13,6 +15,8 @@ class ViewDSLSupport implements DSLSupport {
     private static final Map<ViewType, Class<? extends View>> VIEW_TYPE_MAPPING = [
             (null)                      : ListView.class,
             (ViewType.ListView)         : ListView.class,
+            (ViewType.NestedView)       : NestedView.class,
+            (ViewType.SectionedView)    : SectionedView.class,
             (ViewType.BuildPipelineView): BuildPipelineView.class,
     ]
 

@@ -30,7 +30,7 @@ dependencies {
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
         exclude(module: 'groovy')
     }
-    compile('org.jenkins-ci.plugins:job-dsl-core:1.24') {
+    compile('org.jenkins-ci.plugins:job-dsl-core:1.25') {
         exclude(module: 'groovy-all')
     }
 
