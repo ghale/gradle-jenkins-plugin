@@ -69,6 +69,7 @@ task integTest(type: Test) {
 
     systemProperty "jenkins.port", "${jenkinsPort}"
     systemProperty "jenkins.plugin", "${jar.archivePath}"
+    shouldRunAfter test
 }
 check.dependsOn integTest
 

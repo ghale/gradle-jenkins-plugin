@@ -4,6 +4,7 @@ import nebula.test.IntegrationSpec
 
 abstract class AbstractJenkinsIntegrationTest extends IntegrationSpec {
     def serverName = "test"
+    def needsCleanup = true
 
     def setup() {
         buildFile << """
@@ -28,6 +29,8 @@ abstract class AbstractJenkinsIntegrationTest extends IntegrationSpec {
     }
 
     def cleanup() {
-        runTasks("deleteJenkinsItems")
+        if (needsCleanup) {
+            runTasks("deleteJenkinsItems")
+        }
     }
 }

@@ -28,7 +28,7 @@ class JenkinsViewIntegrationTest extends AbstractJenkinsIntegrationTest {
         """
     }
 
-    def "can create/dump/validate/delete view in jenkins" () {
+    def "can create/dump/delete view in jenkins" () {
         when:
         ExecutionResult result = runTasks('updateJenkinsItems')
 

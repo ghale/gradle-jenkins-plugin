@@ -24,6 +24,13 @@ class JenkinsJobIntegrationTest extends AbstractJenkinsIntegrationTest {
         result.standardOutput.contains("Creating new item test_job")
 
         when:
+        result = runTasks('updateJenkinsItems')
+
+        then:
+        result.success
+        result.standardOutput.contains("Jenkins item test_job has no changes to the existing item")
+
+        when:
         result = runTasks('dumpRemoteJenkinsItems')
 
         then:
@@ -42,5 +49,24 @@ class JenkinsJobIntegrationTest extends AbstractJenkinsIntegrationTest {
         then:
         result.success
         result.standardOutput.contains("Deleting item test_job")
+    }
+
+    def "can force update a job" () {
+        when:
+        ExecutionResult result = runTasks('updateJenkinsItems')
+
+        then:
+        result.success
+        result.standardOutput.contains("Creating new item test_job")
+
+        when:
+        buildFile << """
+            project.ext.forceJenkinsJobsUpdate = 'true'
+        """
+        result = runTasks('updateJenkinsItems')
+
+        then:
+        result.success
+        result.standardOutput.contains("Updating item test_job")
     }
 }
