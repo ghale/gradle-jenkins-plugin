@@ -64,11 +64,6 @@ class MapJobManagement extends AbstractJobManagement {
     }
 
     @Override
-    String getMavenSettingsId(String settingsName){
-        return null
-    }
-
-    @Override
     String getConfigFileId(ConfigFileType type, String name){
         return null
     }

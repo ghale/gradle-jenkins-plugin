@@ -37,7 +37,6 @@ class ViewFixtures {
 
     protected static final String NESTED_DSL_VIEW_XML = """
             <hudson.plugins.nested__view.NestedView>
-                <name>nested</name>
                 <filterExecutors>false</filterExecutors>
                 <filterQueue>false</filterQueue>
                 <properties class="hudson.model.View\$PropertyList"></properties>

@@ -1,0 +1,95 @@
+ext.jenkinsProcess = null
+task startJenkins {
+    doFirst {
+        def jenkinsWar = configurations.jenkins.getSingleFile().path
+        def javaHomeDir = new File(System.getProperty('java.home'))
+        def javaExeFile = new File(javaHomeDir, 'bin/java')
+        def jenkinsHomeDir = file("${buildDir}/jenkins")
+        delete(jenkinsHomeDir)
+        jenkinsHomeDir.mkdirs()
+
+        project.jenkinsProcess = new BackgroundProcess(
+                command: [ javaExeFile.path, "-jar", jenkinsWar, "--httpPort=${jenkinsPort}" ],
+                directory: jenkinsHomeDir,
+                environment: [ 'JENKINS_HOME': jenkinsHomeDir.path ],
+                log: logger,
+                startupCheck: { it.endsWith("Jenkins is fully up and running") }
+        )
+        logger.warn("Starting jenkins on port ${jenkinsPort}...")
+        jenkinsProcess.start()
+
+        // wait for something to listen on the port
+        ant.waitfor(checkevery: '5', checkeveryunit: 'second') {
+            ant.socket(server: "localhost", 'port': "${jenkinsPort}")
+        }
+        // wait for the log message that jenkins has started
+        while (! jenkinsProcess.watcher.started) {
+            sleep(2000)
+        }
+    }
+}
+
+task stopJenkins {
+    doFirst {
+        jenkinsProcess.stop()
+    }
+}
+
+integTest {
+    dependsOn jar
+    dependsOn startJenkins
+    finalizedBy stopJenkins
+}
+
+class BackgroundProcess {
+    List<String> command
+    Process process
+    Map environment = [:]
+    File directory
+    Logger log
+    StartupWatcher watcher
+    Closure startupCheck
+
+    void start() {
+        ProcessBuilder builder = new ProcessBuilder(command.toArray() as String[])
+        builder.environment().putAll(environment.collectEntries {k, v -> [ k.toString(), v.toString() ] })
+        builder.directory(directory)
+        builder.redirectErrorStream(true)
+        process = builder.start()
+        watcher = new StartupWatcher(new BufferedReader(new InputStreamReader( process.getInputStream())), log, startupCheck)
+        watcher.start()
+    }
+
+    void setEnv(String key, String value) {
+        environment.put(key, value)
+    }
+
+    void stop() {
+        process.destroy()
+    }
+}
+
+class StartupWatcher extends Thread {
+    BufferedReader bufferedReader
+    Logger logger
+    Closure startupCheck
+    boolean started
+
+    public StartupWatcher(BufferedReader reader, Logger logger, Closure closure) {
+        this.bufferedReader = reader
+        this.logger = logger
+        this.startupCheck = closure
+    }
+
+    @Override
+    void run() {
+        String line
+        while(line = bufferedReader.readLine()) {
+            logger.warn(line)
+            if (! started) {
+                started = startupCheck.call(line)
+            }
+        }
+
+    }
+}

@@ -1,6 +1,9 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url 'http://repo.jenkins-ci.org/releases/'
+        }
     }
 
     dependencies {
@@ -19,6 +22,18 @@ repositories {
     addAll(buildscript.repositories)
 }
 
+sourceSets {
+    integTest {
+        compileClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
+    jenkins
+}
+
 dependencies {
     compile(
         gradleApi(),
@@ -30,12 +45,32 @@ dependencies {
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
         exclude(module: 'groovy')
     }
-    compile('org.jenkins-ci.plugins:job-dsl-core:1.25') {
+    compile('org.jenkins-ci.plugins:job-dsl-core:1.26') {
         exclude(module: 'groovy-all')
     }
 
-    testCompile 'com.netflix.nebula:nebula-test:1.12.2'
+    testCompile('com.netflix.nebula:nebula-test:1.12.4') {
+        exclude(module: 'groovy-all')
+    }
+
+    jenkins('org.jenkins-ci.main:jenkins-war:1.+') { transitive = false }
 }
+
+if (! project.hasProperty('jenkinsPort')) {
+    ext.jenkinsPort = 9999
+}
+
+task integTest(type: Test) {
+    binResultsDir = file("${buildDir}/integTest-results/binary/integTest")
+    reports.html.destination = "${buildDir}/reports/integTest"
+    reports.junitXml.destination = "${buildDir}/integTest=results"
+    classpath = sourceSets.integTest.runtimeClasspath
+    testClassesDir = compileIntegTestJava.destinationDir
+
+    systemProperty "jenkins.port", "${jenkinsPort}"
+    systemProperty "jenkins.plugin", "${jar.archivePath}"
+}
+check.dependsOn integTest
 
 afterEvaluate {
     javadocJar {
@@ -45,7 +80,7 @@ afterEvaluate {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.11'
+    gradleVersion = '1.12'
 }
 
 modifyPom {
@@ -95,7 +130,10 @@ bintray {
         vcsUrl = 'https://github.com/ghale/gradle-jenkins-plugin.git'
         labels = ['jenkins', 'gradle']
         publicDownloadNumbers = true
-        attributes = ['gradle-plugin': 'com.terrafolio.jenkins:com.terrafolio:gradle-jenkins-plugin']
+        version.attributes = ['gradle-plugin': 'com.terrafolio.jenkins:com.terrafolio:gradle-jenkins-plugin']
     }
 }
+
+apply from: "gradle/jenkinsIntegTest.gradle"
+
 
