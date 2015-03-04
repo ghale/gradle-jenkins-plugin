@@ -4,15 +4,18 @@ buildscript {
         maven {
             url 'http://repo.jenkins-ci.org/releases/'
         }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.0"
     }
 }
 
-apply plugin: 'com.jfrog.bintray'
+apply plugin: "com.gradle.plugin-publish"
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -45,10 +48,12 @@ dependencies {
         'org.apache.ivy:ivy:2.2.0'
     )
 
-    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.5.2') {
+    compile('org.codehaus.groovy.modules.http-builder:http-builder:0.6') {
         exclude(module: 'groovy')
+        exclude(module: 'xercesImpl')
     }
-    compile('org.jenkins-ci.plugins:job-dsl-core:1.26') {
+
+    compile('org.jenkins-ci.plugins:job-dsl-core:1.34') {
         exclude(module: 'groovy-all')
     }
 
@@ -87,6 +92,10 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.12'
 }
 
+nexus {
+    sign = false
+}
+
 modifyPom {
     project {
         name 'gradle-jenkins-plugin'
@@ -118,23 +127,17 @@ modifyPom {
     }
 }
 
-bintray {
-    user = project.hasProperty('bintrayUsername') ? project.getProperty('bintrayUsername') : ''
-    key = project.hasProperty('bintrayApiKey') ? project.getProperty('bintrayApiKey') : ''
+pluginBundle {
+    website = 'https://github.com/ghale/gradle-jenkins-plugin'
+    vcsUrl = 'https://github.com/ghale/gradle-jenkins-plugin'
+    description = 'A Gradle plugin for programmatically managing Jenkins instances.'
+    tags = ['jenkins', 'gradle']
 
-    configurations = ['archives']
-
-    pkg {
-        repo = 'gradle-plugins'
-        name = 'gradle-jenkins-plugin'
-        licenses = ['Apache-2.0']
-        desc = 'A Gradle plugin for programmatically managing Jenkins instances.'
-        websiteUrl = 'https://github.com/ghale/gradle-jenkins-plugin'
-        issueTrackerUrl = 'https://github.com/ghale/gradle-jenkins-plugin/issues'
-        vcsUrl = 'https://github.com/ghale/gradle-jenkins-plugin.git'
-        labels = ['jenkins', 'gradle']
-        publicDownloadNumbers = true
-        version.attributes = ['gradle-plugin': 'com.terrafolio.jenkins:com.terrafolio:gradle-jenkins-plugin']
+    plugins {
+        jenkins {
+            id = 'com.terrafolio.jenkins'
+            displayName = 'Gradle Jenkins plugin'
+        }
     }
 }
 

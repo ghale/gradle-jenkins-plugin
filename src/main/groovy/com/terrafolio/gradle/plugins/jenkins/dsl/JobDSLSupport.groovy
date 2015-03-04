@@ -1,15 +1,24 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
+import com.terrafolio.gradle.plugins.jenkins.jobdsl.DSLJobFactory
+import com.terrafolio.gradle.plugins.jenkins.jobdsl.DefaultDSLJobFactory
 import javaposse.jobdsl.dsl.*
 
 /**
  * Created by ghale on 6/2/14.
  */
 class JobDSLSupport implements DSLSupport {
-    def JobManagement jobManagement
+    JobManagement jobManagement
+    DSLJobFactory jobFactory
 
     JobDSLSupport(JobManagement jobManagement) {
         this.jobManagement = jobManagement
+        this.jobFactory = new DefaultDSLJobFactory()
+    }
+
+    JobDSLSupport(JobManagement jobManagement, DSLJobFactory jobFactory) {
+        this.jobManagement = jobManagement
+        this.jobFactory = jobFactory
     }
 
     @Override
@@ -27,7 +36,7 @@ class JobDSLSupport implements DSLSupport {
 
     @Override
     def String evaluateDSL(String name, String type, Closure closure) {
-        def Job job = new Job(jobManagement, ['type': type])
+        def Job job = jobFactory.create(jobManagement, type)
         // Load the existing xml as a template if it exists
         if (jobManagement.getConfig(name) && job.templateName == null) {
             job.using(name)

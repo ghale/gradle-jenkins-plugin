@@ -1,27 +1,24 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
+import com.terrafolio.gradle.plugins.jenkins.jobdsl.DSLViewFactory
+import com.terrafolio.gradle.plugins.jenkins.jobdsl.DefaultDSLViewFactory
 import javaposse.jobdsl.dsl.*
-import javaposse.jobdsl.dsl.views.BuildPipelineView
-import javaposse.jobdsl.dsl.views.ListView
-import javaposse.jobdsl.dsl.views.NestedView
-import javaposse.jobdsl.dsl.views.SectionedView
 
 /**
  * Created by ghale on 6/2/14.
  */
 class ViewDSLSupport implements DSLSupport {
-    def JobManagement jobManagement
-
-    private static final Map<ViewType, Class<? extends View>> VIEW_TYPE_MAPPING = [
-            (null)                      : ListView.class,
-            (ViewType.ListView)         : ListView.class,
-            (ViewType.NestedView)       : NestedView.class,
-            (ViewType.SectionedView)    : SectionedView.class,
-            (ViewType.BuildPipelineView): BuildPipelineView.class,
-    ]
+    JobManagement jobManagement
+    DSLViewFactory viewFactory
 
     ViewDSLSupport(JobManagement jobManagement) {
         this.jobManagement = jobManagement
+        this.viewFactory = new DefaultDSLViewFactory()
+    }
+
+    ViewDSLSupport(JobManagement jobManagement, DSLViewFactory viewFactory) {
+        this.jobManagement = jobManagement
+        this.viewFactory = viewFactory
     }
 
     @Override
@@ -39,8 +36,7 @@ class ViewDSLSupport implements DSLSupport {
 
     @Override
     String evaluateDSL(String name, String type, Closure closure) {
-        Class<? extends View> viewClass = VIEW_TYPE_MAPPING[type as ViewType]
-        View view = viewClass.newInstance()
+        View view = viewFactory.createView(jobManagement, type)
         view.with(closure)
         jobManagement.createOrUpdateView(name, view.xml, true)
         return name

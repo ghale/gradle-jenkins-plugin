@@ -4,6 +4,7 @@ import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
 import nebula.test.ProjectSpec
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
+import spock.lang.Unroll
 
 /**
  * Created by ghale on 4/11/14.
@@ -14,7 +15,8 @@ class JenkinsViewTest extends ProjectSpec {
         project.apply plugin: 'com.terrafolio.jenkins'
     }
 
-    def "configure with dsl closure generates correct xml" () {
+    @Unroll
+    def "configure with dsl closure generates correct xml for #viewType" () {
         setup:
         XMLUnit.setIgnoreWhitespace(true)
 
