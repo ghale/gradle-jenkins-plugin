@@ -57,7 +57,7 @@ dependencies {
         exclude(module: 'groovy-all')
     }
 
-    testCompile('com.netflix.nebula:nebula-test:1.12.4') {
+    testCompile('com.netflix.nebula:nebula-test:1.12.5') {
         exclude(module: 'groovy-all')
     }
 
@@ -138,6 +138,12 @@ pluginBundle {
             id = 'com.terrafolio.jenkins'
             displayName = 'Gradle Jenkins plugin'
         }
+    }
+
+    mavenCoordinates {
+        groupId = project.group
+        artifactId = project.name
+        version = project.version
     }
 }
 
