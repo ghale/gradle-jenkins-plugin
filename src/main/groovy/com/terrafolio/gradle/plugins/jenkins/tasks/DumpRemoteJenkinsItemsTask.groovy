@@ -6,6 +6,8 @@ import com.terrafolio.gradle.plugins.jenkins.service.BuildDirService
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 
 class DumpRemoteJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
+    def prettyPrint = false
+
     DumpRemoteJenkinsItemsTask() {
         description = "Dumps remote item configurations from server(s) to files."
     }
@@ -21,7 +23,14 @@ class DumpRemoteJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
 
             def file = new File(buildDir.makeAndGetDir("remotes/${server.name}/$itemTypeDir"), "${item.name}.xml")
 
-            file.write(serverStrItem)
+            if (prettyPrint) {
+                file.withWriter { fileWriter ->
+                    def node = new XmlParser().parseText(serverStrItem);
+                    new XmlNodePrinter(new PrintWriter(fileWriter)).print(node)
+                }
+            } else {
+                file.write(serverStrItem)
+            }
         }
     }
 }
