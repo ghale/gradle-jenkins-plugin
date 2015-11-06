@@ -5,6 +5,7 @@ import com.terrafolio.gradle.plugins.jenkins.service.BuildDirService
 
 class DumpJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
     def prettyPrint = true
+    def prettyPrintPreserveWhitespace = false;
 
     public DumpJenkinsItemsTask() {
         super();
@@ -20,7 +21,7 @@ class DumpJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
                 file.withWriter { fileWriter ->
                     def node = new XmlParser().parseText(item.getServerSpecificXml(server));
                     def nodePrinter = new XmlNodePrinter(new PrintWriter(fileWriter))
-                    nodePrinter.preserveWhitespace = true;
+                    nodePrinter.preserveWhitespace = prettyPrintPreserveWhitespace;
                     nodePrinter.print(node)
                 }
             } else {

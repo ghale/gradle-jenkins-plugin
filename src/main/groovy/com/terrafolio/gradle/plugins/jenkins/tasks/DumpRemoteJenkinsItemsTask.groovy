@@ -7,6 +7,7 @@ import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 
 class DumpRemoteJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
     def prettyPrint = false
+    def prettyPrintPreserveWhitespace = true;
 
     DumpRemoteJenkinsItemsTask() {
         description = "Dumps remote item configurations from server(s) to files."
@@ -27,7 +28,7 @@ class DumpRemoteJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
                 file.withWriter { fileWriter ->
                     def node = new XmlParser().parseText(serverStrItem);
                     def nodePrinter = new XmlNodePrinter(new PrintWriter(fileWriter))
-                    nodePrinter.preserveWhitespace = true;
+                    nodePrinter.preserveWhitespace = prettyPrintPreserveWhitespace;
                     nodePrinter.print(node)
                 }
             } else {
