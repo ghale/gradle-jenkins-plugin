@@ -19,7 +19,9 @@ class DumpJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
             if (prettyPrint) {
                 file.withWriter { fileWriter ->
                     def node = new XmlParser().parseText(item.getServerSpecificXml(server));
-                    new XmlNodePrinter(new PrintWriter(fileWriter)).print(node)
+                    def nodePrinter = new XmlNodePrinter(new PrintWriter(fileWriter))
+                    nodePrinter.preserveWhitespace = true;
+                    nodePrinter.print(node)
                 }
             } else {
                 def xml = item.getServerSpecificXml(server)

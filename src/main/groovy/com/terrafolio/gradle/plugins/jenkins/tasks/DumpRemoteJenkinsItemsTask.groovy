@@ -26,7 +26,9 @@ class DumpRemoteJenkinsItemsTask extends AbstractDumpJenkinsItemsTask {
             if (prettyPrint) {
                 file.withWriter { fileWriter ->
                     def node = new XmlParser().parseText(serverStrItem);
-                    new XmlNodePrinter(new PrintWriter(fileWriter)).print(node)
+                    def nodePrinter = new XmlNodePrinter(new PrintWriter(fileWriter))
+                    nodePrinter.preserveWhitespace = true;
+                    nodePrinter.print(node)
                 }
             } else {
                 file.write(serverStrItem)
