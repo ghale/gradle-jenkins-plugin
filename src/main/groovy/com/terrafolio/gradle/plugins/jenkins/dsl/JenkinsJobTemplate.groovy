@@ -1,7 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
+import com.terrafolio.gradle.plugins.jenkins.jobdsl.DSLJobType
 import javaposse.jobdsl.dsl.JobManagement
-import javaposse.jobdsl.dsl.JobType
 
 /**
  * Created by ghale on 4/8/14.
@@ -24,7 +24,7 @@ class JenkinsJobTemplate implements DSLConfigurable, XMLConfigurable {
     }
 
     def void setType(String type) {
-        if (JobType.find(type) == null) {
+        if (DSLJobType.find(type) == null) {
             throw new JenkinsConfigurationException("${type} is not a valid jenkins-job-dsl type!")
         }
         this.type = type

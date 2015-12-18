@@ -1,8 +1,8 @@
 package com.terrafolio.gradle.plugins.jenkins.dsl
 
+import com.terrafolio.gradle.plugins.jenkins.jobdsl.DSLJobType
 import groovy.xml.StreamingMarkupBuilder
 import javaposse.jobdsl.dsl.JobManagement
-import javaposse.jobdsl.dsl.JobType
 import org.gradle.util.ConfigureUtil
 
 class JenkinsJob extends AbstractJenkinsConfigurable implements DSLConfigurable, XMLConfigurable {
@@ -37,7 +37,7 @@ class JenkinsJob extends AbstractJenkinsConfigurable implements DSLConfigurable,
     }
 
     def void setType(String type) {
-        if (JobType.find(type) == null) {
+        if (DSLJobType.find(type) == null) {
             throw new JenkinsConfigurationException("${type} is not a valid jenkins-job-dsl type!")
         }
         this.type = type

@@ -51,8 +51,7 @@ class ViewDSLSupportTest extends TempDirSpec {
         setup:
         File file = file("test.dsl",
                 """
-                    view {
-                        name "test"
+                    listView("test") {
                     }
                 """
         )
@@ -68,8 +67,7 @@ class ViewDSLSupportTest extends TempDirSpec {
         setup:
         File file = file("test.dsl",
                 """
-                    view(type: NestedView) {
-                        name 'test'
+                    nestedView("test") {
                     }
                 """
         )
@@ -85,8 +83,7 @@ class ViewDSLSupportTest extends TempDirSpec {
         setup:
         File file = file("test.dsl",
                 """
-                    view(type: SectionedView) {
-                        name 'test'
+                    sectionedView("test") {
                     }
                 """
         )
@@ -101,7 +98,7 @@ class ViewDSLSupportTest extends TempDirSpec {
     def "evaluateDSL from closure creates correct XML" () {
         setup:
         Closure dsl = {
-            name "test"
+            name = "test"
         }
         support.jobManagement = new MapJobManagement(new HashMap<String, String>())
         XMLUnit.setIgnoreWhitespace(true)

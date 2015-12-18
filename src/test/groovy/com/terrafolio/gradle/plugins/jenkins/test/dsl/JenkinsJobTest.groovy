@@ -68,8 +68,7 @@ class JenkinsJobTest extends ProjectSpec {
         XMLUnit.setIgnoreWhitespace(true)
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            job {
-                name "\${GRADLE_JOB_NAME}"
+            freeStyleJob("\${GRADLE_JOB_NAME}") {
             }
         """)
 
@@ -95,7 +94,7 @@ class JenkinsJobTest extends ProjectSpec {
             jobs {
                 test {
                     dsl {
-                        name "Test Job"
+                        name = "Test Job"
                     }
                 }
             }
@@ -115,7 +114,7 @@ class JenkinsJobTest extends ProjectSpec {
                 test {
                     type 'Freeform'
                     dsl {
-                        name "Test Job"
+                        name = "Test Job"
                     }
                 }
             }
@@ -135,7 +134,7 @@ class JenkinsJobTest extends ProjectSpec {
                 test {
                     type 'Maven'
                     dsl {
-                        name "Test Job"
+                        name = "Test Job"
                     }
                 }
             }
@@ -155,7 +154,7 @@ class JenkinsJobTest extends ProjectSpec {
                 test {
                     type 'Multijob'
                     dsl {
-                        name "Test Job"
+                        name = "Test Job"
                     }
                 }
             }
@@ -175,7 +174,7 @@ class JenkinsJobTest extends ProjectSpec {
                 test {
                     type 'BuildFlow'
                     dsl {
-                        name "Test Job"
+                        name = "Test Job"
                     }
                 }
             }
@@ -224,8 +223,7 @@ class JenkinsJobTest extends ProjectSpec {
         def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('true', 'false')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            job {
-                name "\${GRADLE_JOB_NAME}"
+            freeStyleJob("\${GRADLE_JOB_NAME}") {
             }
         """)
 
@@ -384,8 +382,7 @@ class JenkinsJobTest extends ProjectSpec {
         def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            job {
-                name "\${GRADLE_JOB_NAME}"
+            freeStyleJob("\${GRADLE_JOB_NAME}") {
                 using "\${GRADLE_JOB_NAME}"
                 keepDependencies true
             }
@@ -418,8 +415,7 @@ class JenkinsJobTest extends ProjectSpec {
         def newXml = JobFixtures.FREEFORM_DSL_JOB_XML.replaceFirst('false', 'true').replaceFirst('n><', 'n>test<')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            job {
-                name "\${GRADLE_JOB_NAME}"
+            freeStyleJob("\${GRADLE_JOB_NAME}") {
                 using "\${GRADLE_JOB_NAME}"
                 keepDependencies true
             }
@@ -446,8 +442,7 @@ class JenkinsJobTest extends ProjectSpec {
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             for (i in 0..1) {
-                job {
-                    name "Test Job \${i}"
+                freeStyleJob("Test Job \${i}") {
                 }
             }
         """)
@@ -474,7 +469,7 @@ class JenkinsJobTest extends ProjectSpec {
             jobs {
                 test {
                     dsl {
-                        name "Test Job"
+                        name = "Test Job"
                         wrappers {
                             configure { root ->
                                 count++

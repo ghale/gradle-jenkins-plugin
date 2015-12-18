@@ -3,7 +3,6 @@ package com.terrafolio.gradle.plugins.jenkins.test.dsl
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsJob
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsView
 import javaposse.jobdsl.dsl.NameNotProvidedException
-import javaposse.jobdsl.dsl.ViewType
 import nebula.test.ProjectSpec
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
@@ -77,8 +76,7 @@ class JenkinsConfigurationTest extends ProjectSpec {
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             for (i in 0..2) {
-                job {
-                    name "Test Job \${i}"
+                freeStyleJob("Test Job \${i}") {
                 }
             }
         """)
@@ -106,8 +104,7 @@ class JenkinsConfigurationTest extends ProjectSpec {
         def dslFile1 = new File(jenkinsDir, 'test1.dsl')
         dslFile1.write("""
             for (i in 0..2) {
-                job {
-                    name "Test Job \${i}"
+                freeStyleJob("Test Job \${i}") {
                 }
             }
         """)
@@ -115,8 +112,7 @@ class JenkinsConfigurationTest extends ProjectSpec {
         def dslFile2 = new File(jenkinsDir, 'test2.dsl')
         dslFile2.write("""
             for (i in 0..2) {
-                job {
-                    name "Another Job \${i}"
+                freeStyleJob("Another Job \${i}") {
                 }
             }
         """)
@@ -145,8 +141,7 @@ class JenkinsConfigurationTest extends ProjectSpec {
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             for (i in 0..2) {
-                view(type: ListView) {
-                    name("test view \${i}")
+                listView("test view \${i}") {
                 }
             }
         """)
@@ -173,8 +168,7 @@ class JenkinsConfigurationTest extends ProjectSpec {
         def dslFile1 = new File(jenkinsDir, 'test1.dsl')
         dslFile1.write("""
             for (i in 0..2) {
-                view(type: ListView) {
-                    name "test view \${i}"
+                listView("test view \${i}") {
                 }
             }
         """)
@@ -182,8 +176,7 @@ class JenkinsConfigurationTest extends ProjectSpec {
         def dslFile2 = new File(jenkinsDir, 'test2.dsl')
         dslFile2.write("""
             for (i in 0..2) {
-                view(type: ListView) {
-                    name "another view \${i}"
+                listView("another view \${i}") {
                 }
             }
         """)
@@ -212,8 +205,7 @@ class JenkinsConfigurationTest extends ProjectSpec {
         project.jenkins {
             dsl {
                 for (i in 0..2) {
-                    job {
-                        name "Test Job ${i}"
+                    freeStyleJob("Test Job ${i}") {
                     }
                 }
             }
@@ -236,8 +228,7 @@ class JenkinsConfigurationTest extends ProjectSpec {
         project.jenkins {
             dsl {
                 for (i in 0..2) {
-                    view(type: ViewType.ListView) {
-                        name "test view ${i}"
+                    listView("test view ${i}") {
                     }
                 }
             }
@@ -254,46 +245,6 @@ class JenkinsConfigurationTest extends ProjectSpec {
         "test view 2" | EMPTY_DSL_VIEW_XML
     }
 
-    def "configure throws exeception when no job name provided with dsl closure"() {
-        when:
-        project.jenkins {
-            dsl {
-                for (i in 0..2) {
-                    job {
-                        steps {
-                            shell("echo test")
-                        }
-                    }
-                }
-            }
-        }
-
-        then:
-        thrown(NameNotProvidedException)
-    }
-
-    def "configure throws exeception when no job name provided with dsl file"() {
-        setup:
-        def dslFile = project.file('test.dsl')
-        dslFile.write("""
-            for (i in 0..9) {
-                job {
-                    steps {
-                        shell "echo test"
-                    }
-                }
-            }
-        """)
-
-        when:
-        project.jenkins {
-            dsl project.files('test.dsl')
-        }
-
-        then:
-        thrown(NameNotProvidedException)
-    }
-
     def "configure configures jobs using dsl closure with basis xml"(jobName, xml) {
         setup:
         project.jenkins {
@@ -306,9 +257,8 @@ class JenkinsConfigurationTest extends ProjectSpec {
             }
             dsl {
                 for (i in 0..2) {
-                    job {
+                    freeStyleJob("Another Job ${i}") {
                         using "Test Job"
-                        name "Another Job ${i}"
                     }
                 }
             }
@@ -329,9 +279,8 @@ class JenkinsConfigurationTest extends ProjectSpec {
         def dslFile = project.file('test.dsl')
         dslFile.write("""
             for (i in 0..2) {
-                job {
+                freeStyleJob("Another Job \${i}") {
                     using "Test Job"
-                    name "Another Job \${i}"
                 }
             }
         """)

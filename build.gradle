@@ -53,9 +53,11 @@ dependencies {
         exclude(module: 'xercesImpl')
     }
 
-    compile('org.jenkins-ci.plugins:job-dsl-core:1.34') {
+    compile('org.jenkins-ci.plugins:job-dsl-core:1.42') {
         exclude(module: 'groovy-all')
     }
+
+    compile 'com.google.guava:guava:19.0'
 
     testCompile('com.netflix.nebula:nebula-test:1.12.5') {
         exclude(module: 'groovy-all')

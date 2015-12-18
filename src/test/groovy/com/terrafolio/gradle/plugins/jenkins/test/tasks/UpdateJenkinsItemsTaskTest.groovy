@@ -107,6 +107,8 @@ class UpdateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
                       <properties class="hudson.model.View\$PropertyList"/>
                       <jobNames class="tree-set">
                         <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                        <string>execute-skips-view-update-when-there-are-no-changes compile (develop)</string>
+                        <string>execute-skips-view-update-when-there-are-no-changes compile (master)</string>
                       </jobNames>
                       <jobFilters/>
                       <columns/>

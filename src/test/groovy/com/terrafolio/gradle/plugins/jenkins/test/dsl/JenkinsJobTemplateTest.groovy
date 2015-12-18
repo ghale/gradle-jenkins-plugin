@@ -90,8 +90,7 @@ class JenkinsJobTemplateTest extends ProjectSpec {
         XMLUnit.setIgnoreWhitespace(true)
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            job {
-                name "\${GRADLE_JOB_NAME}"
+            freeStyleJob("\${GRADLE_JOB_NAME}") {
             }
         """)
 
@@ -117,7 +116,7 @@ class JenkinsJobTemplateTest extends ProjectSpec {
             templates {
                 test {
                     dsl {
-                        name "Test Job"
+                        name = "Test Job"
                     }
                 }
             }

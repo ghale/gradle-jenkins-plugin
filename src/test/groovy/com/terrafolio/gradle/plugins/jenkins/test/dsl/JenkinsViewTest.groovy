@@ -27,7 +27,7 @@ class JenkinsViewTest extends ProjectSpec {
                     type viewType
                 }
                 dsl {
-                    name "test"
+                    name = "test"
                 }
             }
         }
@@ -47,8 +47,7 @@ class JenkinsViewTest extends ProjectSpec {
         XMLUnit.setIgnoreWhitespace(true)
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            view(type: ListView) {
-                name "test"
+            listView("test") {
             }
         """)
 
@@ -68,11 +67,9 @@ class JenkinsViewTest extends ProjectSpec {
         XMLUnit.setIgnoreWhitespace(true)
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-                view {
-                    name "Test View 1"
+                listView("Test View 1") {
                 }
-                view {
-                    name "Test View 2"
+                listView("Test View 2") {
                 }
         """)
 
@@ -175,7 +172,7 @@ class JenkinsViewTest extends ProjectSpec {
         project.jenkins.views {
             test {
                 dsl {
-                    name "test"
+                    name = "test"
                 }
                 xml override { viewXml ->
                     viewXml.filterExecutors = 'true'
@@ -193,8 +190,7 @@ class JenkinsViewTest extends ProjectSpec {
         def newXml = ViewFixtures.LIST_DSL_VIEW_XML.replaceFirst('false', 'true')
         def dslFile = project.file('test.dsl')
         dslFile.write("""
-            view(type: ListView) {
-                name "test"
+            listView("test") {
             }
         """)
 

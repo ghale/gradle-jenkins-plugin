@@ -53,7 +53,14 @@ class MapJobManagement extends AbstractJobManagement {
     }
 
     @Override
+    void logPluginDeprecationWarning(String pluginShortName, String minimumVersion) { }
+
+    @Override
     void requireMinimumPluginVersion(String pluginShortName, String version){
+    }
+
+    @Override
+    void requireMinimumPluginVersion(String pluginShortName, String version, boolean failIfMissing) {
     }
 
     @Override
@@ -105,6 +112,9 @@ class MapJobManagement extends AbstractJobManagement {
 
     @Override
     void requirePlugin(String pluginShortName) { }
+
+    @Override
+    void requirePlugin(String pluginShortName, boolean failIfMissing) { }
 
     @Override
     void requireMinimumCoreVersion(String version) { }
