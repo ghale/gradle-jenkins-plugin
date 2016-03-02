@@ -86,9 +86,4 @@ class MapJobManagementTest extends Specification {
         expect:
         jm.getConfig("test") == null
     }
-
-    def "getCredentials returns passed uuid" () {
-        expect:
-        jm.getCredentialsId("test") == "test"
-    }
 }

@@ -37,6 +37,7 @@ class MapJobManagement extends AbstractJobManagement {
         return true
     }
 
+    @Override
     String createOrUpdateConfigFile(ConfigFile configFile, boolean ignoreExisting){
         return null
     }
@@ -48,12 +49,17 @@ class MapJobManagement extends AbstractJobManagement {
     }
 
     @Override
-    String getCredentialsId(String credentialsDescription) {
-        return credentialsDescription
-    }
+    void logPluginDeprecationWarning(String pluginShortName, String minimumVersion) { }
 
     @Override
-    void logPluginDeprecationWarning(String pluginShortName, String minimumVersion) { }
+    boolean isMinimumPluginVersionInstalled(String pluginShortName, String version) {
+        VersionNumber actualVersion = getPluginVersion(pluginShortName)
+        if (actualVersion == null) {
+            return false
+        }
+        VersionNumber minimumVersion = new VersionNumber(version)
+        return !actualVersion.isOlderThan(minimumVersion)
+    }
 
     @Override
     void requireMinimumPluginVersion(String pluginShortName, String version){
