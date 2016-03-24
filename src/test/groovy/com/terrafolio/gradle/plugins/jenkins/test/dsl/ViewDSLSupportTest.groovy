@@ -16,7 +16,7 @@ class ViewDSLSupportTest extends TempDirSpec {
 
     def setup() {
         mockJobManagement = Mock(JobManagement)
-        support = new ViewDSLSupport(mockJobManagement)
+        support = new TestViewDSLSupport(mockJobManagement)
     }
 
     def "addConfig adds a config to JobManagement" () {
@@ -55,7 +55,7 @@ class ViewDSLSupportTest extends TempDirSpec {
                     }
                 """
         )
-        support.jobManagement = new MapJobManagement(new HashMap<String, String>())
+        support = new TestViewDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)
 
         expect:
@@ -71,7 +71,7 @@ class ViewDSLSupportTest extends TempDirSpec {
                     }
                 """
         )
-        support.jobManagement = new MapJobManagement(new HashMap<String, String>())
+        support = new TestViewDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)
 
         expect:
@@ -87,7 +87,7 @@ class ViewDSLSupportTest extends TempDirSpec {
                     }
                 """
         )
-        support.jobManagement = new MapJobManagement(new HashMap<String, String>())
+        support = new TestViewDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)
 
         expect:
@@ -100,7 +100,7 @@ class ViewDSLSupportTest extends TempDirSpec {
         Closure dsl = {
             name = "test"
         }
-        support.jobManagement = new MapJobManagement(new HashMap<String, String>())
+        support = new TestViewDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)
 
         expect:
@@ -114,5 +114,13 @@ class ViewDSLSupportTest extends TempDirSpec {
         'BuildPipelineView' | ViewFixtures.BUILD_PIPELINE_VIEW_XML
         'NestedView'        | ViewFixtures.NESTED_DSL_VIEW_XML
         'SectionedView'     | ViewFixtures.SECTIONED_DSL_VIEW_XML
+    }
+
+    static class TestViewDSLSupport implements ViewDSLSupport {
+        final JobManagement jobManagement
+
+        TestViewDSLSupport(JobManagement jobManagement) {
+            this.jobManagement = jobManagement
+        }
     }
 }

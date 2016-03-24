@@ -16,7 +16,7 @@ class JobDSLSupportTest extends TempDirSpec {
 
     def setup() {
         mockJobManagement = Mock(JobManagement)
-        support = new JobDSLSupport(mockJobManagement)
+        support = new TestDSLSupport(mockJobManagement)
     }
 
     def "addConfig adds a config to JobManagement" () {
@@ -55,7 +55,7 @@ class JobDSLSupportTest extends TempDirSpec {
                     }
                 """
         )
-        support.jobManagement = new MapJobManagement(new HashMap<String, String>())
+        support = new TestDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)
 
         expect:
@@ -68,7 +68,7 @@ class JobDSLSupportTest extends TempDirSpec {
         Closure dsl = {
             name = "test"
         }
-        support.jobManagement = new MapJobManagement(new HashMap<String, String>())
+        support = new TestDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)
 
         expect:
@@ -83,4 +83,11 @@ class JobDSLSupportTest extends TempDirSpec {
         'Buildflow' | JobFixtures.BUILDFLOW_DSL_JOB_XML
     }
 
+    class TestDSLSupport implements JobDSLSupport {
+        final JobManagement jobManagement
+
+        TestDSLSupport(JobManagement jobManagement) {
+            this.jobManagement = jobManagement
+        }
+    }
 }

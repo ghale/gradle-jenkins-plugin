@@ -1,7 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.test.dsl
 
-import com.terrafolio.gradle.plugins.jenkins.dsl.DefaultXMLSupport
 import com.terrafolio.gradle.plugins.jenkins.dsl.XMLSupport
+import com.terrafolio.gradle.plugins.jenkins.dsl.BasicXMLSupport
 import com.terrafolio.gradle.plugins.jenkins.test.TempDirSpec
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
@@ -9,11 +9,11 @@ import org.custommonkey.xmlunit.XMLUnit
 /**
  * Created on 6/27/14.
  */
-class DefaultXMLSupportTest extends TempDirSpec {
-    XMLSupport support
+class XMLSupportTest extends TempDirSpec {
+    BasicXMLSupport support
 
     def setup() {
-        support = new DefaultXMLSupport()
+        support = new TestXMLSupport()
     }
 
     def "xml from file loads correctly" () {
@@ -56,4 +56,6 @@ class DefaultXMLSupportTest extends TempDirSpec {
         expect:
         new Diff(expectedXml, support.override { it.keepDependencies = 'true' }).similar()
     }
+
+    class TestXMLSupport implements XMLSupport { }
 }

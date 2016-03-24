@@ -1,6 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsTask
+import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsItemsTask
 import com.terrafolio.gradle.plugins.jenkins.tasks.JenkinsValidationException
 import com.terrafolio.gradle.plugins.jenkins.tasks.ValidateJenkinsItemsTask
 import org.gradle.api.tasks.TaskExecutionException
@@ -10,7 +10,7 @@ import org.gradle.api.tasks.TaskExecutionException
  */
 class ValidateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
     @Override
-    AbstractJenkinsTask createTaskUnderTest() {
+    AbstractJenkinsItemsTask createTaskUnderTest() {
         return project.task('taskUnderTest', type: ValidateJenkinsItemsTask)
     }
 

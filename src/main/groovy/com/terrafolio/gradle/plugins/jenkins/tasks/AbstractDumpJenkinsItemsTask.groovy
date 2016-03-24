@@ -8,7 +8,7 @@ import com.terrafolio.gradle.plugins.jenkins.service.BuildDirService
 /**
  * Created by ghale on 5/18/14.
  */
-abstract class AbstractDumpJenkinsItemsTask extends AbstractJenkinsTask {
+abstract class AbstractDumpJenkinsItemsTask extends AbstractJenkinsItemsTask {
     @Override
     public void doExecute() {
         def buildDirService = BuildDirService.forProject(project)

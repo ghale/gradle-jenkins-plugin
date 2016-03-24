@@ -8,7 +8,7 @@ import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.Difference
 import org.custommonkey.xmlunit.XMLUnit
 
-class ValidateJenkinsItemsTask extends AbstractJenkinsTask {
+class ValidateJenkinsItemsTask extends AbstractJenkinsItemsTask {
     def failOnDifference = true
 
     ValidateJenkinsItemsTask() {

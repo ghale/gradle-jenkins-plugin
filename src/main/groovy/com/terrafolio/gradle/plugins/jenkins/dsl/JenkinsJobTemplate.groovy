@@ -6,17 +6,15 @@ import javaposse.jobdsl.dsl.JobManagement
 /**
  * Created by ghale on 4/8/14.
  */
-class JenkinsJobTemplate implements DSLConfigurable, XMLConfigurable {
+class JenkinsJobTemplate implements JobDSLSupport, XMLSupport, DSLConfigurable, XMLConfigurable {
     def String name
     def String type
 
-    protected DSLSupport dslSupport
-    protected XMLSupport xmlSupport
+    final JobManagement jobManagement
 
-    JenkinsJobTemplate(String name, JobManagement jm) {
+    JenkinsJobTemplate(String name, JobManagement jobManagement) {
         this.name = name
-        dslSupport = new JobDSLSupport(jm)
-        xmlSupport = new DefaultXMLSupport()
+        this.jobManagement = jobManagement
     }
 
     def void type(String type) {
@@ -30,74 +28,23 @@ class JenkinsJobTemplate implements DSLConfigurable, XMLConfigurable {
         this.type = type
     }
 
-    def void setTemplateXml(String xml) {
-        xmlSupport.setXml(xml)
-        dslSupport.addConfig(name, xml)
-    }
-
     @Override
     void dsl(File dslFile) {
-        dslSupport.setParameter("GRADLE_JOB_NAME", name)
-        def jobName = dslSupport.evaluateDSL(dslFile)
-        setTemplateXml(dslSupport.getConfig(jobName))
+        setParameter("GRADLE_JOB_NAME", name)
+        def jobName = evaluateDSL(dslFile)
+        setXml(getConfig(jobName))
     }
 
     @Override
     void dsl(Closure closure) {
-        dslSupport.setParameter("GRADLE_JOB_NAME", name)
-        def jobName = dslSupport.evaluateDSL(name, type, closure)
-        setTemplateXml(dslSupport.getConfig(jobName))
-    }
-
-    @Override
-    DSLSupport getDSLSupport() {
-        return dslSupport
-    }
-
-    @Override
-    void setDSLSupport(DSLSupport support) {
-        this.dslSupport = support
-    }
-
-    @Override
-    String override(Closure closure) {
-        return xmlSupport.override(closure)
-    }
-
-    @Override
-    String getXml() {
-        return xmlSupport.getXml()
+        setParameter("GRADLE_JOB_NAME", name)
+        def jobName = evaluateDSL(name, type, closure)
+        setXml(getConfig(jobName))
     }
 
     @Override
     void setXml(String xml) {
-        setTemplateXml(xml)
-    }
-
-    @Override
-    void xml(String xml) {
-        setTemplateXml(xml)
-    }
-
-    @Override
-    void xml(File xmlFile) {
-        xmlSupport.xml(xmlFile)
-        setTemplateXml(xmlSupport.xml)
-    }
-
-    @Override
-    void xml(Closure closure) {
-        xmlSupport.xml(closure)
-        setTemplateXml(xmlSupport.xml)
-    }
-
-    @Override
-    XMLSupport getXMLSupport() {
-        return xmlSupport
-    }
-
-    @Override
-    void setXMLSupport(XMLSupport support) {
-        this.xmlSupport = support
+        XMLSupport.super.setXml(xml)
+        addConfig(name, xml)
     }
 }

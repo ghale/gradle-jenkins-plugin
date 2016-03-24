@@ -3,8 +3,7 @@ package com.terrafolio.gradle.plugins.jenkins.dsl
 /**
  * Created by ghale on 6/2/14.
  */
-public interface XMLConfigurable {
-
+public interface BasicXMLSupport {
     def String override(Closure closure)
 
     def String getXml()

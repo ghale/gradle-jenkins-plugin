@@ -5,10 +5,10 @@ import groovy.xml.StreamingMarkupBuilder
 import javaposse.jobdsl.dsl.JobManagement
 import org.gradle.util.ConfigureUtil
 
-class JenkinsJob extends AbstractJenkinsConfigurable implements DSLConfigurable, XMLConfigurable {
+class JenkinsJob extends AbstractJenkinsConfigurable implements JobDSLSupport, DSLConfigurable, XMLConfigurable {
     def definition
     def type
-    protected DSLSupport dslSupport
+    final JobManagement jobManagement;
 
     def defaultOverrides = {
         create([ uri: "createItem", params: [ name: definition.name ] ])
@@ -17,9 +17,9 @@ class JenkinsJob extends AbstractJenkinsConfigurable implements DSLConfigurable,
         delete([ uri: "job/${definition.name}/doDelete" ])
     }
 
-    JenkinsJob(String name, JobManagement jm) {
+    JenkinsJob(String name, JobManagement jobManagement) {
         this.name = name
-        this.dslSupport = new JobDSLSupport(jm)
+        this.jobManagement = jobManagement
     }
 
     @Override
@@ -50,7 +50,7 @@ class JenkinsJob extends AbstractJenkinsConfigurable implements DSLConfigurable,
     def setDefinition(JenkinsJobDefinition definition) {
         this.definition = definition
         if (definition.xml != null) {
-            dslSupport.addConfig(name, definition.xml)
+            addConfig(name, definition.xml)
         }
     }
 
@@ -60,38 +60,28 @@ class JenkinsJob extends AbstractJenkinsConfigurable implements DSLConfigurable,
         }
         ConfigureUtil.configure(closure, definition)
         if (definition.xml != null) {
-            dslSupport.addConfig(name, definition.xml)
+            addConfig(name, definition.xml)
         }
     }
 
     @Override
     def void dsl(File dslFile) {
-        dslSupport.setParameter("GRADLE_JOB_NAME", name)
+        setParameter("GRADLE_JOB_NAME", name)
 
-        def jobName = dslSupport.evaluateDSL(dslFile)
+        def jobName = evaluateDSL(dslFile)
         def definition = new JenkinsJobDefinition(jobName == null ? name : jobName)
-        definition.xml dslSupport.getConfig(jobName)
+        definition.xml getConfig(jobName)
         setDefinition(definition)
     }
 
     @Override
     def void dsl(Closure closure) {
-        dslSupport.setParameter("GRADLE_JOB_NAME", name)
+        setParameter("GRADLE_JOB_NAME", name)
 
-        def jobName = dslSupport.evaluateDSL(name, type, closure)
+        def jobName = evaluateDSL(name, type, closure)
         def definition = new JenkinsJobDefinition(jobName)
-        definition.xml dslSupport.getConfig(jobName)
+        definition.xml getConfig(jobName)
         setDefinition(definition)
-    }
-
-    @Override
-    DSLSupport getDSLSupport() {
-        return dslSupport
-    }
-
-    @Override
-    void setDSLSupport(DSLSupport support) {
-        this.dslSupport = support
     }
 
     @Override
@@ -145,15 +135,5 @@ class JenkinsJob extends AbstractJenkinsConfigurable implements DSLConfigurable,
     @Override
     void xml(Closure closure) {
         setXml(new StreamingMarkupBuilder().bind(closure).toString())
-    }
-
-    @Override
-    XMLSupport getXMLSupport() {
-        return definition
-    }
-
-    @Override
-    void setXMLSupport(XMLSupport support) {
-        this.definition = support
     }
 }

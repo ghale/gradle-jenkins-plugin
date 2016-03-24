@@ -1,6 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsTask
+import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsItemsTask
 import com.terrafolio.gradle.plugins.jenkins.tasks.DumpJenkinsItemsTask
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
@@ -10,7 +10,7 @@ import org.custommonkey.xmlunit.XMLUnit
  */
 class DumpJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
     @Override
-    AbstractJenkinsTask createTaskUnderTest() {
+    AbstractJenkinsItemsTask createTaskUnderTest() {
         return project.task('taskUnderTest', type: DumpJenkinsItemsTask)
     }
 

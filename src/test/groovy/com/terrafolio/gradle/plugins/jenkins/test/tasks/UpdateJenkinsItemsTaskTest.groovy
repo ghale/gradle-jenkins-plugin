@@ -1,11 +1,11 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsTask
+import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsItemsTask
 import com.terrafolio.gradle.plugins.jenkins.tasks.UpdateJenkinsItemsTask
 
 class UpdateJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
     @Override
-    AbstractJenkinsTask createTaskUnderTest() {
+    AbstractJenkinsItemsTask createTaskUnderTest() {
         return project.task('taskUnderTest', type: UpdateJenkinsItemsTask)
     }
 

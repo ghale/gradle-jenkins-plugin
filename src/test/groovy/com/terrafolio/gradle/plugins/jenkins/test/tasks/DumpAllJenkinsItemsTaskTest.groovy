@@ -1,13 +1,13 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
 import com.terrafolio.gradle.plugins.jenkins.ConsoleFactory
-import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsTask
+import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsItemsTask
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
 
 class DumpAllJenkinsItemsTaskTest extends JenkinsPluginTaskSpec {
     @Override
-    AbstractJenkinsTask createTaskUnderTest() {
+    AbstractJenkinsItemsTask createTaskUnderTest() {
         return project.tasks.dumpJenkinsItems
     }
 

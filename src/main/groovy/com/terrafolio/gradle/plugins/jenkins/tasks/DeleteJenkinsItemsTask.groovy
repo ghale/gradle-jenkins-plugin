@@ -6,7 +6,7 @@ import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsServerDefinition
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsView
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 
-class DeleteJenkinsItemsTask extends AbstractJenkinsTask {
+class DeleteJenkinsItemsTask extends AbstractJenkinsItemsTask {
     DeleteJenkinsItemsTask() {
         super()
         description = "Deletes items from the server(s)."

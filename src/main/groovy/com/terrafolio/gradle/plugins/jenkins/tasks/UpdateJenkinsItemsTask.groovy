@@ -6,7 +6,7 @@ import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
 
-class UpdateJenkinsItemsTask extends AbstractJenkinsTask {
+class UpdateJenkinsItemsTask extends AbstractJenkinsItemsTask {
     UpdateJenkinsItemsTask() {
         description = "Updates item configurations on the server(s)."
     }

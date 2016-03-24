@@ -7,19 +7,8 @@ import javaposse.jobdsl.dsl.*
 /**
  * Created by ghale on 6/2/14.
  */
-class ViewDSLSupport implements DSLSupport {
-    JobManagement jobManagement
-    DSLViewFactory viewFactory
-
-    ViewDSLSupport(JobManagement jobManagement) {
-        this.jobManagement = jobManagement
-        this.viewFactory = new DefaultDSLViewFactory()
-    }
-
-    ViewDSLSupport(JobManagement jobManagement, DSLViewFactory viewFactory) {
-        this.jobManagement = jobManagement
-        this.viewFactory = viewFactory
-    }
+trait ViewDSLSupport implements DSLSupport {
+    final DSLViewFactory viewFactory = new DefaultDSLViewFactory()
 
     @Override
     String evaluateDSL(File dslFile) {

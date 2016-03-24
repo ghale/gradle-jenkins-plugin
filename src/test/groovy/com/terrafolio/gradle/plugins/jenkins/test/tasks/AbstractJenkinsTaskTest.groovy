@@ -1,6 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.test.tasks
 
-import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsTask
+import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsItemsTask
 import com.terrafolio.gradle.plugins.jenkins.tasks.DumpJenkinsItemsTask
 import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
 
@@ -9,7 +9,7 @@ import com.terrafolio.gradle.plugins.jenkins.dsl.JenkinsConfigurationException
  */
 class AbstractJenkinsTaskTest extends JenkinsPluginTaskSpec {
     @Override
-    AbstractJenkinsTask createTaskUnderTest() {
+    AbstractJenkinsItemsTask createTaskUnderTest() {
         return project.task('taskUnderTest', type: DumpJenkinsItemsTask)
     }
 

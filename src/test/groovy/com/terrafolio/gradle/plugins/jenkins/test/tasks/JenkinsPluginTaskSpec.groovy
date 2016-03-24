@@ -3,7 +3,7 @@ package com.terrafolio.gradle.plugins.jenkins.test.tasks
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsService
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceFactory
-import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsTask
+import com.terrafolio.gradle.plugins.jenkins.tasks.AbstractJenkinsItemsTask
 import nebula.test.ProjectSpec
 import org.junit.Ignore
 
@@ -12,7 +12,7 @@ import org.junit.Ignore
  */
 abstract class JenkinsPluginTaskSpec extends ProjectSpec {
     public JenkinsService mockJenkinsRESTService
-    public AbstractJenkinsTask taskUnderTest
+    public AbstractJenkinsItemsTask taskUnderTest
 
     public static final String BASE_JOB_XML = """
         <project>
@@ -89,10 +89,10 @@ abstract class JenkinsPluginTaskSpec extends ProjectSpec {
         injectFactory(taskUnderTest)
     }
 
-    abstract AbstractJenkinsTask createTaskUnderTest()
+    abstract AbstractJenkinsItemsTask createTaskUnderTest()
 
     @Ignore
-    def injectFactory(AbstractJenkinsTask task) {
+    def injectFactory(AbstractJenkinsItemsTask task) {
         task.serviceFactory = new JenkinsServiceFactory() {
             @Override
             JenkinsService getService(String url) {

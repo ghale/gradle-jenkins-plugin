@@ -158,7 +158,7 @@ class JenkinsPlugin implements Plugin<Project> {
     }
 
     def checkAllServerValues(taskGraph) {
-        taskGraph.getAllTasks().findAll { it instanceof AbstractJenkinsTask }.collect { AbstractJenkinsTask task ->
+        taskGraph.getAllTasks().findAll { it instanceof AbstractJenkinsItemsTask }.collect { AbstractJenkinsItemsTask task ->
             if (task.needsCredentials) {
                 if (task.servers != null) {
                     return task.servers
