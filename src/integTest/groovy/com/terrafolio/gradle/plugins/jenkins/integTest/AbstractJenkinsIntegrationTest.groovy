@@ -12,7 +12,7 @@ abstract class AbstractJenkinsIntegrationTest extends IntegrationSpec {
         buildFile << """
             buildscript {
                 dependencies {
-                    classpath files('${System.getProperty('jenkins.plugin')}')
+                    classpath files('${System.getProperty('jenkins.plugin').replaceAll("\\\\", "/")}')
                 }
             }
 
