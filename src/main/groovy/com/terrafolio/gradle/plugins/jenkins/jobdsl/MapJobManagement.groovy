@@ -10,7 +10,7 @@ import javaposse.jobdsl.dsl.JobConfigurationNotFoundException
 import javaposse.jobdsl.dsl.NameNotProvidedException
 import hudson.util.VersionNumber
 import javaposse.jobdsl.dsl.UserContent
-import javaposse.jobdsl.dsl.helpers.ExtensibleContext
+import javaposse.jobdsl.dsl.ExtensibleContext
 
 /**
  * Created by ghale on 4/6/14.
@@ -30,7 +30,6 @@ class MapJobManagement extends AbstractJobManagement {
         return map.get(jobName)
     }
 
-    @Override
     boolean createOrUpdateConfig(String jobName, String config, boolean ignoreExisting) throws NameNotProvidedException, ConfigurationMissingException {
         validateUpdateArgs(jobName, config)
         map.put(jobName, config)
