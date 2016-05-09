@@ -19,14 +19,6 @@ class JobDSLSupportTest extends TempDirSpec {
         support = new TestDSLSupport(mockJobManagement)
     }
 
-    def "addConfig adds a config to JobManagement" () {
-        when:
-        support.addConfig("test", "XXX")
-
-        then:
-        1 * mockJobManagement.createOrUpdateConfig("test", "XXX", true)
-    }
-
     def "getConfig returns a config from JobManagement" () {
         when:
         support.getConfig("test")
