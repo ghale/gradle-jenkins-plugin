@@ -53,7 +53,7 @@ dependencies {
         exclude(module: 'groovy')
     }
 
-    compile('org.jenkins-ci.plugins:job-dsl-core:1.44') {
+    compile('org.jenkins-ci.plugins:job-dsl-core:1.46') {
         exclude(module: 'groovy-all')
     }
 
