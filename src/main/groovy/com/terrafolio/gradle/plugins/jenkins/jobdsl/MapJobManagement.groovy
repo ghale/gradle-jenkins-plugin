@@ -69,11 +69,6 @@ class MapJobManagement extends AbstractJobManagement {
     }
 
     @Override
-    VersionNumber getPluginVersion(String pluginShortName){
-        return null
-    }
-
-    @Override
     Integer getVSphereCloudHash(String name){
         return null
     }
@@ -123,11 +118,6 @@ class MapJobManagement extends AbstractJobManagement {
 
     @Override
     void requireMinimumCoreVersion(String version) { }
-
-    @Override
-    VersionNumber getJenkinsVersion() {
-        return null
-    }
 
     @Override
     Set<String> getPermissions(String authorizationMatrixPropertyClassName) {
