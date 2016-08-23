@@ -1,5 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.service
 
+import com.google.common.annotations.VisibleForTesting
 import groovy.xml.StreamingMarkupBuilder
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
@@ -20,6 +21,10 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 
     public JenkinsRESTServiceImpl(String url) {
         this.url = url
+    }
+
+    @VisibleForTesting
+    public JenkinsRESTServiceImpl() {
     }
 
     def getRestClient() {
