@@ -10,7 +10,7 @@ import javaposse.jobdsl.dsl.JobConfigurationNotFoundException
 import javaposse.jobdsl.dsl.NameNotProvidedException
 import hudson.util.VersionNumber
 import javaposse.jobdsl.dsl.UserContent
-import javaposse.jobdsl.dsl.helpers.ExtensibleContext
+import javaposse.jobdsl.dsl.ExtensibleContext
 
 /**
  * Created by ghale on 4/6/14.
@@ -30,7 +30,6 @@ class MapJobManagement extends AbstractJobManagement {
         return map.get(jobName)
     }
 
-    @Override
     boolean createOrUpdateConfig(String jobName, String config, boolean ignoreExisting) throws NameNotProvidedException, ConfigurationMissingException {
         validateUpdateArgs(jobName, config)
         map.put(jobName, config)
@@ -67,11 +66,6 @@ class MapJobManagement extends AbstractJobManagement {
 
     @Override
     void requireMinimumPluginVersion(String pluginShortName, String version, boolean failIfMissing) {
-    }
-
-    @Override
-    VersionNumber getPluginVersion(String pluginShortName){
-        return null
     }
 
     @Override
@@ -124,11 +118,6 @@ class MapJobManagement extends AbstractJobManagement {
 
     @Override
     void requireMinimumCoreVersion(String version) { }
-
-    @Override
-    VersionNumber getJenkinsVersion() {
-        return null
-    }
 
     @Override
     Set<String> getPermissions(String authorizationMatrixPropertyClassName) {

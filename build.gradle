@@ -5,17 +5,17 @@ buildscript {
             url 'http://repo.jenkins-ci.org/releases/'
         }
         maven {
-            url "https://plugins.gradle.org/m2/"
+            url 'https://plugins.gradle.org/m2/'
         }
     }
 
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.3"
+        classpath 'com.gradle.publish:plugin-publish-plugin:0.9.3'
     }
 }
 
-apply plugin: "com.gradle.plugin-publish"
+apply plugin: 'com.gradle.plugin-publish'
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -47,11 +47,13 @@ dependencies {
         'xmlunit:xmlunit:1.3'
     )
 
+    compile('org.jenkins-ci:version-number:1.1')
+
     compile('org.codehaus.groovy.modules.http-builder:http-builder:0.7.2') {
         exclude(module: 'groovy')
     }
 
-    compile('org.jenkins-ci.plugins:job-dsl-core:1.43') {
+    compile('org.jenkins-ci.plugins:job-dsl-core:1.50') {
         exclude(module: 'groovy-all')
     }
 
