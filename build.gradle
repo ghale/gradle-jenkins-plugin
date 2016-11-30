@@ -16,6 +16,7 @@ buildscript {
 }
 
 apply plugin: 'com.gradle.plugin-publish'
+apply plugin: 'java-gradle-plugin'
 apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -67,6 +68,8 @@ dependencies {
         exclude(module: 'groovy-all')
     }
 
+    integTestCompile gradleTestKit()
+
     jenkins('org.jenkins-ci.main:jenkins-war:1.+') { transitive = false }
 }
 
@@ -82,7 +85,6 @@ task integTest(type: Test) {
     testClassesDir = compileIntegTestJava.destinationDir
 
     systemProperty "jenkins.port", "${jenkinsPort}"
-    systemProperty "jenkins.plugin", "${jar.archivePath}"
     shouldRunAfter test
 }
 check.dependsOn integTest

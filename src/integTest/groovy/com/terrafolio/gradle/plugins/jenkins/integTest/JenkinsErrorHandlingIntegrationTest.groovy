@@ -1,7 +1,5 @@
 package com.terrafolio.gradle.plugins.jenkins.integTest
 
-import nebula.test.functional.ExecutionResult
-
 class JenkinsErrorHandlingIntegrationTest extends AbstractJenkinsIntegrationTest {
     def setup() {
         buildFile << """
@@ -26,12 +24,12 @@ class JenkinsErrorHandlingIntegrationTest extends AbstractJenkinsIntegrationTest
         """
 
         when:
-        ExecutionResult result = runTasks('updateJenkinsItems')
+        TaskResults results = fails('updateJenkinsItems')
 
         then:
-        result.failure
-        result.standardError.contains("Jenkins Service Call failed")
-        result.standardError.contains("Connection to http://localhost:${badPort} refused")
+        results.allFailed
+        results.output.contains("Jenkins Service Call failed")
+        results.output.contains("Connection to http://localhost:${badPort} refused")
     }
 
     def "provides sensible error when url path is wrong" () {
@@ -44,11 +42,11 @@ class JenkinsErrorHandlingIntegrationTest extends AbstractJenkinsIntegrationTest
         """
 
         when:
-        ExecutionResult result = runTasks('updateJenkinsItems')
+        TaskResults results = fails('updateJenkinsItems')
 
         then:
-        result.failure
-        result.standardError.contains("Jenkins Service Call failed")
-        result.standardError.contains("Not Found")
+        results.allFailed
+        results.output.contains("Jenkins Service Call failed")
+        results.output.contains("Not Found")
     }
 }

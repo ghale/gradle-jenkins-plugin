@@ -1,7 +1,5 @@
 package com.terrafolio.gradle.plugins.jenkins.integTest
 
-import nebula.test.functional.ExecutionResult
-
 class JenkinsViewIntegrationTest extends AbstractJenkinsIntegrationTest {
     def setup() {
         buildFile << """
@@ -30,24 +28,24 @@ class JenkinsViewIntegrationTest extends AbstractJenkinsIntegrationTest {
 
     def "can create/dump/delete view in jenkins" () {
         when:
-        ExecutionResult result = runTasks('updateJenkinsItems')
+        TaskResults results = succeeds('updateJenkinsItems')
 
         then:
-        result.success
-        result.standardOutput.contains("Creating new item test_view")
+        results.allSucceeded
+        results.output.contains("Creating new item test_view")
 
         when:
-        result = runTasks('dumpRemoteJenkinsItems')
+        results = succeeds('dumpRemoteJenkinsItems')
 
         then:
-        result.success
+        results.allSucceeded
         fileExists("build/remotes/${serverName}/views/test_view.xml")
 
         when:
-        result = runTasks('deleteJenkinsItems')
+        results = succeeds('deleteJenkinsItems')
 
         then:
-        result.success
-        result.standardOutput.contains("Deleting item test_view")
+        results.allSucceeded
+        results.output.contains("Deleting item test_view")
     }
 }
