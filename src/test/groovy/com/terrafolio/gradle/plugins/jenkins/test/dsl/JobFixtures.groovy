@@ -48,7 +48,7 @@ class JobFixtures {
             </maven2-moduleset>
     """
     protected static final String MULTIJOB_DSL_JOB_XML = """
-            <com.tikal.jenkins.plugins.multijob.MultiJobProject plugin="jenkins-multijob-plugin@1.8">
+            <com.tikal.jenkins.plugins.multijob.MultiJobProject>
               <actions/>
               <description/>
               <keepDependencies>false</keepDependencies>

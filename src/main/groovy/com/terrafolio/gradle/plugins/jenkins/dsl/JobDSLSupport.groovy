@@ -13,7 +13,8 @@ trait JobDSLSupport implements DSLSupport {
     @Override
     def String evaluateDSL(File dslFile) {
         ScriptRequest request = new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false)
-        GeneratedItems generatedItems = DslScriptLoader.runDslEngine(request, jobManagement)
+        DslScriptLoader scriptLoader = new DslScriptLoader(jobManagement)
+        GeneratedItems generatedItems = scriptLoader.runScripts([request])
 
         if (generatedItems.jobs.size() != 1) {
             throw new JenkinsConfigurationException("The DSL script ${dslFile.path} did not generate exactly one job (${generatedItems.jobs.size()})!  Use the general dsl form to generate multiple jobs from dsl.")

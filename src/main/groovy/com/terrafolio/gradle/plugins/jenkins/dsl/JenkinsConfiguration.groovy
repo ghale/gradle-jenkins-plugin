@@ -9,7 +9,7 @@ class JenkinsConfiguration {
     private final NamedDomainObjectContainer<JenkinsServerDefinition> servers
     private final NamedDomainObjectContainer<JenkinsJobTemplate> templates
     private final NamedDomainObjectContainer<JenkinsView> views
-    private final JobManagement jm
+    private final JobManagement jobManagement
 
     def defaultServer
 
@@ -17,12 +17,12 @@ class JenkinsConfiguration {
                                 NamedDomainObjectContainer<JenkinsJobTemplate> templates,
                                 NamedDomainObjectContainer<JenkinsServerDefinition> servers,
                                 NamedDomainObjectContainer<JenkinsView> views,
-                                JobManagement jm) {
+                                JobManagement jobManagement) {
         this.jobs = jobs
         this.servers = servers
         this.templates = templates
         this.views = views
-        this.jm = jm
+        this.jobManagement = jobManagement
     }
 
     def jobs(Closure closure) {
@@ -48,47 +48,47 @@ class JenkinsConfiguration {
     def dsl(FileCollection files) {
         jobs.each { job ->
             if (job.definition != null && job.definition.xml != null) {
-                jm.createOrUpdateConfig(job.definition.name, job.definition.xml, true)
+                jobManagement.createOrUpdateConfig(job.definition.name, job.definition.xml, true)
             }
         }
 
-        files.each { dslFile ->
-            ScriptRequest request = new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false)
-            GeneratedItems generatedItems = DslScriptLoader.runDslEngine(request, jm)
+        DslScriptLoader scriptLoader = new DslScriptLoader(jobManagement)
+        Collection<ScriptRequest> scriptRequests = files.collect { dslFile -> new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false) }
+        GeneratedItems generatedItems = scriptLoader.runScripts(scriptRequests)
 
-            generatedItems.getJobs().each { generatedJob ->
-                def JenkinsJob job = jobs.findByName(generatedJob.jobName)
-                if (job == null) {
-                    job = new JenkinsJob(generatedJob.jobName, jm)
-                }
-                job.definition = new JenkinsJobDefinition(generatedJob.jobName)
-                job.definition.xml jm.getConfig(generatedJob.jobName)
-                jobs.add(job)
+        generatedItems.getJobs().each { generatedJob ->
+            def JenkinsJob job = jobs.findByName(generatedJob.jobName)
+            if (job == null) {
+                job = new JenkinsJob(generatedJob.jobName, jobManagement)
             }
-
-            generatedItems.getViews().each { GeneratedView generatedView ->
-                def JenkinsView view = jobs.findByName(generatedView.name)
-                if (view == null) {
-                    view = new JenkinsView(generatedView.name, jm)
-                }
-                view.xml = jm.getConfig(generatedView.name)
-                views.add(view)
-            }
+            job.definition = new JenkinsJobDefinition(generatedJob.jobName)
+            job.definition.xml jobManagement.getConfig(generatedJob.jobName)
+            jobs.add(job)
         }
+
+        generatedItems.getViews().each { GeneratedView generatedView ->
+            def JenkinsView view = views.findByName(generatedView.name)
+            if (view == null) {
+                view = new JenkinsView(generatedView.name, jobManagement)
+            }
+            view.xml = jobManagement.getConfig(generatedView.name)
+            views.add(view)
+        }
+
     }
 
     def dsl(Closure closure) {
         def JobParent jobParent = new JobParent() {
             def run() { }
         }
-        jobParent.setJm(jm)
+        jobParent.setJm(jobManagement)
         jobParent.with(closure)
 
         jobParent.getReferencedJobs().each { referencedJob ->
-            jm.createOrUpdateConfig(referencedJob.name, referencedJob.xml, true)
+            jobManagement.createOrUpdateConfig(referencedJob.name, referencedJob.xml, true)
             def JenkinsJob job = jobs.findByName(referencedJob.name)
             if (job == null) {
-                job = new JenkinsJob(referencedJob.name, jm)
+                job = new JenkinsJob(referencedJob.name, jobManagement)
             }
             job.definition = new JenkinsJobDefinition(referencedJob.name)
             job.definition.xml referencedJob.xml
@@ -96,10 +96,10 @@ class JenkinsConfiguration {
         }
 
         jobParent.getReferencedViews().each { referencedView ->
-            jm.createOrUpdateView(referencedView.name, referencedView.xml, true)
+            jobManagement.createOrUpdateView(referencedView.name, referencedView.xml, true)
             def JenkinsView view = jobs.findByName(referencedView.name)
             if (view == null) {
-                view = new JenkinsView(referencedView.name, jm)
+                view = new JenkinsView(referencedView.name, jobManagement)
             }
             view.xml = referencedView.xml
             views.add(view)
