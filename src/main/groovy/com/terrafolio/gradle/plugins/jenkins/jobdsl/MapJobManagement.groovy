@@ -2,8 +2,6 @@ package com.terrafolio.gradle.plugins.jenkins.jobdsl
 
 import com.google.common.collect.Maps
 import javaposse.jobdsl.dsl.AbstractJobManagement
-import javaposse.jobdsl.dsl.ConfigFile
-import javaposse.jobdsl.dsl.ConfigFileType
 import javaposse.jobdsl.dsl.ConfigurationMissingException
 import javaposse.jobdsl.dsl.Item
 import javaposse.jobdsl.dsl.JobConfigurationNotFoundException
@@ -37,11 +35,6 @@ class MapJobManagement extends AbstractJobManagement {
     }
 
     @Override
-    String createOrUpdateConfigFile(ConfigFile configFile, boolean ignoreExisting){
-        return null
-    }
-
-    @Override
     void createOrUpdateView(String viewName, String config, boolean ignoreExisting) throws NameNotProvidedException, ConfigurationMissingException {
         validateUpdateArgs(viewName, config)
         map.put(viewName, config)
@@ -61,6 +54,13 @@ class MapJobManagement extends AbstractJobManagement {
     }
 
     @Override
+    boolean isMinimumCoreVersion(String version) {
+        VersionNumber minimumVersion = new VersionNumber(version)
+        System.out.println("CORE VERSION:"+minimumVersion);
+        return true;//temporary
+    }
+
+    @Override
     void requireMinimumPluginVersion(String pluginShortName, String version){
     }
 
@@ -70,11 +70,6 @@ class MapJobManagement extends AbstractJobManagement {
 
     @Override
     Integer getVSphereCloudHash(String name){
-        return null
-    }
-
-    @Override
-    String getConfigFileId(ConfigFileType type, String name){
         return null
     }
 
