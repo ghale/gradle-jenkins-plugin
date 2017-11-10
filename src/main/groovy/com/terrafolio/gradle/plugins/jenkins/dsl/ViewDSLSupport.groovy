@@ -26,7 +26,7 @@ trait ViewDSLSupport implements DSLSupport {
 
     @Override
     String evaluateDSL(String name, String type, Closure closure) {
-        View view = viewFactory.createView(jobManagement, type)
+        View view = viewFactory.createView(jobManagement, type, name)
         view.with(closure)
         jobManagement.createOrUpdateView(name, view.xml, true)
         return name

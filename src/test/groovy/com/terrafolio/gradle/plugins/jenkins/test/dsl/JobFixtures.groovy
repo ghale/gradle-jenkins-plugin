@@ -15,7 +15,7 @@ class JobFixtures {
                 <disabled>false</disabled>
                 <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
                 <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-                <triggers class='vector'></triggers>
+                <triggers></triggers>
                 <concurrentBuild>false</concurrentBuild>
                 <builders></builders>
                 <publishers></publishers>
@@ -33,7 +33,7 @@ class JobFixtures {
               <disabled>false</disabled>
               <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
               <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-              <triggers class="vector"/>
+              <triggers/>
               <concurrentBuild>false</concurrentBuild>
               <aggregatorStyleBuild>true</aggregatorStyleBuild>
               <incrementalBuild>false</incrementalBuild>
@@ -58,7 +58,7 @@ class JobFixtures {
               <disabled>false</disabled>
               <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
               <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-              <triggers class="vector"/>
+              <triggers/>
               <concurrentBuild>false</concurrentBuild>
               <builders/>
               <publishers/>
@@ -76,7 +76,7 @@ class JobFixtures {
               <disabled>false</disabled>
               <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
               <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-              <triggers class="vector"/>
+              <triggers/>
               <concurrentBuild>false</concurrentBuild>
               <builders/>
               <publishers/>

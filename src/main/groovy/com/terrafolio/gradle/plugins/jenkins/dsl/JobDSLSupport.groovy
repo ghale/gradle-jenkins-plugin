@@ -12,7 +12,7 @@ trait JobDSLSupport implements DSLSupport {
 
     @Override
     def String evaluateDSL(File dslFile) {
-        ScriptRequest request = new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false)
+        ScriptRequest request = new ScriptRequest(dslFile.name, dslFile.parentFile.toURI().toURL(), false)
         DslScriptLoader scriptLoader = new DslScriptLoader(jobManagement)
         GeneratedItems generatedItems = scriptLoader.runScripts([request])
 
