@@ -96,11 +96,9 @@ class ViewDSLSupportTest extends TempDirSpec {
         new Diff(ViewFixtures.SECTIONED_DSL_VIEW_XML, support.getConfig('test')).similar()
     }
 
-    @Ignore
     def "evaluateDSL from closure creates correct XML" () {
         setup:
         Closure dsl = {
-            description ""
         }
         support = new TestViewDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)
