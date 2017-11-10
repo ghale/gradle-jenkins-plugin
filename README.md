@@ -1,4 +1,5 @@
-[![Build Status] (https://travis-ci.org/ghale/gradle-jenkins-plugin.svg?branch=master)](https://travis-ci.org/crc83/gradle-jenkins-plugin.svg?branch=master)
+[![Build Status](https://travis-ci.org/ghale/gradle-jenkins-plugin.svg?branch=master)](https://travis-ci.org/crc83/gradle-jenkins-plugin.svg?branch=master)
+
 
 [![Coverage Status](https://coveralls.io/repos/github/crc83/gradle-jenkins-plugin/badge.svg?branch=master)](https://coveralls.io/github/crc83/gradle-jenkins-plugin?branch=master)
 
