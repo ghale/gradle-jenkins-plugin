@@ -58,7 +58,9 @@ class JobDSLSupportTest extends TempDirSpec {
     def "evaluateDSL from closure creates correct XML" (String type, String expectedXml) {
         setup:
         Closure dsl = {
-            name = "test"
+            //this property is read only
+            //name = "test"
+            description ""
         }
         support = new TestDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)

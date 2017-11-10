@@ -10,7 +10,7 @@ class ViewFixtures {
               <filterQueue>false</filterQueue>
               <properties class="hudson.model.View\$PropertyList"/>
               <jobNames class="tree-set">
-                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+                <comparator class="hudson.util.CaseInsensitiveComparator"></comparator>
               </jobNames>
               <jobFilters/>
               <columns/>

@@ -6,6 +6,7 @@ import com.terrafolio.gradle.plugins.jenkins.test.TempDirSpec
 import javaposse.jobdsl.dsl.JobManagement
 import org.custommonkey.xmlunit.Diff
 import org.custommonkey.xmlunit.XMLUnit
+import org.junit.Ignore
 
 /**
  * Created on 6/27/14.
@@ -95,10 +96,11 @@ class ViewDSLSupportTest extends TempDirSpec {
         new Diff(ViewFixtures.SECTIONED_DSL_VIEW_XML, support.getConfig('test')).similar()
     }
 
+    @Ignore
     def "evaluateDSL from closure creates correct XML" () {
         setup:
         Closure dsl = {
-            name = "test"
+            description ""
         }
         support = new TestViewDSLSupport(new MapJobManagement(new HashMap<String, String>()))
         XMLUnit.setIgnoreWhitespace(true)
