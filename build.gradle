@@ -34,7 +34,7 @@ repositories {
 }
 
 release {
-	buildTasks = [publishPlugins]
+	buildTasks = ['publishPlugins']
 }
 
 sourceSets {

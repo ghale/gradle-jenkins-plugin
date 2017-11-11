@@ -16,4 +16,10 @@ Gradle plugin to programmatically configure Jenkins jobs.  This plugin allows yo
 
 See https://github.com/ghale/gradle-jenkins-plugin/wiki for details on usage.
 
+To release plugin
+----------------------
+Run locally 'gradle release'.
+Tag will be created and plugin will be published to gradle repository.
+Please refer [https://plugins.gradle.org/docs/publish-plugin] to configure local publishing
+
               
