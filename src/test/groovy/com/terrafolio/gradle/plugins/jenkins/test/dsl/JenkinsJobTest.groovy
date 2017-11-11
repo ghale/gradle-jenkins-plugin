@@ -516,4 +516,33 @@ class JenkinsJobTest extends ProjectSpec {
         then:
         new Diff(newXml, project.jenkins.jobs.findByName('test').getServerSpecificXml(project.jenkins.servers.test_server)).similar()
     }
+
+    def "configure with dsl closure and gradle step generates correct freeform xml" () {
+        setup:
+        XMLUnit.setIgnoreWhitespace(true)
+
+        when:
+        project.jenkins {
+            jobs {
+                test {
+                    type 'Freeform'
+                    dsl {
+                        name = "Test Job"
+
+                        steps {
+                            gradle {
+                                tasks 'compileJava'
+                                useWrapper false
+                                gradleName "GRADLE_4_10"
+                                passAsProperties true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        then:
+        new Diff(JobFixtures.FREEFORM_DSL_GRADLE_JOB_XML, project.jenkins.jobs.findByName('test').definition.xml).similar()
+    }
 }

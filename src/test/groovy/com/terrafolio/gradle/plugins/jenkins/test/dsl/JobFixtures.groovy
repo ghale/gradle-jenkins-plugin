@@ -85,4 +85,35 @@ class JobFixtures {
               <dsl></dsl>
             </com.cloudbees.plugins.flow.BuildFlow>
     """
+    protected static final String FREEFORM_DSL_GRADLE_JOB_XML = """
+        <project>
+            <actions></actions>
+            <description></description>
+            <keepDependencies>false</keepDependencies>
+            <properties></properties>
+            <scm class='hudson.scm.NullSCM'></scm>
+            <canRoam>true</canRoam>
+            <disabled>false</disabled>
+            <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+            <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+            <triggers></triggers>
+            <concurrentBuild>false</concurrentBuild>
+            <builders>
+                <hudson.plugins.gradle.Gradle>
+                    <switches></switches>
+                    <tasks>compileJava</tasks>
+                    <rootBuildScriptDir></rootBuildScriptDir>
+                    <buildFile></buildFile>
+                    <gradleName>GRADLE_4_10</gradleName>
+                    <useWrapper>false</useWrapper>
+                    <makeExecutable>false</makeExecutable>
+                    <fromRootBuildScriptDir>true</fromRootBuildScriptDir>
+                    <useWorkspaceAsHome>false</useWorkspaceAsHome>
+                    <passAsProperties>true</passAsProperties>
+                </hudson.plugins.gradle.Gradle>
+            </builders>
+            <publishers></publishers>
+            <buildWrappers></buildWrappers>
+        </project>
+    """
 }

@@ -45,6 +45,9 @@ class MapJobManagement extends AbstractJobManagement {
 
     @Override
     boolean isMinimumPluginVersionInstalled(String pluginShortName, String version) {
+        if ("gradle".equals(pluginShortName)) {
+            return true;
+        }
         VersionNumber actualVersion = getPluginVersion(pluginShortName)
         if (actualVersion == null) {
             return false

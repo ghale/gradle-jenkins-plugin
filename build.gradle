@@ -1,6 +1,7 @@
 buildscript {
     repositories {
         jcenter()
+		mavenLocal()
         maven {
             url 'http://repo.jenkins-ci.org/releases/'
         }
@@ -21,6 +22,7 @@ apply plugin: 'groovy'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'nexus'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -152,4 +154,4 @@ pluginBundle {
     }
 }
 
-apply from: "gradle/jenkinsIntegTest.gradle"
+//apply from: "gradle/jenkinsIntegTest.gradle"
