@@ -13,6 +13,7 @@ buildscript {
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
         classpath 'com.gradle.publish:plugin-publish-plugin:0.9.3'
+		classpath 'net.researchgate:gradle-release:2.6.0'
     }
 }
 
@@ -23,12 +24,17 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'nexus'
 apply plugin: 'maven-publish'
+apply plugin: 'net.researchgate.release'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 repositories {
     addAll(buildscript.repositories)
+}
+
+release {
+	buildTasks = [publishPlugins]
 }
 
 sourceSets {
@@ -107,13 +113,19 @@ modifyPom {
     project {
         name 'gradle-jenkins-plugin'
         description 'This is a gradle plugin for programmatically configuring Jenkins jobs.'
-        url 'https://github.com/ghale/gradle-jenkins-plugin'
+        url 'https://github.com/crc83/gradle-jenkins-plugin'
         inceptionYear '2012'
 
         scm {
             url 'https://github.com/ghale/gradle-jenkins-plugin.git'
             connection 'scm:https://github.com/ghale/gradle-jenkins-plugin.git'
             developerConnection 'scm:git@github.com/ghale/gradle-jenkins-plugin.git'
+        }
+
+        scm {
+            url 'https://github.com/crc83/gradle-jenkins-plugin.git'
+            connection 'scm:https://github.com/crc83/gradle-jenkins-plugin.git'
+            developerConnection 'scm:git@github.com/crc83/gradle-jenkins-plugin.git'
         }
 
         licenses {
@@ -130,13 +142,18 @@ modifyPom {
                 name 'Gary Hale'
                 email 'ghhale@computer.org'
             }
+            developer {
+                id 'crc83'
+                name 'Sergiy Beley'
+                email 'sergiy.beley@gmail.com'
+            }
         }
     }
 }
 
 pluginBundle {
     website = 'https://github.com/ghale/gradle-jenkins-plugin'
-    vcsUrl = 'https://github.com/ghale/gradle-jenkins-plugin'
+    vcsUrl = 'https://github.com/crc83/gradle-jenkins-plugin'
     description = 'A Gradle plugin for programmatically managing Jenkins instances.'
     tags = ['jenkins', 'gradle']
 
@@ -154,4 +171,4 @@ pluginBundle {
     }
 }
 
-//apply from: "gradle/jenkinsIntegTest.gradle"
+apply from: "gradle/jenkinsIntegTest.gradle"
