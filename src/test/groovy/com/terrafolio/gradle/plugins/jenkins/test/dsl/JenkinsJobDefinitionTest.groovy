@@ -4,7 +4,7 @@ import nebula.test.ProjectSpec
 
 class JenkinsJobDefinitionTest extends ProjectSpec {
     def setup() {
-        project.apply plugin: 'com.terrafolio.jenkins'
+        project.apply plugin: 'com.sbelei.jenkins'
     }
 
     def "configure sets name" () {

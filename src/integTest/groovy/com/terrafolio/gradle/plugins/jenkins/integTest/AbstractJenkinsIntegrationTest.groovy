@@ -16,7 +16,7 @@ abstract class AbstractJenkinsIntegrationTest extends Specification {
         buildFile = testProjectDir.newFile("build.gradle")
         buildFile << """
             plugins {
-                id 'com.terrafolio.jenkins'
+                id 'com.sbelei.jenkins'
             }
 
             jenkins {

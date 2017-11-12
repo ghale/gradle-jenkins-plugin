@@ -10,7 +10,7 @@ import org.custommonkey.xmlunit.XMLUnit
 class JenkinsJobTemplateTest extends ProjectSpec {
 
     def setup() {
-        project.apply plugin: 'com.terrafolio.jenkins'
+        project.apply plugin: 'com.sbelei.jenkins'
     }
 
     def "xml from file creates correct xml" () {

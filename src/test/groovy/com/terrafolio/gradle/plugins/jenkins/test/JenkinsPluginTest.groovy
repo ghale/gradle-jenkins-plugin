@@ -10,7 +10,7 @@ import org.gradle.api.execution.TaskExecutionGraph
 import org.gradle.api.plugins.BasePlugin
 
 class JenkinsPluginTest extends PluginProjectSpec {
-    static final String PLUGINID = 'com.terrafolio.jenkins'
+    static final String PLUGINID = 'com.sbelei.jenkins'
 
     @Override
     String getPluginName() {

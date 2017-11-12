@@ -12,7 +12,7 @@ import spock.lang.Unroll
 class JenkinsViewTest extends ProjectSpec {
 
     def setup() {
-        project.apply plugin: 'com.terrafolio.jenkins'
+        project.apply plugin: 'com.sbelei.jenkins'
     }
 
     @Unroll

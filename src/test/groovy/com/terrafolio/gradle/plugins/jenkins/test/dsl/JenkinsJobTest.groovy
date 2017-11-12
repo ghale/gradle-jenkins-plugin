@@ -8,7 +8,7 @@ import org.custommonkey.xmlunit.XMLUnit
 class JenkinsJobTest extends ProjectSpec {
 
     def setup() {
-        project.apply plugin: 'com.terrafolio.jenkins'
+        project.apply plugin: 'com.sbelei.jenkins'
     }
 
     def "configure adds to definition"() {
