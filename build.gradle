@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         jcenter()
-		mavenLocal()
+        mavenLocal()
         maven {
             url 'http://repo.jenkins-ci.org/releases/'
         }
@@ -75,7 +75,7 @@ dependencies {
 
     integTestCompile gradleTestKit()
 
-    jenkins('org.jenkins-ci.main:jenkins-war:1.+') { transitive = false }
+    jenkins('org.jenkins-ci.main:jenkins-war:2.32.2+') { transitive = false }
 }
 
 if (! project.hasProperty('jenkinsPort')) {
@@ -146,7 +146,7 @@ modifyPom {
 }
 
 pluginBundle {
-    website = 'https://github.com/ghale/gradle-jenkins-plugin'
+    website = 'https://github.com/crc83/gradle-jenkins-plugin'
     vcsUrl = 'https://github.com/crc83/gradle-jenkins-plugin'
     description = 'A Gradle plugin for programmatically managing Jenkins instances.'
     tags = ['jenkins', 'gradle']
