@@ -75,7 +75,7 @@ dependencies {
 
     integTestCompile gradleTestKit()
 
-    jenkins('org.jenkins-ci.main:jenkins-war:2.32.2+') { transitive = false }
+    jenkins('org.jenkins-ci.main:jenkins-war:1.+') { transitive = false }
 }
 
 if (! project.hasProperty('jenkinsPort')) {
