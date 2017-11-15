@@ -12,7 +12,7 @@ buildscript {
 
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.7'
-        classpath 'com.gradle.publish:plugin-publish-plugin:0.9.3'
+        classpath 'com.gradle.publish:plugin-publish-plugin:0.9.9'
 		classpath 'net.researchgate:gradle-release:2.6.0'
     }
 }
