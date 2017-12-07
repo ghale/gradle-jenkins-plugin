@@ -1,5 +1,6 @@
 package com.terrafolio.gradle.plugins.jenkins.test.service
 
+import com.terrafolio.gradle.plugins.jenkins.service.Crumb
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsRESTServiceImpl
 import com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException
 import com.terrafolio.gradle.plugins.jenkins.service.PreemptiveAuthInterceptor
@@ -24,7 +25,12 @@ class JenkinsRESTServiceImplTest extends Specification {
 
     def setup() {
         mockRESTClient = Mock(RESTClient)
-        service = new JenkinsRESTServiceImpl(url, username, password)
+        service = new JenkinsRESTServiceImpl(url, username, password) {
+            @Override
+            Crumb getCrumb(RESTClient client) {
+                return new Crumb()
+            }
+        }
         service.client = mockRESTClient
     }
 

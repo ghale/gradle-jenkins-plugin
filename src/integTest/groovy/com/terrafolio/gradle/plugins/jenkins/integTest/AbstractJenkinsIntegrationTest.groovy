@@ -27,7 +27,7 @@ abstract class AbstractJenkinsIntegrationTest extends Specification {
                     }
                 }
                 defaultServer servers.test
-            }
+            } 
         """
     }
 
