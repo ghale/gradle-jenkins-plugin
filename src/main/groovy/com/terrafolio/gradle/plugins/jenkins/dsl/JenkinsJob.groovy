@@ -11,20 +11,34 @@ class JenkinsJob extends AbstractJenkinsConfigurable implements JobDSLSupport, D
     final JobManagement jobManagement;
 
     def defaultOverrides = {
-        create([ uri: "createItem", params: [ name: definition.name ] ])
-           get([ uri: "job/${definition.name}/config.xml" ])
-        update([ uri: "job/${definition.name}/config.xml" ])
-        delete([ uri: "job/${definition.name}/doDelete" ])
-    }
+            create([ uri: "${folder}createItem", params: [ name: definition.name ] ])
+            get([ uri: "${folder}job/${definition.name}/config.xml" ])
+            update([ uri: "${folder}job/${definition.name}/config.xml" ])
+            delete([ uri: "${folder}job/${definition.name}/doDelete" ])
+     }
 
     JenkinsJob(String name, JobManagement jobManagement) {
         this.name = name
         this.jobManagement = jobManagement
     }
-
-    @Override
-    def Closure getDefaultOverrides() {
-        return this.defaultOverrides
+    
+    /*
+    I'm not using this.
+    Currently user may specify folder in format /job/NameOfFolder1/job/NameOfSubFolder1/
+     */
+    String getFolderUrl() {
+        if ("".equals(folder)) {
+            folder
+        }
+        String theFolder = folder
+        if (!theFolder.startsWith('/')) {
+            theFolder = "/${theFolder}"
+        }
+        theFolder =  ${theFolder.replaceAll("/", "/job/")}
+        if (!theFolder.endsWith("/")) {
+            theFolder = "${theFolder}/"
+        }
+        theFolder
     }
 
     @Override
@@ -97,6 +111,11 @@ class JenkinsJob extends AbstractJenkinsConfigurable implements JobDSLSupport, D
         } else {
             return definition.xml
         }
+    }
+
+    @Override
+    Closure getDefaultOverrides() {
+        return defaultOverrides
     }
 
     @Override

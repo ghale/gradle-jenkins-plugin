@@ -10,6 +10,7 @@ abstract class AbstractJenkinsConfigurable implements JenkinsConfigurable {
     def serverDefinitions = []
     def JenkinsOverrides serviceOverrides
     def String name
+    def String folder
 
     @Override
     def void serviceOverrides(Closure closure) {
