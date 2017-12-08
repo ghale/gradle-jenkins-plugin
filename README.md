@@ -24,4 +24,18 @@ Please refer [https://plugins.gradle.org/docs/publish-plugin] to configure local
 
 Improvements
 ----------------------
-1) "Invalid crumb" issue fixed
+1)[1.4.3] "Invalid crumb" issue fixed
+2)[1.4.4] Add possibility to import job into folder. If your folder on Jenkins is "Folder1/SubFolred1", please specify it as
+(no slash at the beginning and slash at the end) 
+(it's temporary solution and maybe I'll improve it in a future)
+
+[source, groovy]
+----
+jobs{
+	my_job{
+		...
+		folder = "job/Folder1/job/SubFolder1/"
+		...
+	}
+}
+-----
