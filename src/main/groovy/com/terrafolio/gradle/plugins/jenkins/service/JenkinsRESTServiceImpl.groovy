@@ -71,8 +71,6 @@ class JenkinsRESTServiceImpl implements JenkinsService {
         if (httpResponse.isSuccess()) {
             crumbJson.crumbRequestField = httpResponse.data.get("crumbRequestField")
             crumbJson.crumb = httpResponse.data.get("crumb");
-            println "SB:${crumbJson.dump()}"
-            println "SB:${crumbJson.toMap().dump()}"
         }
         crumbJson
     }

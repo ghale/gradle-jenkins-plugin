@@ -65,23 +65,5 @@ class JenkinsRestServiceImplCrumbTest extends Specification {
 
 
     }
-
-    def "empty crumb is parsed correctly" () {
-        setup:
-            def jsonSlurper = new JsonSlurper()
-            def crumbJson = jsonSlurper.parseText("{\"_class\":\"hudson.security.csrf.DefaultCrumbIssuer\",\"crumb\":\"\",\"crumbRequestField\":\"\"}");
-        expect:
-            crumbJson.crumb == ""
-            crumbJson.crumbRequestField == ""
-    }
-
-    def "crumb xml parsed correctly"() {
-        setup:
-            String xml = '''<defaultCrumbIssuer _class="hudson.security.csrf.DefaultCrumbIssuer"><crumb>d02a5f6e61f061279ef45cba5028f3e5</crumb><crumbRequestField>Jenkins-Crumb</crumbRequestField></defaultCrumbIssuer>'''
-            Crumb crumb = new XmlParser().parse(xml);
-            System.out.println("SB:" + xml)
-        expect:
-            crumbJson.crumb == "2e76182265083db06b744fb38dd42b5c"
-            crumbJson.crumbRequestField == "Jenkins-Crumb"
     }
 }
