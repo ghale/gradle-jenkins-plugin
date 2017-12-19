@@ -33,6 +33,9 @@ class JenkinsRESTServiceImpl implements JenkinsService {
             if (username != null) {
                 client.client.addRequestInterceptor(new PreemptiveAuthInterceptor(username, password))
             }
+            if (System.getProperty("com.terrafolio.jenkins.ignoressl") != null) {
+                client.ignoreSSLIssues()
+            }
         }
 
         return client

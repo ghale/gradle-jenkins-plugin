@@ -39,3 +39,6 @@ jobs{
 	}
 }
 -----
+
+since v.1.4.6
+Add -Dcom.terrafolio.jenkins.ignoressl to ignore ssl issues
