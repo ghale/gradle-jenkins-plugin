@@ -6,4 +6,6 @@ Gradle plugin to programmatically configure Jenkins jobs.  This plugin allows yo
 
 See https://github.com/ghale/gradle-jenkins-plugin/wiki for details on usage.
 
-              
+_**I'm currently looking for someone to take over maintenance of this project.  Over the years, this plugin has had a healthy user base and when I was working with Jenkins on a daily basis, I was highly motivated to improve this plugin and keep it up to date.  Thank you to everyone who has contributed and been involved!**_  
+
+_**Unfortunately, I no longer work with Jenkins on a frequent basis and I've had difficulty finding the time in recent years to maintain this plugin. This has resulted in low activity and a lack of responsiveness to issues on my part.  I would welcome someone who is motivated to invest the time it deserves and make this project thrive.  If you're interested, please contact me at: gary at gradle dot com.**_
