@@ -1,16 +1,7 @@
 package com.terrafolio.gradle.plugins.jenkins.jobdsl
 
 import com.google.common.collect.Maps
-import javaposse.jobdsl.dsl.AbstractJobManagement
-import javaposse.jobdsl.dsl.ConfigFile
-import javaposse.jobdsl.dsl.ConfigFileType
-import javaposse.jobdsl.dsl.ConfigurationMissingException
-import javaposse.jobdsl.dsl.Item
-import javaposse.jobdsl.dsl.JobConfigurationNotFoundException
-import javaposse.jobdsl.dsl.NameNotProvidedException
-import hudson.util.VersionNumber
-import javaposse.jobdsl.dsl.UserContent
-import javaposse.jobdsl.dsl.ExtensibleContext
+import javaposse.jobdsl.dsl.*
 
 /**
  * Created by ghale on 4/6/14.
@@ -52,12 +43,7 @@ class MapJobManagement extends AbstractJobManagement {
 
     @Override
     boolean isMinimumPluginVersionInstalled(String pluginShortName, String version) {
-        VersionNumber actualVersion = getPluginVersion(pluginShortName)
-        if (actualVersion == null) {
-            return false
-        }
-        VersionNumber minimumVersion = new VersionNumber(version)
-        return !actualVersion.isOlderThan(minimumVersion)
+        return false
     }
 
     @Override
