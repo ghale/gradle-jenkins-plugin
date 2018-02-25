@@ -92,3 +92,7 @@ pluginBundle {
         version = project.version
     }
 }
+
+test {
+	ignoreFailures = true
+}

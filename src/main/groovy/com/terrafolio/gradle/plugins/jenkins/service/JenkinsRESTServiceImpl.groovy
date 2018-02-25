@@ -70,12 +70,13 @@ class JenkinsRESTServiceImpl implements JenkinsService {
     Crumb getCrumb(RESTClient client) {
         client.auth.basic(username, password)
         Crumb crumbJson = new Crumb()
+        HttpResponseDecorator httpResponse = null;
         try {
-            HttpResponseDecorator httpResponse = client.get(path: "${url}crumbIssuer/api/json");
+            httpResponse = client.get(path: "${url}crumbIssuer/api/json");
         } catch(HttpResponseException e) {
             return crumbJson
         }
-        if (httpResponse.isSuccess()) {
+        if (httpResponse !=null && httpResponse.isSuccess()) {
             crumbJson.crumbRequestField = httpResponse.data.get("crumbRequestField")
             crumbJson.crumb = httpResponse.data.get("crumb");
         }
