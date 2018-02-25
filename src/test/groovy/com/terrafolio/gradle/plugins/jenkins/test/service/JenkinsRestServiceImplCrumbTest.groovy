@@ -6,6 +6,7 @@ import groovy.json.JsonParserType
 import groovy.json.JsonSlurper
 import groovyx.net.http.AuthConfig
 import groovyx.net.http.HttpResponseDecorator
+import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 import org.apache.http.HttpResponse
 import org.apache.http.HttpVersion
@@ -53,6 +54,8 @@ class JenkinsRestServiceImplCrumbTest extends Specification {
             mockAuth.basic(username, password) >> {}
             mockRESTClient.getAuth() >> { mockAuth }
             mockRESTClient.get(_) >> { Map map ->
+                //TODO : Make another test with thrown exception
+                // groovyx.net.http.HttpResponseException: Not Found
                 HttpResponse baseResponse = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 404, "OK"))
                 HttpResponseDecorator response = new HttpResponseDecorator(baseResponse,[:])
                 return response
@@ -62,8 +65,16 @@ class JenkinsRestServiceImplCrumbTest extends Specification {
         expect:
             actualCrumb.crumbRequestField == ""
             actualCrumb.crumb == ""
-
-
     }
+
+    def "Empty crumb produces correct map" () {
+        setup:
+            Crumb crumb = new Crumb()
+
+        expect:
+            crumb.crumbRequestField == ""
+            crumb.crumb == ""
+
+            crumb.toMap().size() == 0
     }
 }

@@ -69,8 +69,12 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 
     Crumb getCrumb(RESTClient client) {
         client.auth.basic(username, password)
-        HttpResponseDecorator httpResponse = client.get(path: "${url}crumbIssuer/api/json");
         Crumb crumbJson = new Crumb()
+        try {
+            HttpResponseDecorator httpResponse = client.get(path: "${url}crumbIssuer/api/json");
+        } catch(HttpResponseException e) {
+            return crumbJson
+        }
         if (httpResponse.isSuccess()) {
             crumbJson.crumbRequestField = httpResponse.data.get("crumbRequestField")
             crumbJson.crumb = httpResponse.data.get("crumb");
@@ -80,7 +84,7 @@ class JenkinsRESTServiceImpl implements JenkinsService {
 
     @Override
     public String getConfiguration(String jobName, Map overrides)
-            throws JenkinsServiceException {
+            throws com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException {
         def responseXml
         try {
             responseXml = restServiceGET(overrides.uri, overrides.params)

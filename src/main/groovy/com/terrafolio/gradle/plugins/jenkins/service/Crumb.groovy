@@ -7,7 +7,9 @@ class Crumb {
 
     Map<String, String> toMap() {
         Map<String, String> map = new HashMap<>()
-        map.put(crumbRequestField, crumb)
+        if (crumb != "") {
+            map.put(crumbRequestField, crumb)
+        }
         return map
     }
 
