@@ -12,7 +12,8 @@ buildscript {
 
     dependencies {
         classpath 'com.gradle.publish:plugin-publish-plugin:0.9.9'
-		classpath 'net.researchgate:gradle-release:2.6.0'
+        classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2'
+        classpath 'net.researchgate:gradle-release:2.6.0'
     }
 }
 
@@ -23,6 +24,8 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
 apply plugin: 'net.researchgate.release'
+apply plugin: 'jacoco'
+apply plugin: 'org.sonarqube'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -32,7 +35,11 @@ repositories {
 }
 
 release {
-	buildTasks = ['publishPlugins']
+    buildTasks = ['publishPlugins']
+}
+
+task build(type: GradleBuild) {
+    tasks = ['jar', 'test', 'jacocoTestReport', 'sonarqube']
 }
 
 sourceSets {
@@ -73,6 +80,17 @@ task wrapper(type: Wrapper) {
     gradleVersion = '4.3.1'
 }
 
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.organization", "crc83-github"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.login", "${github_sonar_token}"
+    }
+}
+
+
+
 pluginBundle {
     website = 'https://github.com/crc83/gradle-jenkins-plugin'
     vcsUrl = 'https://github.com/crc83/gradle-jenkins-plugin'
@@ -94,5 +112,5 @@ pluginBundle {
 }
 
 test {
-	ignoreFailures = true
+    ignoreFailures = true
 }
