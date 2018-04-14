@@ -38,7 +38,9 @@ release {
     buildTasks = ['publishPlugins']
 }
 
-task build(type: GradleBuild) {
+defaultTasks 'dailyBuild'
+
+task dailyBuild(type: GradleBuild) {
     tasks = ['jar', 'test', 'jacocoTestReport', 'sonarqube']
 }
 
