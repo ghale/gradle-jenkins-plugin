@@ -28,11 +28,6 @@ class MapJobManagement extends AbstractJobManagement {
     }
 
     @Override
-    String createOrUpdateConfigFile(ConfigFile configFile, boolean ignoreExisting){
-        return null
-    }
-
-    @Override
     void createOrUpdateView(String viewName, String config, boolean ignoreExisting) throws NameNotProvidedException, ConfigurationMissingException {
         validateUpdateArgs(viewName, config)
         map.put(viewName, config)
@@ -45,7 +40,12 @@ class MapJobManagement extends AbstractJobManagement {
     boolean isMinimumPluginVersionInstalled(String pluginShortName, String version) {
         return false
     }
-
+    
+    @Override
+    boolean isMinimumCoreVersion(String version) {
+        return false
+    }
+    
     @Override
     void requireMinimumPluginVersion(String pluginShortName, String version){
     }
@@ -56,11 +56,6 @@ class MapJobManagement extends AbstractJobManagement {
 
     @Override
     Integer getVSphereCloudHash(String name){
-        return null
-    }
-
-    @Override
-    String getConfigFileId(ConfigFileType type, String name){
         return null
     }
 

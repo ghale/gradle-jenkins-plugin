@@ -5,7 +5,7 @@ import javaposse.jobdsl.dsl.View
 
 class DefaultDSLViewFactory implements DSLViewFactory {
     @Override
-    View createView(JobManagement management, String type) {
+    View createView(JobManagement management, String type, String viewName) {
         Class<? extends View> viewClass
         if (type == null) {
             viewClass = DSLViewType.ListView.viewClass
@@ -13,6 +13,6 @@ class DefaultDSLViewFactory implements DSLViewFactory {
             viewClass = DSLViewType.find(type).viewClass
         }
 
-        return viewClass.newInstance(management)
+        return viewClass.newInstance(management, viewName)
     }
 }
