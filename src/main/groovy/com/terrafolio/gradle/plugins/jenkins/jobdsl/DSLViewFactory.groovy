@@ -5,5 +5,5 @@ import javaposse.jobdsl.dsl.View
 
 
 interface DSLViewFactory {
-    View createView(JobManagement management, String type)
+    View createView(JobManagement management, String type, String viewName)
 }

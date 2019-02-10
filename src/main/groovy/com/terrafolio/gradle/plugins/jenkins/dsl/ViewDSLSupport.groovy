@@ -12,7 +12,7 @@ trait ViewDSLSupport implements DSLSupport {
 
     @Override
     String evaluateDSL(File dslFile) {
-        ScriptRequest request = new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false)
+        ScriptRequest request = new ScriptRequest(dslFile.text)
         DslScriptLoader scriptLoader = new DslScriptLoader(jobManagement)
         GeneratedItems generatedItems = scriptLoader.runScripts([request])
 
@@ -26,7 +26,7 @@ trait ViewDSLSupport implements DSLSupport {
 
     @Override
     String evaluateDSL(String name, String type, Closure closure) {
-        View view = viewFactory.createView(jobManagement, type)
+        View view = viewFactory.createView(jobManagement, type, name)
         view.with(closure)
         jobManagement.createOrUpdateView(name, view.xml, true)
         return name

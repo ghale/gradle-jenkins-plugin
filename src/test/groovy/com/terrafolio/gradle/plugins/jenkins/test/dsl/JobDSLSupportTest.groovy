@@ -55,26 +55,6 @@ class JobDSLSupportTest extends TempDirSpec {
         new Diff(JobFixtures.FREEFORM_DSL_JOB_XML, support.getConfig('test')).similar()
     }
 
-    def "evaluateDSL from closure creates correct XML" (String type, String expectedXml) {
-        setup:
-        Closure dsl = {
-            name = "test"
-        }
-        support = new TestDSLSupport(new MapJobManagement(new HashMap<String, String>()))
-        XMLUnit.setIgnoreWhitespace(true)
-
-        expect:
-        support.evaluateDSL('test', type, dsl) == 'test'
-        new Diff(expectedXml, support.getConfig('test')).similar()
-
-        where:
-        type        | expectedXml
-        'Freeform'  | JobFixtures.FREEFORM_DSL_JOB_XML
-        'Maven'     | JobFixtures.MAVEN_DSL_JOB_XML
-        'Multijob'  | JobFixtures.MULTIJOB_DSL_JOB_XML
-        'Buildflow' | JobFixtures.BUILDFLOW_DSL_JOB_XML
-    }
-
     class TestDSLSupport implements JobDSLSupport {
         final JobManagement jobManagement
 

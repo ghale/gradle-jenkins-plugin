@@ -5,7 +5,7 @@ import javaposse.jobdsl.dsl.JobManagement
 
 class DefaultDSLJobFactory implements DSLJobFactory {
     @Override
-    Job create(JobManagement management, String type) {
+    Job create(JobManagement management, String type, String jobName) {
         Class<? extends Job> jobClass
         if (type == null) {
             jobClass = DSLJobType.Freeform.jobClass
@@ -13,6 +13,6 @@ class DefaultDSLJobFactory implements DSLJobFactory {
             jobClass = DSLJobType.find(type).jobClass
         }
         
-        return jobClass.newInstance(management)
+        return jobClass.newInstance(management, jobName)
     }
 }

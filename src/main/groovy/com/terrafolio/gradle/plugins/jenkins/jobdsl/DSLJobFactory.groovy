@@ -5,5 +5,5 @@ import javaposse.jobdsl.dsl.JobManagement
 
 
 interface DSLJobFactory {
-    Job create(JobManagement management, String type)
+    Job create(JobManagement management, String type, String jobName)
 }

@@ -95,27 +95,6 @@ class ViewDSLSupportTest extends TempDirSpec {
         new Diff(ViewFixtures.SECTIONED_DSL_VIEW_XML, support.getConfig('test')).similar()
     }
 
-    def "evaluateDSL from closure creates correct XML" () {
-        setup:
-        Closure dsl = {
-            name = "test"
-        }
-        support = new TestViewDSLSupport(new MapJobManagement(new HashMap<String, String>()))
-        XMLUnit.setIgnoreWhitespace(true)
-
-        expect:
-        support.evaluateDSL('test', viewType, dsl) == 'test'
-        new Diff(xmlToMatch, support.getConfig('test')).similar()
-
-        where:
-        viewType            | xmlToMatch
-        null                | ViewFixtures.LIST_DSL_VIEW_XML
-        'ListView'          | ViewFixtures.LIST_DSL_VIEW_XML
-        'BuildPipelineView' | ViewFixtures.BUILD_PIPELINE_VIEW_XML
-        'NestedView'        | ViewFixtures.NESTED_DSL_VIEW_XML
-        'SectionedView'     | ViewFixtures.SECTIONED_DSL_VIEW_XML
-    }
-
     static class TestViewDSLSupport implements ViewDSLSupport {
         final JobManagement jobManagement
 

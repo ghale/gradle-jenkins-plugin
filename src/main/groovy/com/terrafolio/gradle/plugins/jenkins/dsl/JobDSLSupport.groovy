@@ -12,7 +12,7 @@ trait JobDSLSupport implements DSLSupport {
 
     @Override
     def String evaluateDSL(File dslFile) {
-        ScriptRequest request = new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false)
+        ScriptRequest request = new ScriptRequest(dslFile.text)
         DslScriptLoader scriptLoader = new DslScriptLoader(jobManagement)
         GeneratedItems generatedItems = scriptLoader.runScripts([request])
 
@@ -26,7 +26,7 @@ trait JobDSLSupport implements DSLSupport {
 
     @Override
     def String evaluateDSL(String name, String type, Closure closure) {
-        def Job job = jobFactory.create(jobManagement, type)
+        def Job job = jobFactory.create(jobManagement, type, name)
         // Load the existing xml as a template if it exists
         if (jobManagement.getConfig(name) && job.templateName == null) {
             job.using(name)

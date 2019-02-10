@@ -53,7 +53,7 @@ class JenkinsConfiguration {
         }
 
         DslScriptLoader scriptLoader = new DslScriptLoader(jobManagement)
-        Collection<ScriptRequest> scriptRequests = files.collect { dslFile -> new ScriptRequest(dslFile.name, null, dslFile.parentFile.toURI().toURL(), false) }
+        Collection<ScriptRequest> scriptRequests = files.collect { dslFile -> new ScriptRequest(dslFile.text) }
         GeneratedItems generatedItems = scriptLoader.runScripts(scriptRequests)
 
         generatedItems.getJobs().each { generatedJob ->
