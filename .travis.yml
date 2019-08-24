@@ -12,4 +12,4 @@ cache:
     - $HOME/.gradle/wrapper/
 
 script:
-  - ./gradlew check --scan -s
+  - ./gradlew travisBuild --scan -s

@@ -44,6 +44,10 @@ task dailyBuild(type: GradleBuild) {
     tasks = ['jar', 'test', 'jacocoTestReport', 'sonarqube']
 }
 
+task travisBuild(type: GradleBuild) {
+    tasks = ['jar', 'test', 'jacocoTestReport']
+}
+
 sourceSets {
 
 }
@@ -77,6 +81,8 @@ if (! project.hasProperty('jenkinsPort')) {
     ext.jenkinsPort = 9999
 }
 
+// I use sonarcloud only for local build.
+// For travis build please refer coveralls.io
 sonarqube {
     properties {
         property "sonar.sourceEncoding", "UTF-8"
@@ -111,6 +117,3 @@ pluginBundle {
 test {
     ignoreFailures = true
 }
-
-tasks.sonarqube.dependsOn tasks.test
-tasks.check.dependsOn tasks.sonarqube
