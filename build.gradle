@@ -132,3 +132,7 @@ pluginBundle {
 test {
     ignoreFailures = true
 }
+
+tasks.jacocoTestReport.dependsOn tasks.test
+tasks.coveralls.dependsOn tasks.jacocoTestReport
+tasks.check.dependsOn tasks.coveralls
