@@ -15,6 +15,7 @@ buildscript {
         classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2'
         classpath 'net.researchgate:gradle-release:2.6.0'
 		classpath 'com.gradle:build-scan-plugin:2.4.1'
+		classpath 'gradle.plugin.com.github.kt3k.coveralls:coveralls-gradle-plugin:2.8.4'
     }
 }
 
@@ -28,9 +29,7 @@ apply plugin: 'net.researchgate.release'
 apply plugin: 'jacoco'
 apply plugin: 'org.sonarqube'
 apply plugin: 'com.gradle.build-scan'
-
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+apply plugin: 'com.github.kt3k.coveralls'
 
 repositories {
     addAll(buildscript.repositories)
@@ -42,13 +41,14 @@ release {
 
 defaultTasks 'dailyBuild'
 
+coveralls {
+    jacocoReportPath 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
+}
+
 task dailyBuild(type: GradleBuild) {
     tasks = ['jar', 'test', 'jacocoTestReport', 'sonarqube']
 }
 
-task travisBuild(type: GradleBuild) {
-    tasks = ['jar', 'test', 'jacocoTestReport']
-}
 
 sourceSets {
 
