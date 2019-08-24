@@ -47,13 +47,14 @@ jacocoTestReport {
         html.enabled = true
     }
 }
-
+/*
 coveralls {
     jacocoReportPath 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
 }
+*/
 
 task dailyBuild(type: GradleBuild) {
-    tasks = ['jar', 'test', 'jacocoTestReport', 'sonarqube']
+    tasks = ['jar', 'test', 'jacocoTestReport', 'coveralls']
 }
 
 
@@ -132,7 +133,3 @@ pluginBundle {
 test {
     ignoreFailures = true
 }
-
-tasks.jacocoTestReport.dependsOn tasks.test
-tasks.coveralls.dependsOn tasks.jacocoTestReport
-tasks.check.dependsOn tasks.coveralls
