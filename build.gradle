@@ -14,6 +14,7 @@ buildscript {
         classpath 'com.gradle.publish:plugin-publish-plugin:0.9.9'
         classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2'
         classpath 'net.researchgate:gradle-release:2.6.0'
+		classpath 'com.gradle:build-scan-plugin:1.16'
     }
 }
 
@@ -26,6 +27,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'net.researchgate.release'
 apply plugin: 'jacoco'
 apply plugin: 'org.sonarqube'
+apply plugin: 'com.gradle.build-scan'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -92,6 +94,12 @@ sonarqube {
     }
 }
 
+buildScan {
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'     
+    termsOfServiceAgree = 'yes'                                   
+
+    publishAlways()                                               
+}
 
 
 pluginBundle {
