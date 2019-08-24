@@ -77,10 +77,6 @@ if (! project.hasProperty('jenkinsPort')) {
     ext.jenkinsPort = 9999
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.3.1'
-}
-
 sonarqube {
     properties {
         property "sonar.sourceEncoding", "UTF-8"
@@ -115,3 +111,6 @@ pluginBundle {
 test {
     ignoreFailures = true
 }
+
+tasks.sonarqube.dependsOn tasks.test
+tasks.check.dependsOn tasks.sonarqube
