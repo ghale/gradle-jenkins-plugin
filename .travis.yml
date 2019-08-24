@@ -1,3 +1,6 @@
+jdk:
+  - openjdk8
+
 language: groovy
 
 before_cache:
