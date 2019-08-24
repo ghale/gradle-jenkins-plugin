@@ -3,6 +3,10 @@ jdk:
 
 language: groovy
 
+env:
+  global:
+    secure: "CRe4vg/7rY2Tr3o65k7uNFvIPRPiGDnDoH3XtCsNozOnWF3FUCWjCG8MQXEbgywJSlqhoed5Ram2gUUB2mUJzFcopJiur2HFa9yY6dzUFWk2krm1YN3IqeIPUsx4dAqc7KxL5UNWQB/e0/famRglhWR7qOAt8N0ZrAVeEoNZwn+jvBQVj/eM4Xl6qot67JacfzjBiEIrOUivz9Q8klhaA9/oJ1Yic0WiWIbMXFCD5fLRH0qwK+po+expY5Z14z+OJnwfFObOJUllEw6mFMjGOA8KwpfiPEz+LrQNHU4zEzc/ihVgh0c2hz1w7uj3fPiySrEFbR5K+KPEPcWSYMclWcQbxy177ZabNHrF6M+xRWIR/9qQdksDCvCZaTH/OIkz4VCAwb14YrWti70yb7nZnpP/HvIw3vpz1GEVWl05Ss7wUSQIDxwbB7Ukx4RfC2abAC9VwSw83n1XJZ7NVSXfou/+N1XGnNNZED85AbLxLL8GImjDiGzrqjDb2gXplAdz78rZZmOStefDhcKwI8NQYuYNqbMVyghK5cruIqUctO0Tf5ZiEwx2zAR4UkS6EzJ8b4pvinRtdOhD9/EUAtN9LmO0gJDlOi0Iyp2pBPk9i4kmTl85/RISMO/wHmgfnWAaBkMLsSi4lG3GDXAI9I9DQ9mNeYTSKuuB2c6imVcIMWA="
+
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 
