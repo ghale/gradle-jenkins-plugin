@@ -1,4 +1,4 @@
-package com.terrafolio.gradle.plugins.jenkins.service;
+package com.terrafolio.gradle.plugins.service;
 
 import java.util.Map;
 

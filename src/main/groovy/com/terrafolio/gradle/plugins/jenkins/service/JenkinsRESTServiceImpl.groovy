@@ -7,7 +7,13 @@ import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 import static groovyx.net.http.ContentType.XML
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 class JenkinsRESTServiceImpl implements JenkinsService {
+	
+	Logger logger = LoggerFactory.getLogger(JenkinsRESTServiceImpl.class);
+
     def RESTClient client
     def url
     def username
@@ -42,8 +48,9 @@ class JenkinsRESTServiceImpl implements JenkinsService {
     }
 
     def restServiceGET(path, query) {
+    	logger.info("Initializing rest client for:" + url)
         def client = getRestClient()
-
+		logger.info("Getting data from:" + path)
         def response = client.get(path: path, query: query)
         if (response.success) {
             return response.getData()
@@ -55,7 +62,8 @@ class JenkinsRESTServiceImpl implements JenkinsService {
     def restServicePOST(path, query, payload) {
        def client = getRestClient()
        Crumb crumbJson = getCrumb(client)
-
+	   logger.debug("crumbRequestField :" + crumbJson.crumbRequestField)
+	   logger.debug("crumb" + crumbJson.crumb)
        def response = client.post(path: path, headers: crumbJson.toMap(), query: query, requestContentType: XML, body: payload)
 
         if (response) {
@@ -88,13 +96,10 @@ class JenkinsRESTServiceImpl implements JenkinsService {
             throws com.terrafolio.gradle.plugins.jenkins.service.JenkinsServiceException {
         def responseXml
         try {
+			
             responseXml = restServiceGET(overrides.uri, overrides.params)
         } catch (HttpResponseException hre) {
-            if (hre.response.status == 404) {
-                responseXml = null
-            } else {
-                throw new JenkinsServiceException("Jenkins Service Call failed", hre)
-            }
+            responseXml = null
         } catch (Exception e) {
             throw new JenkinsServiceException("Jenkins Service Call failed", e)
         }

@@ -1,4 +1,4 @@
-package com.terrafolio.gradle.plugins.jenkins.tasks;
+package com.terrafolio.gradle.plugins.tasks;
 
 import org.gradle.api.GradleScriptException;
 
